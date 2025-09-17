@@ -80,9 +80,12 @@ export class MemStorage implements IStorage {
   async createTrialRequest(insertRequest: InsertTrialRequest): Promise<TrialRequest> {
     const id = randomUUID();
     const request: TrialRequest = { 
-      ...insertRequest, 
+      ...insertRequest,
       id, 
-      createdAt: new Date() 
+      createdAt: new Date(),
+      company: insertRequest.company ?? null,
+      budget: insertRequest.budget ?? null,
+      description: insertRequest.description ?? null
     };
     this.trialRequests.set(id, request);
     return request;
