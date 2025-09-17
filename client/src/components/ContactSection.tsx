@@ -35,7 +35,6 @@ export default function ContactSection({ onSubmit }: ContactSectionProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Contact form submitted:', formData);
     
     try {
       const response = await fetch('/api/contact', {
@@ -259,7 +258,7 @@ export default function ContactSection({ onSubmit }: ContactSectionProps) {
                       <label className="text-sm font-medium mb-2 block">
                         Chủ đề *
                       </label>
-                      <Select value={formData.subject} onValueChange={(value) => handleInputChange('subject', value)}>
+                      <Select value={formData.subject} onValueChange={(value) => handleInputChange('subject', value)} required>
                         <SelectTrigger data-testid="select-contact-subject">
                           <SelectValue placeholder="Chọn chủ đề" />
                         </SelectTrigger>

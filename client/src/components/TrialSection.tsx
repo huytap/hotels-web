@@ -39,7 +39,6 @@ export default function TrialSection({ onSubmit }: TrialSectionProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Trial form submitted:', formData);
     
     try {
       const response = await fetch('/api/trial', {
@@ -271,7 +270,7 @@ export default function TrialSection({ onSubmit }: TrialSectionProps) {
                     <label className="text-sm font-medium mb-1 block">
                       Loại website cần làm *
                     </label>
-                    <Select value={formData.websiteType} onValueChange={(value) => handleInputChange('websiteType', value)}>
+                    <Select value={formData.websiteType} onValueChange={(value) => handleInputChange('websiteType', value)} required>
                       <SelectTrigger data-testid="select-website-type">
                         <SelectValue placeholder="Chọn loại website" />
                       </SelectTrigger>
