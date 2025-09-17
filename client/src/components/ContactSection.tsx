@@ -33,26 +33,52 @@ export default function ContactSection({ onSubmit }: ContactSectionProps) {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Contact form submitted:', formData);
     
-    // TODO: Remove mock functionality - integrate with real backend
-    toast({
-      title: "Tin nhắn đã được gửi!",
-      description: "Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi trong vòng 24h.",
-    });
-    
-    onSubmit?.(formData);
-    
-    // Reset form
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      subject: '',
-      message: ''
-    });
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        toast({
+          title: "Tin nhắn đã được gửi!",
+          description: "Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi trong vòng 24h.",
+        });
+        
+        onSubmit?.(formData);
+        
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: ''
+        });
+      } else {
+        toast({
+          title: "Có lỗi xảy ra!",
+          description: result.message || "Vui lòng thử lại sau.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Contact submission error:', error);
+      toast({
+        title: "Có lỗi xảy ra!",
+        description: "Không thể gửi tin nhắn. Vui lòng thử lại sau.",
+        variant: "destructive",
+      });
+    }
   };
 
   const contactInfo = [

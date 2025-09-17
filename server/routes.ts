@@ -67,9 +67,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get contact submissions (for admin/debugging)
+  // Get contact submissions (admin only - for debugging in development)
   app.get("/api/contact", async (req, res) => {
     try {
+      // Only allow in development environment
+      if (process.env.NODE_ENV === 'production') {
+        return res.status(404).json({
+          success: false,
+          message: "Not found"
+        });
+      }
+      
       const submissions = await storage.getContactSubmissions();
       res.json({ submissions });
     } catch (error) {
@@ -81,9 +89,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get trial requests (for admin/debugging)
+  // Get trial requests (admin only - for debugging in development)
   app.get("/api/trial", async (req, res) => {
     try {
+      // Only allow in development environment
+      if (process.env.NODE_ENV === 'production') {
+        return res.status(404).json({
+          success: false,
+          message: "Not found"
+        });
+      }
+      
       const requests = await storage.getTrialRequests();
       res.json({ requests });
     } catch (error) {

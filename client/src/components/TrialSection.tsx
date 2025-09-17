@@ -37,28 +37,54 @@ export default function TrialSection({ onSubmit }: TrialSectionProps) {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Trial form submitted:', formData);
     
-    // TODO: Remove mock functionality - integrate with real backend
-    toast({
-      title: "Đăng ký thành công!",
-      description: "Chúng tôi sẽ liên hệ với bạn trong vòng 24h để tư vấn miễn phí.",
-    });
-    
-    onSubmit?.(formData);
-    
-    // Reset form
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      company: '',
-      websiteType: '',
-      description: '',
-      budget: ''
-    });
+    try {
+      const response = await fetch('/api/trial', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        toast({
+          title: "Đăng ký thành công!",
+          description: "Chúng tôi sẽ liên hệ với bạn trong vòng 24h để tư vấn miễn phí.",
+        });
+        
+        onSubmit?.(formData);
+        
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          company: '',
+          websiteType: '',
+          description: '',
+          budget: ''
+        });
+      } else {
+        toast({
+          title: "Có lỗi xảy ra!",
+          description: result.message || "Vui lòng thử lại sau.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Trial submission error:', error);
+      toast({
+        title: "Có lỗi xảy ra!",
+        description: "Không thể gửi đăng ký. Vui lòng thử lại sau.",
+        variant: "destructive",
+      });
+    }
   };
 
   const benefits = [
