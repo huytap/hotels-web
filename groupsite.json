@@ -1,0 +1,23 @@
+{
+    "key": "group_site_settings",
+    "title": "Cấu hình Website",
+    "fields": [
+        {
+            "key": "field_third_party_widget_code",
+            "label": "Code Widget Bên Thứ 3",
+            "name": "third_party_widget_code",
+            "type": "textarea",
+            "instructions": "Nhập mã widget đặt phòng từ OTA (Booking.com, Agoda, Traveloka...)",
+            "rows": 5
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "options_page",
+                "operator": "==",
+                "value": "theme-general-settings"
+            }
+        ]
+    ]
+}

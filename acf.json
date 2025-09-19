@@ -1,0 +1,170 @@
+{
+    "key": "group_homepage_sections",
+    "title": "Homepage Sections",
+    "fields": [
+        {
+            "key": "field_homepage_sections",
+            "label": "Homepage Sections",
+            "name": "homepage_sections",
+            "type": "flexible_content",
+            "layouts": {
+                "layout_slider": {
+                    "key": "layout_slider",
+                    "name": "slider",
+                    "label": "Slider",
+                    "sub_fields": [
+                        {
+                            "key": "field_slides",
+                            "label": "Slides",
+                            "name": "slides",
+                            "type": "repeater",
+                            "sub_fields": [
+                                {
+                                    "key": "field_slide_image",
+                                    "label": "Image",
+                                    "name": "image",
+                                    "type": "image",
+                                    "return_format": "url"
+                                },
+                                {
+                                    "key": "field_slide_title",
+                                    "label": "Title",
+                                    "name": "title",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "field_slide_desc",
+                                    "label": "Description",
+                                    "name": "description",
+                                    "type": "textarea"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "layout_booking": {
+                    "key": "layout_booking",
+                    "name": "booking",
+                    "label": "Booking Section",
+                    "sub_fields": []
+                },
+                "layout_intro": {
+                    "key": "layout_intro",
+                    "name": "intro",
+                    "label": "Introduction",
+                    "sub_fields": [
+                        {
+                            "key": "field_intro_image",
+                            "label": "Image",
+                            "name": "image",
+                            "type": "image",
+                            "return_format": "url"
+                        },
+                        {
+                            "key": "field_intro_title",
+                            "label": "Title",
+                            "name": "title",
+                            "type": "text"
+                        },
+                        {
+                            "key": "field_intro_content",
+                            "label": "Content",
+                            "name": "content",
+                            "type": "wysiwyg"
+                        }
+                    ]
+                },
+                "layout_rooms": {
+                    "key": "layout_rooms",
+                    "name": "rooms",
+                    "label": "Rooms",
+                    "sub_fields": [
+                        {
+                            "key": "field_rooms_title",
+                            "label": "Section Title",
+                            "name": "title",
+                            "type": "text"
+                        }
+                    ]
+                },
+                "layout_amenities": {
+                    "key": "layout_amenities",
+                    "name": "amenities",
+                    "label": "Amenities",
+                    "sub_fields": [
+                        {
+                            "key": "field_amenities_title",
+                            "label": "Section Title",
+                            "name": "title",
+                            "type": "text"
+                        },
+                        {
+                            "key": "field_amenities_items",
+                            "label": "Items",
+                            "name": "items",
+                            "type": "repeater",
+                            "sub_fields": [
+                                {
+                                    "key": "field_amenity_icon",
+                                    "label": "Icon (SVG/HTML)",
+                                    "name": "icon",
+                                    "type": "textarea"
+                                },
+                                {
+                                    "key": "field_amenity_text",
+                                    "label": "Text",
+                                    "name": "text",
+                                    "type": "text"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "layout_services": {
+                    "key": "layout_services",
+                    "name": "services",
+                    "label": "Services",
+                    "sub_fields": [
+                        {
+                            "key": "field_services_title",
+                            "label": "Section Title",
+                            "name": "title",
+                            "type": "text"
+                        },
+                        {
+                            "key": "field_services_items",
+                            "label": "Items",
+                            "name": "items",
+                            "type": "repeater",
+                            "sub_fields": [
+                                {
+                                    "key": "field_service_name",
+                                    "label": "Name",
+                                    "name": "name",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "field_service_desc",
+                                    "label": "Description",
+                                    "name": "description",
+                                    "type": "textarea"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "button_label": "Add Section"
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "page_template",
+                "operator": "==",
+                "value": "front-page.php"
+            }
+        ]
+    ],
+    "position": "acf_after_title"
+}
