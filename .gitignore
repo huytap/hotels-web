@@ -24,7 +24,7 @@ wp-config.php
 /wp-content/cache/
 
 # Third-party plugins and themes (nếu bạn không phát triển)
-/wp-content/themes/
+/wp-content/themes/*
 # Nếu bạn phát triển theme của mình, loại trừ tất cả trừ thư mục theme của bạn
 !/wp-content/themes/hotel-theme/
 !/wp-content/themes/main-hotel/
