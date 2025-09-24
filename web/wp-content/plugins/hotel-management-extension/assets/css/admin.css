@@ -1,0 +1,1643 @@
+/**
+ * Hotel Management Extension - Admin CSS
+ * File: assets/css/admin.css
+ */
+
+/* ========== GENERAL STYLES ========== */
+.hme-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hme-loading-spinner {
+    text-align: center;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.hme-loading-spinner .spinner {
+    float: none !important;
+    margin: 0 auto 10px;
+}
+
+.hme-empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.hme-empty-state .dashicons {
+    font-size: 48px;
+    margin-bottom: 15px;
+    opacity: 0.3;
+}
+
+.hme-empty-state p {
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+/* ========== FILTERS SECTION ========== */
+.hme-filters-section {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.hme-filters-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.hme-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hme-filter-group label {
+    font-weight: 500;
+    margin: 0;
+    min-width: 80px;
+}
+
+.hme-filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.hme-view-controls {
+    margin-top: 15px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.hme-view-tabs {
+    display: flex;
+    gap: 5px;
+}
+
+.hme-tab-btn {
+    background: #f1f1f1;
+    border: 1px solid #ddd;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.hme-tab-btn:hover {
+    background: #e1e1e1;
+}
+
+.hme-tab-btn.active {
+    background: #0073aa;
+    color: white;
+    border-color: #0073aa;
+}
+
+.hme-view-content {
+    margin-top: 20px;
+}
+
+/* ========== STATUS INDICATORS ========== */
+.hme-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Booking Statuses */
+.hme-status-pending {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.hme-status-confirmed {
+    background: #d1edff;
+    color: #0c5460;
+    border: 1px solid #b8daff;
+}
+
+.hme-status-cancelled {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.hme-status-completed {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.hme-status-no-show {
+    background: #e2e3e5;
+    color: #383d41;
+    border: 1px solid #d6d8db;
+}
+
+/* Promotion Statuses */
+.hme-status-active {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.hme-status-inactive {
+    background: #e2e3e5;
+    color: #383d41;
+    border: 1px solid #d6d8db;
+}
+
+.hme-status-expired {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.hme-status-upcoming {
+    background: #cce5ff;
+    color: #004085;
+    border: 1px solid #b3d7ff;
+}
+
+.hme-status-used-up {
+    background: #ffeaa7;
+    color: #856404;
+    border: 1px solid #ffdd57;
+}
+
+/* ========== MODALS ========== */
+.hme-modal {
+    position: fixed;
+    z-index: 100000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: hme-modal-fade-in 0.3s ease;
+}
+
+@keyframes hme-modal-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.hme-modal-content {
+    background-color: #fefefe;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: hme-modal-slide-in 0.3s ease;
+}
+
+.hme-modal-content.hme-modal-small {
+    max-width: 400px;
+}
+
+.hme-modal-content.hme-modal-large {
+    max-width: 800px;
+}
+
+@keyframes hme-modal-slide-in {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.hme-modal-header {
+    padding: 20px 20px 15px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hme-modal-header h2,
+.hme-modal-header h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hme-modal-close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.hme-modal-close:hover,
+.hme-modal-close:focus {
+    color: #000;
+}
+
+.hme-modal-body {
+    padding: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.hme-modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* ========== BOOKING FORM STYLES ========== */
+.hme-progress-steps {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0 30px;
+    position: relative;
+}
+
+.hme-progress-steps::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #ddd;
+    z-index: 1;
+}
+
+.hme-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    max-width: 150px;
+}
+
+.step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #ddd;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.step-title {
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+    font-weight: 500;
+}
+
+.hme-step.active .step-number {
+    background: #0073aa;
+    color: white;
+}
+
+.hme-step.active .step-title {
+    color: #0073aa;
+    font-weight: 600;
+}
+
+.hme-step.completed .step-number {
+    background: #00a32a;
+    color: white;
+}
+
+.hme-step.completed .step-title {
+    color: #00a32a;
+}
+
+.hme-booking-form {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.hme-form-step {
+    padding: 30px;
+}
+
+.hme-form-section {
+    margin-bottom: 30px;
+}
+
+.hme-form-section:last-child {
+    margin-bottom: 0;
+}
+
+.hme-form-section h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 20px;
+    color: #23282d;
+    border-bottom: 2px solid #0073aa;
+    padding-bottom: 10px;
+}
+
+.hme-form-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 15px;
+    color: #555;
+}
+
+.hme-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.hme-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.hme-form-group label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #23282d;
+}
+
+.hme-form-group label.required::after {
+    content: ' *';
+    color: #d63638;
+}
+
+.hme-form-group .description {
+    font-size: 13px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.hme-input-group {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+}
+
+.hme-input-group input {
+    flex: 1;
+}
+
+.hme-form-actions {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.hme-nights-info {
+    background: #f0f6fc;
+    border: 1px solid #c8e1ff;
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin: 15px 0;
+    color: #0969da;
+}
+
+.hme-room-details {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.hme-room-info h4 {
+    margin: 0 0 10px;
+    color: #23282d;
+}
+
+.hme-room-info p {
+    margin: 5px 0;
+    font-size: 13px;
+}
+
+.hme-promotion-result {
+    margin-top: 10px;
+    padding: 10px 15px;
+    border-radius: 4px;
+}
+
+.hme-promotion-success {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.hme-promotion-error {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.hme-promotion-success .dashicons,
+.hme-promotion-error .dashicons {
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+.hme-booking-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.hme-summary-section {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.hme-summary-section h3 {
+    background: #23282d;
+    color: white;
+    margin: 0;
+    padding: 15px 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.hme-summary-content {
+    padding: 20px;
+}
+
+.hme-summary-table {
+    width: 100%;
+    font-size: 13px;
+}
+
+.hme-summary-table td {
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.hme-summary-table td:last-child {
+    text-align: right;
+}
+
+.hme-pricing-breakdown {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.hme-pricing-table {
+    width: 100%;
+    font-size: 14px;
+}
+
+.hme-pricing-table td {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.hme-pricing-table .amount {
+    text-align: right;
+    font-weight: 500;
+}
+
+.hme-pricing-table .discount td {
+    color: #00a32a;
+}
+
+.hme-pricing-table .total {
+    border-top: 2px solid #23282d;
+    border-bottom: none;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.hme-pricing-error {
+    text-align: center;
+    color: #d63638;
+    padding: 20px;
+}
+
+.field-error {
+    color: #d63638;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+input.error,
+select.error,
+textarea.error {
+    border-color: #d63638 !important;
+}
+
+/* ========== ROOM RATES CALENDAR ========== */
+.hme-calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.hme-calendar-navigation {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.hme-calendar-navigation h2 {
+    margin: 0;
+    font-size: 18px;
+    min-width: 200px;
+    text-align: center;
+}
+
+.hme-calendar-legend {
+    display: flex;
+    gap: 15px;
+    font-size: 12px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.legend-color.hme-closed {
+    background: #ff6b6b;
+}
+
+.legend-color.hme-low-availability {
+    background: #ffd93d;
+}
+
+.legend-color.hme-no-availability {
+    background: #ff8787;
+}
+
+.legend-color.hme-cta {
+    background: #74c0fc;
+}
+
+.legend-color.hme-ctd {
+    background: #91a7ff;
+}
+
+.hme-calendar-container {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.hme-calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.hme-calendar-table th {
+    background: #f1f1f1;
+    padding: 10px 5px;
+    text-align: center;
+    font-weight: 600;
+    border: 1px solid #ddd;
+}
+
+.hme-calendar-cell {
+    border: 1px solid #ddd;
+    padding: 5px;
+    text-align: center;
+    vertical-align: top;
+    height: 80px;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+.hme-calendar-cell:hover {
+    background: #f0f6fc;
+}
+
+.hme-calendar-cell.other-month {
+    background: #f9f9f9;
+    color: #ccc;
+    cursor: default;
+}
+
+.hme-calendar-cell.other-month:hover {
+    background: #f9f9f9;
+}
+
+.date-number {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.rate-info {
+    font-size: 10px;
+}
+
+.rate-info .rate {
+    font-weight: 600;
+    color: #0073aa;
+}
+
+.rate-info .availability {
+    color: #666;
+}
+
+.no-data {
+    color: #999;
+    font-style: italic;
+    font-size: 10px;
+}
+
+/* Calendar cell states */
+.hme-calendar-cell.hme-closed {
+    background: #ffe6e6;
+    border-color: #ff6b6b;
+}
+
+.hme-calendar-cell.hme-low-availability {
+    background: #fff9db;
+    border-color: #ffd93d;
+}
+
+.hme-calendar-cell.hme-no-availability {
+    background: #ffebee;
+    border-color: #ff8787;
+}
+
+.hme-calendar-cell.hme-cta {
+    background: #e3f2fd;
+    border-color: #74c0fc;
+}
+
+.hme-calendar-cell.hme-ctd {
+    background: #f3e5f5;
+    border-color: #91a7ff;
+}
+
+/* ========== PROMOTIONS STYLES ========== */
+.usage-info {
+    text-align: center;
+}
+
+.usage-bar {
+    width: 100%;
+    height: 6px;
+    background: #f0f0f0;
+    border-radius: 3px;
+    margin: 5px 0;
+    overflow: hidden;
+}
+
+.usage-progress {
+    height: 100%;
+    background: linear-gradient(90deg, #00a32a 0%, #ffb900 70%, #d63638 100%);
+    transition: width 0.3s ease;
+}
+
+.hme-templates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.hme-template-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.hme-template-card:hover {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.hme-template-card.inactive {
+    opacity: 0.7;
+}
+
+.template-header {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.template-header h4 {
+    margin: 0;
+    color: #23282d;
+}
+
+.template-status {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 10px;
+    background: #00a32a;
+    color: white;
+    font-weight: 600;
+}
+
+.hme-template-card.inactive .template-status {
+    background: #666;
+}
+
+.template-body {
+    padding: 20px;
+}
+
+.template-body p {
+    margin: 10px 0;
+    font-size: 13px;
+}
+
+.rates-preview {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px;
+    font-size: 11px;
+    margin-top: 10px;
+}
+
+.rates-preview span {
+    padding: 2px 5px;
+    background: #f0f0f0;
+    border-radius: 3px;
+}
+
+.template-actions {
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 8px;
+}
+
+.hme-generated-code {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.hme-generated-code input {
+    flex: 1;
+    font-family: monospace;
+    font-weight: bold;
+    background: #f9f9f9;
+}
+
+/* ========== DETAIL TABLES ========== */
+.hme-detail-section {
+    margin-bottom: 25px;
+}
+
+.hme-detail-section h3 {
+    margin: 0 0 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    color: #23282d;
+}
+
+.hme-detail-table {
+    width: 100%;
+    font-size: 13px;
+}
+
+.hme-detail-table td {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.hme-detail-table td:first-child {
+    width: 30%;
+    color: #666;
+}
+
+.hme-detail-table td:last-child {
+    font-weight: 500;
+}
+
+/* ========== DASHBOARD STYLES ========== */
+.hme-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.hme-stat-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hme-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.hme-stat-card h3 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.hme-stat-number {
+    font-size: 28px;
+    font-weight: bold;
+    color: #0073aa;
+    display: block;
+    margin: 5px 0;
+}
+
+.hme-stat-card.pending .hme-stat-number {
+    color: #d63638;
+}
+
+.hme-stat-card.revenue .hme-stat-number {
+    color: #00a32a;
+}
+
+.hme-dashboard-section {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.hme-dashboard-section h2,
+.hme-dashboard-section h3 {
+    margin: 0 0 15px;
+    color: #23282d;
+}
+
+.hme-quick-actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.hme-quick-actions .button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    font-size: 14px;
+}
+
+.hme-dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.hme-recent-list ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hme-recent-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hme-recent-list li:last-child {
+    border-bottom: none;
+}
+
+.hme-room-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.hme-room-item {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+}
+
+.hme-room-item strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #23282d;
+}
+
+.available {
+    color: #00a32a;
+    font-weight: 600;
+}
+
+.total {
+    color: #666;
+}
+
+.hme-view-all {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.hme-view-all a {
+    color: #0073aa;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.hme-view-all a:hover {
+    text-decoration: underline;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 1200px) {
+    .hme-booking-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .hme-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 782px) {
+    .hme-filters-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .hme-filter-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .hme-filter-group label {
+        min-width: auto;
+        margin-bottom: 5px;
+    }
+
+    .hme-filter-actions {
+        margin-left: 0;
+        justify-content: center;
+    }
+
+    .hme-form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .hme-progress-steps {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .hme-progress-steps::before {
+        display: none;
+    }
+
+    .hme-step {
+        flex-direction: row;
+        max-width: none;
+    }
+
+    .step-number {
+        margin-bottom: 0;
+        margin-right: 10px;
+    }
+
+    .hme-modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+
+    .hme-calendar-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .hme-calendar-legend {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .hme-templates-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hme-quick-actions {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 600px) {
+    .hme-calendar-table {
+        font-size: 10px;
+    }
+
+    .hme-calendar-cell {
+        height: 60px;
+        padding: 3px;
+    }
+
+    .rate-info {
+        font-size: 9px;
+    }
+}
+
+/* ========== ACCESSIBILITY ========== */
+.hme-modal:focus-within {
+    outline: none;
+}
+
+.hme-modal-content:focus {
+    outline: 2px solid #0073aa;
+    outline-offset: -2px;
+}
+
+.hme-calendar-cell:focus {
+    outline: 2px solid #0073aa;
+    outline-offset: -2px;
+}
+
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid #0073aa;
+    outline-offset: 1px;
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes hme-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hme-view-content {
+    animation: hme-fade-in 0.3s ease;
+}
+
+.hme-stat-card {
+    animation: hme-fade-in 0.3s ease;
+    animation-fill-mode: both;
+}
+
+.hme-stat-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.hme-stat-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.hme-stat-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.hme-stat-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.hme-stat-card:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.hme-stat-card:nth-child(6) {
+    animation-delay: 0.6s;
+}
+
+/* ========== PRINT STYLES ========== */
+@media print {
+
+    .hme-filters-section,
+    .hme-modal,
+    .page-title-action,
+    .tablenav,
+    .column-actions {
+        display: none !important;
+    }
+
+    .hme-stat-card,
+    .hme-dashboard-section,
+    .hme-template-card {
+        border: 1px solid #000 !important;
+        break-inside: avoid;
+    }
+
+    .hme-status {
+        border: 1px solid #000 !important;
+        color: #000 !important;
+    }
+}
+
+/* ========== DARK MODE SUPPORT ========== */
+@media (prefers-color-scheme: dark) {
+
+    .hme-stat-card,
+    .hme-dashboard-section,
+    .hme-filters-section,
+    .hme-booking-form,
+    .hme-template-card {
+        background: #1e1e1e;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+
+    .hme-modal-content {
+        background: #2d2d2d;
+        color: #e0e0e0;
+    }
+
+    .hme-calendar-table th {
+        background: #333;
+        color: #e0e0e0;
+    }
+
+    .hme-calendar-cell {
+        border-color: #444;
+    }
+
+    .hme-calendar-cell:hover {
+        background: #404040;
+    }
+}
+
+/* ========== CUSTOM SCROLLBAR ========== */
+.hme-modal-body::-webkit-scrollbar,
+.hme-calendar-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.hme-modal-body::-webkit-scrollbar-track,
+.hme-calendar-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.hme-modal-body::-webkit-scrollbar-thumb,
+.hme-calendar-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.hme-modal-body::-webkit-scrollbar-thumb:hover,
+.hme-calendar-container::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* ========== LOADING STATES ========== */
+.hme-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #666;
+}
+
+.hme-loading .spinner {
+    float: none !important;
+    margin-right: 10px;
+}
+
+/* Skeleton loading effect */
+.hme-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: hme-skeleton-loading 1.5s infinite;
+}
+
+@keyframes hme-skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.hme-skeleton-text {
+    height: 1em;
+    margin: 0.5em 0;
+    border-radius: 3px;
+}
+
+.hme-skeleton-text.short {
+    width: 60%;
+}
+
+.hme-skeleton-text.medium {
+    width: 80%;
+}
+
+.hme-skeleton-text.long {
+    width: 100%;
+}
+
+/* ========== UTILITY CLASSES ========== */
+.hme-text-center {
+    text-align: center;
+}
+
+.hme-text-left {
+    text-align: left;
+}
+
+.hme-text-right {
+    text-align: right;
+}
+
+.hme-mt-0 {
+    margin-top: 0;
+}
+
+.hme-mt-10 {
+    margin-top: 10px;
+}
+
+.hme-mt-20 {
+    margin-top: 20px;
+}
+
+.hme-mt-30 {
+    margin-top: 30px;
+}
+
+.hme-mb-0 {
+    margin-bottom: 0;
+}
+
+.hme-mb-10 {
+    margin-bottom: 10px;
+}
+
+.hme-mb-20 {
+    margin-bottom: 20px;
+}
+
+.hme-mb-30 {
+    margin-bottom: 30px;
+}
+
+.hme-p-10 {
+    padding: 10px;
+}
+
+.hme-p-15 {
+    padding: 15px;
+}
+
+.hme-p-20 {
+    padding: 20px;
+}
+
+.hme-border {
+    border: 1px solid #ddd;
+}
+
+.hme-border-radius {
+    border-radius: 5px;
+}
+
+.hme-bg-white {
+    background: white;
+}
+
+.hme-bg-light {
+    background: #f9f9f9;
+}
+
+.hme-bg-success {
+    background: #d4edda;
+}
+
+.hme-bg-warning {
+    background: #fff3cd;
+}
+
+.hme-bg-error {
+    background: #f8d7da;
+}
+
+.hme-text-success {
+    color: #155724;
+}
+
+.hme-text-warning {
+    color: #856404;
+}
+
+.hme-text-error {
+    color: #721c24;
+}
+
+.hme-text-muted {
+    color: #666;
+}
+
+.hme-font-weight-normal {
+    font-weight: normal;
+}
+
+.hme-font-weight-bold {
+    font-weight: bold;
+}
+
+.hme-d-none {
+    display: none;
+}
+
+.hme-d-block {
+    display: block;
+}
+
+.hme-d-flex {
+    display: flex;
+}
+
+.hme-d-grid {
+    display: grid;
+}
+
+.hme-flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hme-flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.hme-gap-5 {
+    gap: 5px;
+}
+
+.hme-gap-10 {
+    gap: 10px;
+}
+
+.hme-gap-15 {
+    gap: 15px;
+}
+
+.hme-gap-20 {
+    gap: 20px;
+}
+
+/* ========== WORDPRESS ADMIN INTEGRATION ========== */
+.hme-admin-notice {
+    margin: 15px 0;
+}
+
+.hme-admin-notice.notice-success {
+    border-left: 4px solid #00a32a;
+}
+
+.hme-admin-notice.notice-error {
+    border-left: 4px solid #d63638;
+}
+
+.hme-admin-notice.notice-warning {
+    border-left: 4px solid #dba617;
+}
+
+.hme-admin-notice.notice-info {
+    border-left: 4px solid #0073aa;
+}
+
+/* Override WordPress defaults for better integration */
+.hme-booking-form .form-table th,
+.hme-modal .form-table th {
+    width: auto;
+    padding: 15px 0 15px 0;
+    vertical-align: top;
+}
+
+.hme-booking-form .form-table td,
+.hme-modal .form-table td {
+    padding: 15px 0 15px 20px;
+}
+
+/* Enhanced button styles */
+.button.button-hero {
+    padding: 12px 30px;
+    font-size: 16px;
+    min-height: auto;
+}
+
+.button .dashicons {
+    vertical-align: middle;
+    margin-right: 5px;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.button-large .dashicons {
+    margin-right: 8px;
+    font-size: 18px;
+}
+
+/* Enhanced form controls */
+.hme-booking-form input[type="text"],
+.hme-booking-form input[type="email"],
+.hme-booking-form input[type="tel"],
+.hme-booking-form input[type="number"],
+.hme-booking-form input[type="date"],
+.hme-booking-form select,
+.hme-booking-form textarea,
+.hme-modal input[type="text"],
+.hme-modal input[type="email"],
+.hme-modal input[type="tel"],
+.hme-modal input[type="number"],
+.hme-modal input[type="date"],
+.hme-modal select,
+.hme-modal textarea {
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hme-booking-form input:focus,
+.hme-booking-form select:focus,
+.hme-booking-form textarea:focus,
+.hme-modal input:focus,
+.hme-modal select:focus,
+.hme-modal textarea:focus {
+    border-color: #0073aa;
+    box-shadow: 0 0 0 1px #0073aa;
+}
+
+/* ========== FINAL RESPONSIVE ADJUSTMENTS ========== */
+@media (max-width: 480px) {
+    .hme-form-step {
+        padding: 20px 15px;
+    }
+
+    .hme-stat-card {
+        padding: 15px;
+    }
+
+    .hme-stat-number {
+        font-size: 24px;
+    }
+
+    .hme-dashboard-section {
+        padding: 15px;
+    }
+
+    .hme-modal-body {
+        padding: 15px;
+    }
+
+    .hme-filters-section {
+        padding: 10px;
+    }
+
+    .hme-quick-actions .button {
+        padding: 10px 15px;
+        font-size: 13px;
+    }
+}
+
+/* ========== HIGH CONTRAST MODE ========== */
+@media (prefers-contrast: high) {
+
+    .hme-status,
+    .hme-stat-card,
+    .hme-calendar-cell,
+    .hme-template-card {
+        border-width: 2px;
+    }
+
+    .hme-modal-content {
+        border: 3px solid #000;
+    }
+
+    .button {
+        border-width: 2px;
+    }
+}
+
+/* ========== REDUCED MOTION ========== */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .hme-modal {
+        animation: none;
+    }
+
+    .hme-modal-content {
+        animation: none;
+    }
+
+    .hme-stat-card:hover {
+        transform: none;
+    }
+}

@@ -1,0 +1,135 @@
+[23-Sep-2025 14:29:33 UTC] API Call success: GET /sync/promotions/check-code - HTTP 404
+[23-Sep-2025 14:29:33 UTC] API returned error: HTTP 404 - The route api/sync/sync/promotions/check-code could not be found.
+[23-Sep-2025 14:29:53 UTC] API Call success: GET promotions/check-code - HTTP 500
+[23-Sep-2025 14:29:53 UTC] API returned error: HTTP 500 - Function () does not exist
+[23-Sep-2025 14:31:40 UTC] API Call success: GET promotions/check-code - HTTP 500
+[23-Sep-2025 14:31:40 UTC] API returned error: HTTP 500 - Method App\Http\Controllers\Api\PromotionController::generateUniqueCode does not exist.
+[23-Sep-2025 14:31:41 UTC] Automatic updates starting...
+[23-Sep-2025 14:31:43 UTC] Automatic updates complete.
+[23-Sep-2025 14:32:44 UTC] API Call success: GET promotions/check-code - HTTP 200
+[23-Sep-2025 14:37:08 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[23-Sep-2025 14:37:09 UTC] API Call success: GET room-types - HTTP 200
+[23-Sep-2025 14:37:09 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[23-Sep-2025 14:37:09 UTC] PHP Warning:  Undefined variable $roomTypes in D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\views\promotion-add.php on line 101
+[23-Sep-2025 14:37:09 UTC] PHP Stack trace:
+[23-Sep-2025 14:37:09 UTC] PHP   1. {main}() D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:0
+[23-Sep-2025 14:37:09 UTC] PHP   2. do_action($hook_name = 'hotel-management_page_hotel-promotions') D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:260
+[23-Sep-2025 14:37:09 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\plugin.php:517
+[23-Sep-2025 14:37:09 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:348
+[23-Sep-2025 14:37:09 UTC] PHP   5. Hotel_Management_Extension->promotions_page('') D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:324
+[23-Sep-2025 14:37:09 UTC] PHP   6. include() D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:414
+[23-Sep-2025 14:37:09 UTC] PHP Warning:  foreach() argument must be of type array|object, null given in D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\views\promotion-add.php on line 101
+[23-Sep-2025 14:37:09 UTC] PHP Stack trace:
+[23-Sep-2025 14:37:09 UTC] PHP   1. {main}() D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:0
+[23-Sep-2025 14:37:09 UTC] PHP   2. do_action($hook_name = 'hotel-management_page_hotel-promotions') D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:260
+[23-Sep-2025 14:37:09 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\plugin.php:517
+[23-Sep-2025 14:37:09 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:348
+[23-Sep-2025 14:37:09 UTC] PHP   5. Hotel_Management_Extension->promotions_page('') D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:324
+[23-Sep-2025 14:37:09 UTC] PHP   6. include() D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:414
+[23-Sep-2025 14:37:36 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[23-Sep-2025 14:37:37 UTC] API Call success: GET room-types - HTTP 200
+[23-Sep-2025 14:37:37 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[23-Sep-2025 14:37:37 UTC] PHP Warning:  Undefined variable $roomTypes in D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\views\promotion-add.php on line 102
+[23-Sep-2025 14:37:37 UTC] PHP Stack trace:
+[23-Sep-2025 14:37:37 UTC] PHP   1. {main}() D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:0
+[23-Sep-2025 14:37:37 UTC] PHP   2. do_action($hook_name = 'hotel-management_page_hotel-promotions') D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:260
+[23-Sep-2025 14:37:37 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\plugin.php:517
+[23-Sep-2025 14:37:37 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:348
+[23-Sep-2025 14:37:37 UTC] PHP   5. Hotel_Management_Extension->promotions_page('') D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:324
+[23-Sep-2025 14:37:37 UTC] PHP   6. include() D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:414
+[23-Sep-2025 14:37:37 UTC] PHP Warning:  foreach() argument must be of type array|object, null given in D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\views\promotion-add.php on line 102
+[23-Sep-2025 14:37:37 UTC] PHP Stack trace:
+[23-Sep-2025 14:37:37 UTC] PHP   1. {main}() D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:0
+[23-Sep-2025 14:37:37 UTC] PHP   2. do_action($hook_name = 'hotel-management_page_hotel-promotions') D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:260
+[23-Sep-2025 14:37:37 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\plugin.php:517
+[23-Sep-2025 14:37:37 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:348
+[23-Sep-2025 14:37:37 UTC] PHP   5. Hotel_Management_Extension->promotions_page('') D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:324
+[23-Sep-2025 14:37:37 UTC] PHP   6. include() D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:414
+[23-Sep-2025 14:37:56 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[23-Sep-2025 14:37:57 UTC] API Call success: GET room-types - HTTP 200
+[23-Sep-2025 14:37:57 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[23-Sep-2025 14:37:57 UTC] PHP Warning:  Undefined variable $roomTypes in D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\views\promotion-add.php on line 102
+[23-Sep-2025 14:37:57 UTC] PHP Stack trace:
+[23-Sep-2025 14:37:57 UTC] PHP   1. {main}() D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:0
+[23-Sep-2025 14:37:57 UTC] PHP   2. do_action($hook_name = 'hotel-management_page_hotel-promotions') D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:260
+[23-Sep-2025 14:37:57 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\plugin.php:517
+[23-Sep-2025 14:37:57 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:348
+[23-Sep-2025 14:37:57 UTC] PHP   5. Hotel_Management_Extension->promotions_page('') D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:324
+[23-Sep-2025 14:37:57 UTC] PHP   6. include() D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:414
+[23-Sep-2025 14:37:57 UTC] PHP Warning:  foreach() argument must be of type array|object, null given in D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\views\promotion-add.php on line 102
+[23-Sep-2025 14:37:57 UTC] PHP Stack trace:
+[23-Sep-2025 14:37:57 UTC] PHP   1. {main}() D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:0
+[23-Sep-2025 14:37:57 UTC] PHP   2. do_action($hook_name = 'hotel-management_page_hotel-promotions') D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:260
+[23-Sep-2025 14:37:57 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\plugin.php:517
+[23-Sep-2025 14:37:57 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:348
+[23-Sep-2025 14:37:57 UTC] PHP   5. Hotel_Management_Extension->promotions_page('') D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:324
+[23-Sep-2025 14:37:57 UTC] PHP   6. include() D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:414
+[23-Sep-2025 14:38:09 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[23-Sep-2025 14:38:10 UTC] API Call success: GET room-types - HTTP 200
+[23-Sep-2025 14:38:10 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[23-Sep-2025 14:38:10 UTC] PHP Warning:  Undefined variable $roomTypes in D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\views\promotion-add.php on line 103
+[23-Sep-2025 14:38:10 UTC] PHP Stack trace:
+[23-Sep-2025 14:38:10 UTC] PHP   1. {main}() D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:0
+[23-Sep-2025 14:38:10 UTC] PHP   2. do_action($hook_name = 'hotel-management_page_hotel-promotions') D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:260
+[23-Sep-2025 14:38:10 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\plugin.php:517
+[23-Sep-2025 14:38:10 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:348
+[23-Sep-2025 14:38:10 UTC] PHP   5. Hotel_Management_Extension->promotions_page('') D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:324
+[23-Sep-2025 14:38:10 UTC] PHP   6. include() D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:414
+[23-Sep-2025 14:38:10 UTC] PHP Warning:  foreach() argument must be of type array|object, null given in D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\views\promotion-add.php on line 103
+[23-Sep-2025 14:38:10 UTC] PHP Stack trace:
+[23-Sep-2025 14:38:10 UTC] PHP   1. {main}() D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:0
+[23-Sep-2025 14:38:10 UTC] PHP   2. do_action($hook_name = 'hotel-management_page_hotel-promotions') D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:260
+[23-Sep-2025 14:38:10 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\plugin.php:517
+[23-Sep-2025 14:38:10 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:348
+[23-Sep-2025 14:38:10 UTC] PHP   5. Hotel_Management_Extension->promotions_page('') D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:324
+[23-Sep-2025 14:38:10 UTC] PHP   6. include() D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:414
+[23-Sep-2025 14:38:30 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[23-Sep-2025 14:38:31 UTC] API Call success: GET room-types - HTTP 200
+[23-Sep-2025 14:38:31 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[23-Sep-2025 14:38:31 UTC] PHP Warning:  Undefined variable $roomTypes in D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\views\promotion-add.php on line 102
+[23-Sep-2025 14:38:31 UTC] PHP Stack trace:
+[23-Sep-2025 14:38:31 UTC] PHP   1. {main}() D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:0
+[23-Sep-2025 14:38:31 UTC] PHP   2. do_action($hook_name = 'hotel-management_page_hotel-promotions') D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:260
+[23-Sep-2025 14:38:31 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\plugin.php:517
+[23-Sep-2025 14:38:31 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:348
+[23-Sep-2025 14:38:31 UTC] PHP   5. Hotel_Management_Extension->promotions_page('') D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:324
+[23-Sep-2025 14:38:31 UTC] PHP   6. include() D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:414
+[23-Sep-2025 14:38:31 UTC] PHP Warning:  foreach() argument must be of type array|object, null given in D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\views\promotion-add.php on line 102
+[23-Sep-2025 14:38:31 UTC] PHP Stack trace:
+[23-Sep-2025 14:38:31 UTC] PHP   1. {main}() D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:0
+[23-Sep-2025 14:38:31 UTC] PHP   2. do_action($hook_name = 'hotel-management_page_hotel-promotions') D:\projects\hotels\webkhachsan.net\wp-admin\admin.php:260
+[23-Sep-2025 14:38:31 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\plugin.php:517
+[23-Sep-2025 14:38:31 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:348
+[23-Sep-2025 14:38:31 UTC] PHP   5. Hotel_Management_Extension->promotions_page('') D:\projects\hotels\webkhachsan.net\wp-includes\class-wp-hook.php:324
+[23-Sep-2025 14:38:31 UTC] PHP   6. include() D:\projects\hotels\webkhachsan.net\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:414
+[23-Sep-2025 14:38:43 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[23-Sep-2025 14:38:45 UTC] API Call success: GET room-types - HTTP 200
+[23-Sep-2025 14:38:45 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[23-Sep-2025 14:39:03 UTC] API Call success: GET promotions/check-code - HTTP 200
+[23-Sep-2025 14:40:34 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[23-Sep-2025 14:40:35 UTC] API Call success: GET room-types - HTTP 200
+[23-Sep-2025 14:40:35 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[23-Sep-2025 14:40:39 UTC] API Call success: GET promotions/check-code - HTTP 200
+[23-Sep-2025 14:40:53 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[23-Sep-2025 14:40:54 UTC] API Call success: GET room-types - HTTP 200
+[23-Sep-2025 14:40:54 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[23-Sep-2025 14:41:23 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[23-Sep-2025 14:41:24 UTC] API Call success: GET room-types - HTTP 200
+[23-Sep-2025 14:41:24 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[23-Sep-2025 14:41:27 UTC] API Call success: GET promotions/check-code - HTTP 200
+[23-Sep-2025 14:45:57 UTC] API Call success: POST promotions - HTTP 422
+[23-Sep-2025 14:45:57 UTC] API returned error: HTTP 422
+[23-Sep-2025 14:49:33 UTC] API Call success: POST promotions - HTTP 422
+[23-Sep-2025 14:49:33 UTC] API returned error: HTTP 422
+[23-Sep-2025 14:53:58 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[23-Sep-2025 14:54:00 UTC] API Call success: GET room-types - HTTP 200
+[23-Sep-2025 14:54:00 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[23-Sep-2025 14:54:09 UTC] API Call success: GET promotions/check-code - HTTP 200
+[23-Sep-2025 14:54:19 UTC] API Call success: POST promotions - HTTP 422
+[23-Sep-2025 14:54:19 UTC] API returned error: HTTP 422
+[23-Sep-2025 14:56:04 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[23-Sep-2025 14:56:06 UTC] API Call success: GET room-types - HTTP 200
+[23-Sep-2025 14:56:06 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('hotel-management_page_hotel-promotions'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->promotions_page, include('/plugins/hotel-management-extension/views/promotion-add.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[23-Sep-2025 14:56:13 UTC] API Call success: GET promotions/check-code - HTTP 200
+[23-Sep-2025 14:56:18 UTC] API Call success: POST promotions - HTTP 422
+[23-Sep-2025 14:56:18 UTC] API returned error: HTTP 422
