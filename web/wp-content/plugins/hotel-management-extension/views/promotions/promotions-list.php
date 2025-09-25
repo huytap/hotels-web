@@ -22,9 +22,9 @@ $promotion_statuses = HME_Promotion_Manager::get_promotion_statuses();
     <a href="<?php echo admin_url('admin.php?page=hotel-promotions&action=add'); ?>" class="page-title-action">
         <span class="dashicons dashicons-plus-alt"></span> Add New Promotion
     </a>
-    <button type="button" class="page-title-action" id="generate-code-btn">
+    <!-- <button type="button" class="page-title-action" id="generate-code-btn">
         <span class="dashicons dashicons-randomize"></span> Generate Code
-    </button>
+    </button> -->
 
     <!-- Loading Indicator -->
     <div id="hme-loading" class="hme-loading-overlay" style="display: none;">
@@ -474,7 +474,7 @@ $promotion_statuses = HME_Promotion_Manager::get_promotion_statuses();
         }
 
         function loadPromotions() {
-            showLoading();
+            //showLoading();
 
             const data = {
                 action: 'hme_get_promotions',
@@ -491,7 +491,7 @@ $promotion_statuses = HME_Promotion_Manager::get_promotion_statuses();
                 type: 'POST',
                 data: data,
                 success: function(response) {
-                    hideLoading();
+                    //hideLoading();
                     if (response.success) {
                         displayPromotions(response.data);
                     } else {
@@ -499,7 +499,7 @@ $promotion_statuses = HME_Promotion_Manager::get_promotion_statuses();
                     }
                 },
                 error: function() {
-                    hideLoading();
+                    //hideLoading();
                     showError('Error connecting to server');
                 }
             });

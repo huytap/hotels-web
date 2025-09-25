@@ -13,7 +13,7 @@ use App\Models\Hotel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\Rule;
 
-class PromotionController extends Controller
+class PromotionController extends BaseApiController
 {
     /**
      * Display a listing of the resource.
@@ -24,6 +24,10 @@ class PromotionController extends Controller
 
     public function index(Request $request)
     {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
         // 1. Xác thực các tham số đầu vào
         $validator = Validator::make($request->all(), [
             'page' => 'nullable|integer|min:1',
@@ -36,12 +40,6 @@ class PromotionController extends Controller
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
-        }
-
-        // Lấy hotel_id từ wp_id
-        $hotel = Hotel::where('wp_id', $request->input('wp_id'))->first();
-        if (!$hotel) {
-            return response()->json(['message' => 'Hotel not found for the given wp_id.'], 404);
         }
 
         // 2. Xây dựng truy vấn
@@ -74,7 +72,7 @@ class PromotionController extends Controller
         $promotions = $query->paginate($perPage);
 
         // 4. Trả về kết quả
-        return response()->json($promotions);
+        return $this->successResponse($promotions);
     }
 
     /**
@@ -85,10 +83,13 @@ class PromotionController extends Controller
      */
     public function store(Request $request)
     {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
         $wpData = $request->json()->all();
 
         $validator = Validator::make($wpData, [
-            'wp_id' => 'required|integer',
             'data' => 'required|array',
             'data.promotion_code' => 'required|string|unique:promotions,promotion_code',
             'data.name' => 'required|array',
@@ -107,17 +108,17 @@ class PromotionController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $hotelId = HotelHelper::getHotelIdByWpId($wpData['wp_id']);
-        if (!$hotelId) {
-            return response()->json(['error' => 'Invalid wp_id. Hotel not found.'], 404);
-        }
+        // $hotelId = HotelHelper::getHotelIdByWpId($wpData['wp_id']);
+        // if (!$hotelId) {
+        //     return response()->json(['error' => 'Invalid wp_id. Hotel not found.'], 404);
+        // }
 
         try {
             DB::beginTransaction();
             $wpData = $wpData['data'];
-            dd($wpData);
+            //dd($wpData);
             $promotion = Promotion::create([
-                'hotel_id' => $hotelId,
+                'hotel_id' => $hotel->id,
                 'promotion_code' => $wpData['promotion_code'],
                 'name' => $wpData['name'],
                 'description' => $wpData['description'] ?? null,
@@ -132,11 +133,11 @@ class PromotionController extends Controller
                 'max_stay' => $wpData['max_stay'] ?? null
             ]);
 
-            $promotion->roomTypes()->sync($wpData['roomtypes']);
+            $promotion->roomtypes()->sync($wpData['roomtypes']);
 
             DB::commit();
 
-            return response()->json(['message' => 'Promotion created successfully.', 'promotion' => $promotion->load('roomTypes')], 201);
+            return $this->successResponse(['message' => 'Promotion created successfully.', 'promotion' => $promotion->load('roomtypes')], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'An error occurred while creating the promotion.', 'message' => $e->getMessage()], 500);
@@ -159,24 +160,16 @@ class PromotionController extends Controller
      */
     public function show(Request $request, Promotion $promotion)
     {
-        // Lấy wp_id từ request (ưu tiên từ query string hoặc header)
-        $wpId = $request->input('wp_id');
-
-        // Nếu không có wp_id, trả về lỗi
-        if (is_null($wpId)) {
-            return response()->json(['error' => 'wp_id is required.'], 400);
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
         }
-
-        // Tìm hotel_id từ wp_id
-        $hotelId = HotelHelper::getHotelIdByWpId($wpId);
-
         // Kiểm tra xem promotion có thuộc về khách sạn hợp lệ không
-        if (!$hotelId || $promotion->hotel_id !== $hotelId) {
+        if (!$hotel->id || $promotion->hotel_id !== $hotel->id) {
             return response()->json(['error' => 'Promotion not found or does not belong to this hotel.'], 404);
         }
-
         // Tải các mối quan hệ liên quan và trả về phản hồi
-        return response()->json($promotion->load('roomtypes'));
+        return $this->successResponse($promotion->load('roomtypes'));
     }
 
     /**
@@ -188,35 +181,30 @@ class PromotionController extends Controller
      */
     public function update(Request $request, Promotion $promotion)
     {
-        // Xác thực quyền sở hữu:
-        $wpId = $request->input('wp_id');
-
-        if (is_null($wpId)) {
-            return response()->json(['error' => 'wp_id is required.'], 400);
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
         }
-
-        $hotelId = HotelHelper::getHotelIdByWpId($wpId);
-
-        // Kiểm tra xem khách sạn có hợp lệ và promotion có thuộc khách sạn đó không
-        if (!$hotelId || $promotion->hotel_id !== $hotelId) {
+        // Kiểm tra xem promotion có thuộc về khách sạn hợp lệ không
+        if (!$hotel->id || $promotion->hotel_id !== $hotel->id) {
             return response()->json(['error' => 'Promotion not found or does not belong to this hotel.'], 404);
         }
 
         // Xác thực dữ liệu đầu vào:
         $wpData = $request->json()->all();
-
         $validator = Validator::make($wpData, [
-            'promotion_code' => ['required', 'string', Rule::unique('promotions')->ignore($promotion->id)],
-            'name' => 'required|array',
-            'description' => 'nullable|array',
-            'type' => ['nullable', Rule::in(PromotionType::getValues())],
-            'value_type' => 'required|in:percentage,fixed',
-            'value' => 'required|numeric|min:0',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'is_active' => 'nullable|boolean',
-            'roomtypes' => 'required|array',
-            'roomtypes.*' => 'required|exists:roomtypes,id',
+            //'promotion_code' => ['required', 'string', Rule::unique('promotions')->ignore($promotion->id)],
+            'data' => 'required|array',
+            'data.name' => 'required|array',
+            'data.description' => 'nullable|array',
+            'data.type' => ['nullable', Rule::in(PromotionType::getValues())],
+            'data.value_type' => 'required|in:percentage,fixed',
+            'data.value' => 'required|numeric|min:0',
+            'data.start_date' => 'required|date',
+            'data.end_date' => 'required|date|after_or_equal:start_date',
+            'data.is_active' => 'nullable|boolean',
+            'data.roomtypes' => 'required|array',
+            'data.roomtypes.*' => 'required|exists:roomtypes,id',
         ]);
 
         if ($validator->fails()) {
@@ -226,9 +214,10 @@ class PromotionController extends Controller
         // Cập nhật dữ liệu:
         try {
             DB::beginTransaction();
+            $wpData = $wpData['data'];
 
             $promotion->update([
-                'promotion_code' => $wpData['promotion_code'],
+                //'promotion_code' => $wpData['promotion_code'],
                 'name' => $wpData['name'],
                 'description' => $wpData['description'] ?? null,
                 'type' => $wpData['type'] ?? 'Others',
@@ -243,11 +232,11 @@ class PromotionController extends Controller
             ]);
 
             // Cập nhật quan hệ nhiều-nhiều với bảng room_types
-            $promotion->roomTypes()->sync($wpData['roomtypes']);
+            $promotion->roomtypes()->sync($wpData['roomtypes']);
 
             DB::commit();
 
-            return response()->json(['message' => 'Promotion updated successfully.', 'promotion' => $promotion->load('roomTypes')]);
+            return $this->successResponse(['message' => 'Promotion updated successfully.', 'promotion' => $promotion->load('roomtypes')]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'An error occurred while updating the promotion.', 'message' => $e->getMessage()], 500);
@@ -280,7 +269,62 @@ class PromotionController extends Controller
             return response()->json(['error' => 'An error occurred while deleting the promotion.'], 500);
         }
     }
+    public function updateStatus(Request $request)
+    {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+        // Xác thực dữ liệu đầu vào:
+        $wpData = $request->json()->all();
+        $validator = Validator::make($wpData, [
+            'data' => 'required|array',
+            'data.promotion_ids' => 'required|array',
+            'data.promotion_ids.*' => 'required|integer|exists:promotions,id',
+            'data.is_active' => 'required|integer',
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Cập nhật dữ liệu:
+        try {
+            DB::beginTransaction();
+            $wpData = $wpData['data'];
+            $is_active = $wpData['is_active'];
+
+            $promotionIds = $wpData['promotion_ids'];
+            // Find promotions that belong to the correct hotel and are in the provided list.
+            // Using whereIn and the hotel_id ensures security and efficiency.
+            $updatedCount = Promotion::whereIn('id', $promotionIds)
+                ->where('hotel_id', $hotel->id)
+                ->update(['is_active' => $is_active]);
+
+            // Check if all requested promotions were updated.
+            if ($updatedCount !== count($promotionIds)) {
+                DB::rollBack();
+                // Find IDs that were not updated (either not found or don't belong to the hotel)
+                $foundPromotions = Promotion::whereIn('id', $promotionIds)
+                    ->where('hotel_id', $hotel->id)
+                    ->pluck('id')
+                    ->toArray();
+                $notUpdatedIds = array_diff($promotionIds, $foundPromotions);
+
+                return response()->json([
+                    'error' => 'Some promotions were not found or do not belong to this hotel.',
+                    'not_updated_ids' => $notUpdatedIds,
+                ], 404);
+            }
+
+            DB::commit();
+
+            return response()->json(['message' => 'Promotion statuses updated successfully.', 'updated_count' => $updatedCount], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'An error occurred while updating the promotion statuses.', 'message' => $e->getMessage()], 500);
+        }
+    }
     public function generateCode(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -310,7 +354,7 @@ class PromotionController extends Controller
             // Fallback: add timestamp
             $code = $prefix . $this->generateRandomString($length - strlen($prefix) - 4, $type) . date('His');
         }
-        return response()->json(['code' => $code]);
+        return $this->successResponse(['code' => $code]);
     }
     /**
      * Generate unique promotion code

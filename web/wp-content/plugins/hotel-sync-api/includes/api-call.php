@@ -144,9 +144,6 @@ function callApi($endpoint, $method, $data = [])
  */
 function handle_api_response($response)
 {
-    // echo "<pre>";
-    // print_r($response);
-    // die;
     if (is_null($response)) {
         return [
             'success' => false,
@@ -159,18 +156,26 @@ function handle_api_response($response)
         return [
             'success' => false,
             'message' => $response->get_error_message(),
-            'error_code' => $response->get_error_code(),
-            'data' => $response->get_error_data()
+            'data' => null // Hoặc bạn có thể truyền thêm error_code và error_data vào đây
         ];
     }
 
     $http_code = wp_remote_retrieve_response_code($response);
-    $parsed_body = $response['parsed_body'] ?? null;
+    $parsed_body = json_decode(wp_remote_retrieve_body($response), true); // Giải mã JSON từ body
 
+    // Nếu body không phải là JSON hợp lệ hoặc không có
+    if (is_null($parsed_body)) {
+        return [
+            'success' => ($http_code >= 200 && $http_code < 300),
+            'message' => 'Request completed, but no valid JSON response.',
+            'data' => null
+        ];
+    }
+
+    // Trả về cấu trúc đã đồng bộ với backend Laravel
     return [
-        'success' => ($http_code >= 200 && $http_code < 300),
-        'http_code' => $http_code,
-        'message' => $parsed_body['message'] ?? 'Request completed',
-        'data' => $parsed_body
+        'success' => $parsed_body['success'] ?? false,
+        'message' => $parsed_body['message'] ?? 'An unknown error occurred',
+        'data' => $parsed_body['data'] ?? null
     ];
 }

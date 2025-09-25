@@ -24,7 +24,7 @@ class ApiTokenMiddleware
             return response()->json(['message' => 'Missing or invalid Authorization header.'], 401);
         }
         $providedToken = trim(substr($authHeader, 7));
-        $wpId = $request->input('wp_id') ?? $request->json('wp_id');
+        $wpId = $request->input('wp_id') ?? $request->json('wp_id') ?? $request->query('wp_id');
         if (empty($wpId)) {
             return response()->json(['message' => 'Missing wp_id parameter in request body.'], 400);
         }

@@ -6,23 +6,17 @@ $current_lang = get_locale();
 ?>
 
 <div class="wrap">
-    <h1>Thêm Khuyến Mãi Mới</h1>
-    <form id="add-promotion-form" action="" method="post">
+    <h1>Cập Nhật Khuyến Mãi</h1>
+    <form id="update-promotion-form" action="" method="post">
         <div class="hme-form-section">
             <h2 class="hme-form-title">Thông tin cơ bản</h2>
+            <input type="hidden" name="id" id="promotion_id">
             <table class="form-table">
                 <tbody>
                     <tr>
-                        <th scope="row"><label for="hotel_id">ID Khách Sạn</label></th>
-                        <td>
-                            <input type="hidden" name="hotel_id" id="hotel_id" value="1">
-                        </td>
-                    </tr>
-                    <tr>
                         <th scope="row"><label for="promotion_code">Mã Khuyến Mãi</label></th>
                         <td>
-                            <input type="text" name="promotion_code" id="promotion_code" class="regular-text" required>
-                            <button id="generate-code-btn" type="button">Generate Code</button>
+                            <input readonly="readonly" type="text" name="promotion_code" id="promotion_code" class="regular-text" required>
                         </td>
                     </tr>
                     <?php foreach ($languages as $lang_code) : ?>
@@ -153,97 +147,154 @@ $current_lang = get_locale();
         </p>
     </form>
 </div>
-
+<?php
+include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
+?>
 <script>
     jQuery(document).ready(function($) {
-        // Define the HME.Promotion object if it's not already defined
-        // HME.Promotion = HME.Promotion || {};
+        loadPromotion();
 
-        // Function to handle the generation logic
-        HME.Promotion.generateCode = function(callback) {
+        function loadPromotion() {
+            //showLoading();
+            const url = new URL(window.location.href);
+            const params = new URLSearchParams(url.search);
+            const promotionId = params.get('id');
+
             $.ajax({
                 url: hme_admin.ajax_url,
-                type: 'POST',
+                type: 'GET',
                 data: {
-                    action: 'hme_generate_promotion_code',
-                    nonce: hme_admin.nonce
+                    action: 'hme_get_promotion',
+                    nonce: hme_admin.nonce,
+                    promotion_id: promotionId
                 },
                 success: function(response) {
-                    // Check for the 'success' property in the response
                     if (response.success) {
-                        callback(response.data.code);
+                        displayPromotion(response.data.data);
                     } else {
-                        // Handle API errors
-                        HME.UI.showError(response.data || 'Không thể tạo mã khuyến mãi.');
+                        $('#promotion-detail-content').html(`<p class="error">Error: ${response.data}</p>`);
                     }
                 },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    HME.UI.showError('Lỗi AJAX: ' + textStatus);
+                error: function() {
+                    $('#promotion-detail-content').html('<p class="error">Error loading promotion details</p>');
                 }
             });
-        };
-
-        $('#generate-code-btn').click(function() {
-            const promotionCodeInput = $('#promotion_code'); // Use jQuery for consistency
-
-            HME.Promotion.generateCode(function(code) {
-                promotionCodeInput.val(code);
-            });
-        });
-    });
-    document.addEventListener('DOMContentLoaded', function() {
-        const promotionTypeSelect = document.getElementById('type');
-        const bookingDaysRow = document.getElementById('booking-days-row'); // Lấy hàng cần ẩn/hiện
-        const bookingDaysInput = document.getElementById('booking_days_in_advance');
-        const bookingDaysLabel = document.getElementById('booking-days-label');
-        const bookingDaysDescription = bookingDaysInput.nextElementSibling;
-
-        function toggleRequiredAndLabel() {
-            const selectedType = promotionTypeSelect.value;
-
-            if (selectedType === 'early_bird') {
-                // Hiển thị hàng và đặt yêu cầu
-                bookingDaysRow.style.display = 'table-row';
-                bookingDaysInput.setAttribute('required', 'required');
-                bookingDaysLabel.textContent = 'Số ngày đặt trước';
-                bookingDaysDescription.textContent = 'Số ngày tối thiểu khách phải đặt trước so với ngày nhận phòng.';
-            } else if (selectedType === 'last_minutes') {
-                // Hiển thị hàng và đặt yêu cầu
-                bookingDaysRow.style.display = 'table-row';
-                bookingDaysInput.setAttribute('required', 'required');
-                bookingDaysLabel.textContent = 'Số ngày tối đa trước ngày nhận phòng';
-                bookingDaysDescription.textContent = 'Số ngày tối đa trước ngày nhận phòng để được hưởng khuyến mãi.';
-            } else {
-                // Ẩn hàng và xóa yêu cầu
-                bookingDaysRow.style.display = 'none';
-                bookingDaysInput.removeAttribute('required');
-            }
         }
 
-        // Gọi hàm khi trang tải để xử lý trạng thái ban đầu
-        toggleRequiredAndLabel();
+        function displayPromotion(promotion) {
+            if (!promotion || typeof promotion !== 'object') {
+                console.error('Invalid promotion data provided.');
+                return;
+            }
 
-        // Thêm sự kiện lắng nghe khi giá trị của select thay đổi
-        promotionTypeSelect.addEventListener('change', toggleRequiredAndLabel);
+            const form = document.getElementById('update-promotion-form');
+            if (!form) {
+                console.error('Form not found.');
+                return;
+            }
 
-        const form = document.getElementById('add-promotion-form');
-        const promotionCodeInput = document.getElementById('promotion_code');
-        const generateCodeBtn = document.getElementById('generate-code-btn');
+            // Gán giá trị cho các trường
+            const promotionIdInput = form.querySelector('#promotion_id');
+            if (promotionIdInput) {
+                promotionIdInput.value = promotion.id;
+            }
 
-        // Lắng nghe sự kiện submit của form
+            const promoCodeInput = form.querySelector('#promotion_code');
+            if (promoCodeInput) {
+                promoCodeInput.value = promotion.promotion_code;
+            }
+
+            // Điền dữ liệu đa ngôn ngữ một cách an toàn
+            for (const lang in promotion.name) {
+                const nameField = form.querySelector(`input[name="name[${lang}]"]`);
+                if (nameField) {
+                    nameField.value = promotion.name[lang];
+                }
+            }
+
+            for (const lang in promotion.description) {
+                const descriptionField = form.querySelector(`textarea[name="description[${lang}]"]`);
+                if (descriptionField) {
+                    descriptionField.value = promotion.description[lang];
+                }
+            }
+
+            // Điền các trường khác
+            const typeSelect = form.querySelector('#type');
+            if (typeSelect) {
+                typeSelect.value = promotion.type;
+            }
+
+            const valueTypeSelect = form.querySelector('#value_type');
+            if (valueTypeSelect) {
+                valueTypeSelect.value = promotion.value_type;
+            }
+
+            const valueInput = form.querySelector('#value');
+            if (valueInput) {
+                valueInput.value = promotion.value;
+            }
+
+            const startDateInput = form.querySelector('#start_date');
+            if (startDateInput) {
+                startDateInput.value = promotion.start_date;
+            }
+
+            const endDateInput = form.querySelector('#end_date');
+            if (endDateInput) {
+                endDateInput.value = promotion.end_date;
+            }
+
+            const minStayInput = form.querySelector('#min_stay');
+            if (minStayInput) {
+                minStayInput.value = promotion.min_stay;
+            }
+
+            const maxStayInput = form.querySelector('#max_stay');
+            if (maxStayInput) {
+                maxStayInput.value = promotion.max_stay;
+            }
+
+            const bookingDaysInput = form.querySelector('#booking_days_in_advance');
+            if (bookingDaysInput) {
+                bookingDaysInput.value = promotion.booking_days_in_advance;
+            }
+
+            // Xử lý checkbox is_active
+            const isActiveCheckbox = form.querySelector('#is_active');
+            if (isActiveCheckbox) {
+                isActiveCheckbox.checked = promotion.is_active === 1;
+            }
+
+            // Xử lý các checkbox roomtypes
+            if (promotion.roomtypes && Array.isArray(promotion.roomtypes)) {
+                const allRoomtypes = form.querySelectorAll('input[name="roomtypes[]"]');
+                allRoomtypes.forEach(checkbox => {
+                    const isChecked = promotion.roomtypes.some(rt => rt.id == checkbox.value);
+                    checkbox.checked = isChecked;
+                });
+            }
+
+            // Cập nhật tiêu đề và nút submit
+            document.querySelector('.wrap h1').textContent = 'Cập Nhật Khuyến Mãi';
+            document.querySelector('input[type="submit"]').value = 'Cập Nhật Khuyến Mãi';
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('update-promotion-form');
         form.addEventListener('submit', function(event) {
             // Ngăn chặn việc gửi form mặc định
             event.preventDefault();
-
             // Gọi hàm xử lý AJAX
-            ajax_create_promotion();
+            ajax_update_promotion();
         });
         /**
          * Hàm xử lý AJAX để tạo một khuyến mãi mới.
          */
-        function ajax_create_promotion() {
+        function ajax_update_promotion() {
             //showLoading();
-            const form = document.getElementById('add-promotion-form');
+            const form = document.getElementById('update-promotion-form');
             const formData = new FormData(form);
 
             // Lấy dữ liệu đa ngôn ngữ từ form
@@ -258,12 +309,14 @@ $current_lang = get_locale();
                     descriptions[lang] = value;
                 }
             }
-
+            const selectedRoomtypes = [];
+            document.querySelectorAll('input[name="roomtypes[]"]:checked').forEach(checkbox => {
+                selectedRoomtypes.push(checkbox.value);
+            });
             // Tạo đối tượng dữ liệu để gửi đi
             const promotionData = {
-                action: 'hme_create_promotion',
+                action: 'hme_update_promotion',
                 nonce: hme_admin.nonce,
-                promotion_code: formData.get('promotion_code'),
                 name: names,
                 description: descriptions,
                 type: formData.get('type'),
@@ -274,8 +327,9 @@ $current_lang = get_locale();
                 min_stay: formData.get('min_stay') || null,
                 max_stay: formData.get('max_stay') || null,
                 booking_days_in_advance: formData.get('booking_days_in_advance') || null,
-                is_active: formData.get('is_active'),
-                roomtypes: formData.get('roomtypes')
+                is_active: +formData.get('is_active'),
+                roomtypes: selectedRoomtypes,
+                id: formData.get('id')
             };
 
             // Gửi dữ liệu bằng jQuery.ajax hoặc Fetch API
@@ -287,9 +341,9 @@ $current_lang = get_locale();
                 success: function(response) {
                     //hideLoading();
                     // Xử lý khi API thành công
-                    console.log('Promotion created successfully:', response);
+                    alert('Promotion updated successfully');
                     // Có thể chuyển hướng người dùng hoặc làm mới trang
-                    //window.location.reload();
+                    window.location.reload();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     //hideLoading();

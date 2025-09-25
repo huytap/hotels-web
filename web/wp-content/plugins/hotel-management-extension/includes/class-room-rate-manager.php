@@ -20,6 +20,7 @@ class HME_Room_Rate_Manager
 
     /**
      * AJAX Handler: Lấy danh sách room rates
+     * @deprecated No longer used. All functionality moved to hme_api_call handler
      */
     public static function ajax_get_room_rates()
     {
@@ -38,19 +39,19 @@ class HME_Room_Rate_Manager
         $params = array();
 
         if (!empty($date_from)) {
-            $params['date_from'] = $date_from;
+            $params['start_date'] = $date_from;
         }
 
         if (!empty($date_to)) {
-            $params['date_to'] = $date_to;
+            $params['end_date'] = $date_to;
         }
 
         if (!empty($room_type_id)) {
-            $params['room_type_id'] = $room_type_id;
+            $params['roomtype_id'] = $room_type_id;
         }
 
-        // Gọi API
-        $response = callApi('room-rates', 'GET', $params);
+        // Gọi API mới - Room Management
+        $response = callApi('room-management/calendar', 'GET', $params);
         $result = handle_api_response($response);
 
         if ($result['success']) {
@@ -62,6 +63,7 @@ class HME_Room_Rate_Manager
 
     /**
      * AJAX Handler: Cập nhật room rate cho một ngày cụ thể
+     * @deprecated No longer used. All functionality moved to hme_api_call handler
      */
     public static function ajax_update_room_rate()
     {
@@ -80,17 +82,13 @@ class HME_Room_Rate_Manager
             }
         }
 
-        // Sanitize data
+        // Sanitize data cho API mới
         $rate_data = array(
-            'room_type_id' => intval($_POST['room_type_id']),
+            'roomtype_id' => intval($_POST['room_type_id']),
             'date' => sanitize_text_field($_POST['date']),
-            'rate' => floatval($_POST['rate']),
-            'min_stay' => isset($_POST['min_stay']) ? intval($_POST['min_stay']) : 1,
-            'max_stay' => isset($_POST['max_stay']) ? intval($_POST['max_stay']) : 30,
-            'available_rooms' => isset($_POST['available_rooms']) ? intval($_POST['available_rooms']) : null,
-            'is_closed' => isset($_POST['is_closed']) ? (bool)$_POST['is_closed'] : false,
-            'close_to_arrival' => isset($_POST['close_to_arrival']) ? (bool)$_POST['close_to_arrival'] : false,
-            'close_to_departure' => isset($_POST['close_to_departure']) ? (bool)$_POST['close_to_departure'] : false
+            'price' => floatval($_POST['rate']),
+            'total_for_sale' => isset($_POST['available_rooms']) ? intval($_POST['available_rooms']) : null,
+            'is_available' => isset($_POST['is_closed']) ? !((bool)$_POST['is_closed']) : true
         );
 
         // Validate rate
@@ -111,8 +109,8 @@ class HME_Room_Rate_Manager
             return;
         }
 
-        // Gọi API
-        $response = callApi('room-rates', 'PUT', $rate_data);
+        // Gọi API mới - Update cả rate và inventory
+        $response = callApi('room-management/update-both', 'POST', $rate_data);
         $result = handle_api_response($response);
 
         if ($result['success']) {
@@ -124,6 +122,7 @@ class HME_Room_Rate_Manager
 
     /**
      * AJAX Handler: Bulk update room rates cho nhiều ngày
+     * @deprecated No longer used. All functionality moved to hme_api_call handler
      */
     public static function ajax_bulk_update_rates()
     {
@@ -157,52 +156,42 @@ class HME_Room_Rate_Manager
             return;
         }
 
-        // Prepare bulk update data
+        // Prepare bulk update data cho API mới
         $bulk_data = array(
-            'room_type_id' => $room_type_id,
-            'date_from' => $date_from,
-            'date_to' => $date_to,
-            'apply_to_weekdays' => isset($_POST['apply_to_weekdays']) ? array_map('sanitize_text_field', $_POST['apply_to_weekdays']) : null
+            'roomtype_id' => $room_type_id,
+            'start_date' => $date_from,
+            'end_date' => $date_to,
+            'weekdays' => isset($_POST['apply_to_weekdays']) ? array_map('intval', $_POST['apply_to_weekdays']) : null
         );
 
         // Add optional fields if provided
         if (isset($_POST['rate']) && $_POST['rate'] !== '') {
-            $bulk_data['rate'] = floatval($_POST['rate']);
-        }
-
-        if (isset($_POST['rate_adjustment_type']) && isset($_POST['rate_adjustment_value'])) {
-            $bulk_data['rate_adjustment'] = array(
-                'type' => sanitize_text_field($_POST['rate_adjustment_type']), // 'percentage' or 'fixed'
-                'value' => floatval($_POST['rate_adjustment_value'])
-            );
-        }
-
-        if (isset($_POST['min_stay']) && $_POST['min_stay'] !== '') {
-            $bulk_data['min_stay'] = intval($_POST['min_stay']);
-        }
-
-        if (isset($_POST['max_stay']) && $_POST['max_stay'] !== '') {
-            $bulk_data['max_stay'] = intval($_POST['max_stay']);
+            $bulk_data['price'] = floatval($_POST['rate']);
         }
 
         if (isset($_POST['available_rooms']) && $_POST['available_rooms'] !== '') {
-            $bulk_data['available_rooms'] = intval($_POST['available_rooms']);
+            $bulk_data['total_for_sale'] = intval($_POST['available_rooms']);
         }
 
         if (isset($_POST['is_closed'])) {
-            $bulk_data['is_closed'] = (bool)$_POST['is_closed'];
+            $bulk_data['is_available'] = !(bool)$_POST['is_closed'];
         }
 
-        if (isset($_POST['close_to_arrival'])) {
-            $bulk_data['close_to_arrival'] = (bool)$_POST['close_to_arrival'];
-        }
+        // Quyết định gọi API nào dựa trên dữ liệu
+        $hasRateData = isset($bulk_data['price']);
+        $hasInventoryData = isset($bulk_data['total_for_sale']) || isset($bulk_data['is_available']);
 
-        if (isset($_POST['close_to_departure'])) {
-            $bulk_data['close_to_departure'] = (bool)$_POST['close_to_departure'];
+        if ($hasRateData && $hasInventoryData) {
+            // Cần bulk update cả hai - tạm thời gọi riêng lẻ
+            $response = callApi('room-management/rates/bulk', 'POST', $bulk_data);
+        } elseif ($hasRateData) {
+            $response = callApi('room-management/rates/bulk', 'POST', $bulk_data);
+        } elseif ($hasInventoryData) {
+            $response = callApi('room-management/inventory/bulk', 'POST', $bulk_data);
+        } else {
+            wp_send_json_error('No data to update');
+            return;
         }
-
-        // Gọi API
-        $response = callApi('room-rates/bulk-update', 'PUT', $bulk_data);
         $result = handle_api_response($response);
 
         if ($result['success']) {
@@ -214,6 +203,7 @@ class HME_Room_Rate_Manager
 
     /**
      * AJAX Handler: Toggle room availability (đóng/mở phòng)
+     * @deprecated No longer used. All functionality moved to hme_api_call handler
      */
     public static function ajax_toggle_room_availability()
     {
@@ -251,6 +241,7 @@ class HME_Room_Rate_Manager
 
     /**
      * AJAX Handler: Lấy inventory (số phòng có sẵn) cho calendar view
+     * @deprecated No longer used. All functionality moved to hme_api_call handler
      */
     public static function ajax_get_inventory_calendar()
     {
@@ -287,6 +278,7 @@ class HME_Room_Rate_Manager
 
     /**
      * AJAX Handler: Copy rates from one period to another
+     * @deprecated No longer used. All functionality moved to hme_api_call handler
      */
     public static function ajax_copy_rates()
     {
@@ -330,6 +322,7 @@ class HME_Room_Rate_Manager
 
     /**
      * AJAX Handler: Lấy rate templates (mẫu giá phòng)
+     * @deprecated No longer used. All functionality moved to hme_api_call handler
      */
     public static function ajax_get_rate_templates()
     {
@@ -352,6 +345,7 @@ class HME_Room_Rate_Manager
 
     /**
      * AJAX Handler: Tạo hoặc cập nhật rate template
+     * @deprecated No longer used. All functionality moved to hme_api_call handler
      */
     public static function ajax_save_rate_template()
     {
@@ -401,6 +395,7 @@ class HME_Room_Rate_Manager
 
     /**
      * AJAX Handler: Apply rate template to date range
+     * @deprecated No longer used. All functionality moved to hme_api_call handler
      */
     public static function ajax_apply_rate_template()
     {
@@ -436,6 +431,7 @@ class HME_Room_Rate_Manager
 
     /**
      * AJAX Handler: Lấy thống kê revenue by room type
+     * @deprecated No longer used. All functionality moved to hme_api_call handler
      */
     public static function ajax_get_revenue_stats()
     {
@@ -671,5 +667,51 @@ class HME_Room_Rate_Manager
         }
 
         return $errors;
+    }
+
+    /**
+     * AJAX Handler: Export rates
+     */
+    public static function ajax_export_rates()
+    {
+        // Verify nonce
+        if (!wp_verify_nonce($_GET['nonce'] ?? $_POST['nonce'], 'hme_admin_nonce')) {
+            wp_die('Invalid nonce', 'Unauthorized', array('response' => 401));
+            return;
+        }
+
+        // Get parameters
+        $params = array();
+
+        if (!empty($_GET['roomtype_id'])) {
+            $params['roomtype_id'] = sanitize_text_field($_GET['roomtype_id']);
+        }
+
+        if (!empty($_GET['start_date'])) {
+            $params['start_date'] = sanitize_text_field($_GET['start_date']);
+        }
+
+        if (!empty($_GET['end_date'])) {
+            $params['end_date'] = sanitize_text_field($_GET['end_date']);
+        }
+
+        // Export to CSV
+        $csv_content = self::export_rates_csv($params);
+
+        if ($csv_content === false) {
+            wp_die('Failed to export rates', 'Export Error', array('response' => 500));
+            return;
+        }
+
+        // Set headers for CSV download
+        $filename = 'room-rates-' . date('Y-m-d-H-i-s') . '.csv';
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Length: ' . strlen($csv_content));
+
+        // Output CSV content
+        echo $csv_content;
+        exit;
     }
 }

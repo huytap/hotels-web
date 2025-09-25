@@ -4,9 +4,9 @@ get_header();
 
 <div class="container mx-auto px-4 py-8">
     <div class="relative z-10 container mx-auto px-4 py-20">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="grid grid-cols-12 gap-12 mb-16">
             <!-- Nội dung bài viết chính -->
-            <main class="lg:col-span-8">
+            <main class="col-span-12 lg:col-span-8 p-4">
                 <?php
                 if (have_posts()) :
                     while (have_posts()) : the_post(); ?>
@@ -28,7 +28,7 @@ get_header();
             </main>
 
             <!-- Sidebar -->
-            <aside class="lg:col-span-4 space-y-8">
+            <aside class="col-span-12 lg:col-span-4 p-4">
                 <!-- Bài viết liên quan -->
                 <div class="related-posts">
                     <h2 class="text-xl font-semibold mb-4">Bài viết liên quan</h2>

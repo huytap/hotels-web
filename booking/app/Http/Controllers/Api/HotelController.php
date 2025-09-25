@@ -11,7 +11,7 @@ use App\Models\Promotion;
 use App\Models\RoomRate;
 use App\Models\Roomtype;
 
-class HotelController extends Controller
+class HotelController extends BaseApiController
 {
     public function getRooms(Request $request)
     {
@@ -27,7 +27,7 @@ class HotelController extends Controller
         $roomtypes = Roomtype::select('id', 'title')->get();
 
         // Trả về dữ liệu
-        return response()->json($roomtypes);
+        return $this->successResponse($roomtypes, 'Lấy danh sách phòng thành công');
     }
 
     public function getRoomRates(Request $request)

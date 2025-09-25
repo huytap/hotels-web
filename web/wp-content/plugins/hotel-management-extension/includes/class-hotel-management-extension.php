@@ -170,10 +170,17 @@ class Hotel_Management_Extension
 
             // Plugin scripts
             wp_enqueue_script(
+                'hme-room-management-js',
+                HME_PLUGIN_URL . 'assets/js/room-management.js',
+                array('jquery', 'jquery-ui-datepicker', 'jquery-ui-dialog'),
+                '2.0.0',
+                true
+            );
+            wp_enqueue_script(
                 'hme-admin-js',
                 HME_PLUGIN_URL . 'assets/js/admin.js',
-                array('jquery', 'jquery-ui-datepicker', 'jquery-ui-dialog'),
-                '1.0.0',
+                array('jquery'),
+                '2.0.0',
                 true
             );
 
@@ -181,11 +188,18 @@ class Hotel_Management_Extension
                 'hme-admin-css',
                 HME_PLUGIN_URL . 'assets/css/admin.css',
                 array(),
-                '1.0.0'
+                '2.0.0'
+            );
+
+            wp_enqueue_style(
+                'hme-admin-style',
+                HME_PLUGIN_URL . 'assets/css/admin-style.css',
+                array(),
+                '2.0.0'
             );
 
             // Localize script với config
-            wp_localize_script('hme-admin-js', 'hme_admin', array(
+            wp_localize_script('hme-room-management-js', 'hme_admin', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('hme_admin_nonce'),
                 'blog_id' => get_current_blog_id(),
@@ -209,11 +223,8 @@ class Hotel_Management_Extension
         add_action('wp_ajax_hme_delete_booking', array('HME_Booking_Manager', 'ajax_delete_booking'));
         add_action('wp_ajax_hme_get_booking_details', array('HME_Booking_Manager', 'ajax_get_booking_details'));
 
-        // Room Rate AJAX handlers
-        add_action('wp_ajax_hme_get_room_rates', array('HME_Room_Rate_Manager', 'ajax_get_room_rates'));
-        add_action('wp_ajax_hme_update_room_rate', array('HME_Room_Rate_Manager', 'ajax_update_room_rate'));
-        add_action('wp_ajax_hme_bulk_update_rates', array('HME_Room_Rate_Manager', 'ajax_bulk_update_rates'));
-        add_action('wp_ajax_hme_toggle_room_availability', array('HME_Room_Rate_Manager', 'ajax_toggle_room_availability'));
+        // Room Rate AJAX handlers - removed old handlers as they're not used anymore
+        // All room rate functionality now goes through hme_api_call
 
         // Promotion AJAX handlers
         add_action('wp_ajax_hme_get_promotions', array('HME_Promotion_Manager', 'ajax_get_promotions'));
@@ -223,9 +234,16 @@ class Hotel_Management_Extension
         add_action('wp_ajax_hme_get_promotion', array('HME_Promotion_Manager', 'ajax_get_promotion'));
         add_action('wp_ajax_hme_validate_promotion', array('HME_Promotion_Manager', 'ajax_validate_promotion'));
         add_action('wp_ajax_hme_generate_promotion_code', array('HME_Promotion_Manager', 'ajax_generate_promotion_code'));
+        add_action('wp_ajax_hme_bulk_promotion_actions', array('HME_Promotion_Manager', 'ajax_bulk_promotion_actions'));
 
         // Dashboard AJAX handlers
         add_action('wp_ajax_hme_get_dashboard_stats', array($this, 'ajax_get_dashboard_stats'));
+
+        // Generic API call handler
+        add_action('wp_ajax_hme_api_call', array($this, 'ajax_api_call'));
+
+        // Export handlers
+        add_action('wp_ajax_hme_export_rates', array('HME_Room_Rate_Manager', 'ajax_export_rates'));
     }
 
     // ============ PAGE HANDLERS ============
@@ -411,13 +429,13 @@ class Hotel_Management_Extension
 
         switch ($action) {
             case 'add':
-                include HME_PLUGIN_PATH . 'views/promotion-add.php';
+                include HME_PLUGIN_PATH . 'views/promotions/promotion-add.php';
                 break;
             case 'edit':
-                include HME_PLUGIN_PATH . 'views/promotion-edit.php';
+                include HME_PLUGIN_PATH . 'views/promotions/promotion-edit.php';
                 break;
             default:
-                include HME_PLUGIN_PATH . 'views/promotions-list.php';
+                include HME_PLUGIN_PATH . 'views/promotions/promotions-list.php';
         }
     }
 
@@ -433,6 +451,45 @@ class Hotel_Management_Extension
 
         // Gọi API để lấy stats
         $response = callApi('dashboard/stats', 'GET');
+        $result = handle_api_response($response);
+
+        if ($result['success']) {
+            wp_send_json_success($result['data']);
+        } else {
+            wp_send_json_error($result['message']);
+        }
+    }
+
+    /**
+     * Generic API call handler
+     */
+    public function ajax_api_call()
+    {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'hme_admin_nonce')) {
+            wp_send_json_error('Invalid nonce');
+            return;
+        }
+
+        // Get parameters
+        $endpoint = isset($_POST['endpoint']) ? sanitize_text_field($_POST['endpoint']) : '';
+        $method = isset($_POST['method']) ? sanitize_text_field($_POST['method']) : 'GET';
+        $data = isset($_POST['data']) ? $_POST['data'] : array();
+
+        if (empty($endpoint)) {
+            wp_send_json_error('Endpoint is required');
+            return;
+        }
+
+        // Sanitize method
+        $method = strtoupper($method);
+        if (!in_array($method, ['GET', 'POST', 'PUT', 'DELETE'])) {
+            wp_send_json_error('Invalid HTTP method');
+            return;
+        }
+
+        // Call API
+        $response = callApi($endpoint, $method, $data);
         $result = handle_api_response($response);
 
         if ($result['success']) {

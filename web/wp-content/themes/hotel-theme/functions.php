@@ -90,9 +90,8 @@ add_action('wp_enqueue_scripts', 'hotel_theme_scripts');
 function hotel_theme_add_cache_headers()
 {
     if (!is_admin()) {
-        header('Cache-Control: no-cache, no-store, must-revalidate');
-        header('Pragma: no-cache');
-        header('Expires: 0');
+        header('Cache-Control: public, max-age=31536000');
+        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 31536000) . ' GMT');
     }
 }
 add_action('init', 'hotel_theme_add_cache_headers');
