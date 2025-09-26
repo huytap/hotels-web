@@ -3,6 +3,71 @@
  * Room Rates Management Interface
  */
 
+/* ===== TEMPLATE RESTRICTIONS ===== */
+.template-restrictions {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.restrictions-label {
+    font-size: 12px;
+    color: #666;
+    margin-right: 8px;
+}
+
+.restriction-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: #fff;
+    font-weight: bold;
+    margin-right: 4px;
+    text-transform: uppercase;
+}
+
+.restriction-badge.cta {
+    background-color: #d63384; /* Pink */
+}
+
+.restriction-badge.ctd {
+    background-color: #fd7e14; /* Orange */
+}
+
+.restriction-badge.closed {
+    background-color: #dc3545; /* Red */
+}
+
+/* Calendar cell restrictions */
+.cell-restrictions {
+    margin-top: 2px;
+    text-align: center;
+}
+
+.restriction-mini {
+    display: inline-block;
+    font-size: 8px;
+    padding: 1px 3px;
+    border-radius: 2px;
+    color: #fff;
+    font-weight: bold;
+    margin: 0 1px;
+    text-transform: uppercase;
+}
+
+.restriction-mini.cta {
+    background-color: #d63384; /* Pink */
+}
+
+.restriction-mini.ctd {
+    background-color: #fd7e14; /* Orange */
+}
+
+.restriction-mini.closed {
+    background-color: #dc3545; /* Red */
+}
+
 /* ===== GENERAL STYLES ===== */
 .hme-filters-section {
     background: #fff;
@@ -495,6 +560,48 @@
 
 .hme-empty-state a:hover {
     text-decoration: underline;
+}
+
+/* ===== APPLY TEMPLATE MODAL ===== */
+#apply-template-modal .form-table th {
+    width: 140px;
+    font-weight: 600;
+}
+
+#apply-template-modal .form-table td {
+    padding-left: 10px;
+}
+
+#apply-template-name {
+    color: #2271b1;
+    font-size: 16px;
+}
+
+#apply-room-type-name {
+    color: #00a32a;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#apply-date-from,
+#apply-date-to {
+    width: 200px;
+}
+
+#apply-template-modal .description {
+    margin-top: 5px;
+    color: #666;
+    font-style: italic;
+}
+
+#apply-template-modal .button-primary {
+    background-color: #00a32a;
+    border-color: #00a32a;
+}
+
+#apply-template-modal .button-primary:hover {
+    background-color: #008a20;
+    border-color: #008a20;
 }
 
 /* ===== FORM STYLES ===== */

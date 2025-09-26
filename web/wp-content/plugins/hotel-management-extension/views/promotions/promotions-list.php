@@ -62,6 +62,25 @@ $promotion_statuses = HME_Promotion_Manager::get_promotion_statuses();
                 <input type="text" id="promotion-search" name="search" placeholder="Code, title..." class="regular-text">
             </div>
 
+            <div class="hme-filter-group">
+                <label for="has-blackout-filter">Blackout:</label>
+                <select id="has-blackout-filter" name="has_blackout">
+                    <option value="">All</option>
+                    <option value="1">Has Blackout</option>
+                    <option value="0">No Blackout</option>
+                </select>
+            </div>
+
+            <div class="hme-filter-group">
+                <label for="weekdays-filter">Valid Days:</label>
+                <select id="weekdays-filter" name="weekdays_filter">
+                    <option value="">All Days</option>
+                    <option value="weekdays">Weekdays Only</option>
+                    <option value="weekend">Weekend Only</option>
+                    <option value="limited">Limited Days</option>
+                </select>
+            </div>
+
             <div class="hme-filter-actions">
                 <button type="button" id="filter-promotions" class="button">
                     <span class="dashicons dashicons-search"></span> Filter
@@ -111,7 +130,7 @@ $promotion_statuses = HME_Promotion_Manager::get_promotion_statuses();
                 <th scope="col" class="manage-column column-dates sortable" data-sort="start_date">
                     <a><span>Valid Dates</span><span class="sorting-indicator"></span></a>
                 </th>
-                <!-- <th scope="col" class="manage-column column-usage">Usage</th> -->
+                <th scope="col" class="manage-column column-restrictions">Restrictions</th>
                 <th scope="col" class="manage-column column-status">Status</th>
                 <th scope="col" class="manage-column column-created sortable" data-sort="created_at">
                     <a><span>Created</span><span class="sorting-indicator"></span></a>
@@ -322,7 +341,7 @@ $promotion_statuses = HME_Promotion_Manager::get_promotion_statuses();
         });
 
         $('#clear-promotion-filters').on('click', function() {
-            $('#promotion-status-filter, #promotion-type-filter, #promotion-search').val('');
+            $('#promotion-status-filter, #promotion-type-filter, #promotion-search, #has-blackout-filter, #weekdays-filter').val('');
             currentFilters = {};
             currentPage = 1;
             loadPromotions();
@@ -469,7 +488,9 @@ $promotion_statuses = HME_Promotion_Manager::get_promotion_statuses();
             currentFilters = {
                 status: $('#promotion-status-filter').val(),
                 type: $('#promotion-type-filter').val(),
-                search: $('#promotion-search').val()
+                search: $('#promotion-search').val(),
+                has_blackout: $('#has-blackout-filter').val(),
+                weekdays_filter: $('#weekdays-filter').val()
             };
         }
 
@@ -549,6 +570,9 @@ $promotion_statuses = HME_Promotion_Manager::get_promotion_statuses();
                         <td class="column-dates">
                             <strong>Start:</strong> ${formatted.start_date_formatted}<br>
                             <strong>End:</strong> ${formatted.end_date_formatted}
+                        </td>
+                        <td class="column-restrictions">
+                            ${formatRestrictions(promotion)}
                         </td>
                         <td class="column-status">
                             <span class="hme-status ${formatted.status_class}">${formatted.status_label}</span>
@@ -752,9 +776,17 @@ $promotion_statuses = HME_Promotion_Manager::get_promotion_statuses();
 
                 restrictionsHtml += `<p><strong>Loại phòng áp dụng:</strong> ${roomTypeNames.join(', ')}</p>`;
             }
-            // if (promotion.blackout_dates && promotion.blackout_dates.length > 0) {
-            //     restrictionsHtml += `<p><strong>Blackout Dates:</strong> ${promotion.blackout_dates.join(', ')}</p>`;
-            // }
+
+            // Blackout dates
+            if (promotion.blackout_start_date && promotion.blackout_end_date) {
+                restrictionsHtml += `<p><strong>Blackout dates:</strong> ${formatDate(promotion.blackout_start_date)} - ${formatDate(promotion.blackout_end_date)}</p>`;
+            }
+
+            // Valid weekdays
+            const validWeekdays = getValidWeekdays(promotion);
+            if (validWeekdays.length < 7) {
+                restrictionsHtml += `<p><strong>Valid days:</strong> ${validWeekdays.join(', ')}</p>`;
+            }
 
             const html = `
             <div class="hme-promotion-details">
@@ -1099,6 +1131,43 @@ $promotion_statuses = HME_Promotion_Manager::get_promotion_statuses();
 
         function getEditUrl(promotionId) {
             return `<?php echo admin_url('admin.php?page=hotel-promotions&action=edit'); ?>&id=${promotionId}`;
+        }
+
+        function formatRestrictions(promotion) {
+            let restrictions = [];
+
+            // Blackout dates
+            if (promotion.blackout_start_date && promotion.blackout_end_date) {
+                restrictions.push(`<span title="Blackout: ${formatDate(promotion.blackout_start_date)} - ${formatDate(promotion.blackout_end_date)}">🚫 Blackout</span>`);
+            }
+
+            // Valid weekdays
+            const validWeekdays = getValidWeekdays(promotion);
+            if (validWeekdays.length < 7) {
+                restrictions.push(`<span title="Days: ${validWeekdays.join(', ')}">📅 ${validWeekdays.length}/7 days</span>`);
+            }
+
+            // Room types
+            if (promotion.roomtypes && promotion.roomtypes.length > 0) {
+                const roomCount = promotion.roomtypes.length;
+                restrictions.push(`<span title="Room types: ${promotion.roomtypes.map(rt => getRoomTypeName(rt, lang)).join(', ')}">🏠 ${roomCount} room${roomCount > 1 ? 's' : ''}</span>`);
+            }
+
+            return restrictions.length > 0 ? restrictions.join('<br>') : '<span class="text-muted">None</span>';
+        }
+
+        function getValidWeekdays(promotion) {
+            const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            const fields = ['valid_monday', 'valid_tuesday', 'valid_wednesday', 'valid_thursday', 'valid_friday', 'valid_saturday', 'valid_sunday'];
+
+            let validDays = [];
+            fields.forEach((field, index) => {
+                if (promotion[field] === true || promotion[field] === 1) {
+                    validDays.push(weekdays[index]);
+                }
+            });
+
+            return validDays;
         }
 
         function showNotice(message, type) {

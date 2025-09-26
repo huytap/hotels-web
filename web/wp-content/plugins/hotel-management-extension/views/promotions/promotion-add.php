@@ -143,6 +143,47 @@ $current_lang = get_locale();
             </table>
         </div>
 
+        <div class="hme-form-section">
+            <h2 class="hme-form-title">Blackout & Hạn chế ngày</h2>
+            <table class="form-table">
+                <tbody>
+                    <tr>
+                        <th scope="row"><label for="blackout_start_date">Blackout từ ngày</label></th>
+                        <td>
+                            <input type="date" name="blackout_start_date" id="blackout_start_date" class="regular-text">
+                            <p class="description">Ngày bắt đầu không áp dụng khuyến mãi (tùy chọn).</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="blackout_end_date">Blackout đến ngày</label></th>
+                        <td>
+                            <input type="date" name="blackout_end_date" id="blackout_end_date" class="regular-text">
+                            <p class="description">Ngày kết thúc không áp dụng khuyến mãi (tùy chọn).</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label>Ngày trong tuần áp dụng</label></th>
+                        <td>
+                            <fieldset>
+                                <legend class="screen-reader-text">Chọn ngày trong tuần</legend>
+                                <label><input type="checkbox" name="valid_monday" value="1" checked> Thứ 2</label><br>
+                                <label><input type="checkbox" name="valid_tuesday" value="1" checked> Thứ 3</label><br>
+                                <label><input type="checkbox" name="valid_wednesday" value="1" checked> Thứ 4</label><br>
+                                <label><input type="checkbox" name="valid_thursday" value="1" checked> Thứ 5</label><br>
+                                <label><input type="checkbox" name="valid_friday" value="1" checked> Thứ 6</label><br>
+                                <label><input type="checkbox" name="valid_saturday" value="1" checked> Thứ 7</label><br>
+                                <label><input type="checkbox" name="valid_sunday" value="1" checked> Chủ nhật</label><br>
+                                <p class="description">Khuyến mãi chỉ áp dụng vào những ngày được chọn.</p>
+                                <button type="button" id="select-all-days" class="button">Chọn tất cả</button>
+                                <button type="button" id="select-weekdays-only" class="button">Chỉ ngày thường</button>
+                                <button type="button" id="select-weekend-only" class="button">Chỉ cuối tuần</button>
+                            </fieldset>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
         <p class="submit">
             <input type="submit" name="submit" id="submit" class="button button-primary" value="Thêm Khuyến Mãi">
         </p>
@@ -156,6 +197,52 @@ include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
         const form = document.getElementById('add-promotion-form');
         const promotionCodeInput = document.getElementById('promotion_code');
         const generateCodeBtn = document.getElementById('generate-code-btn');
+
+        // Weekday selection buttons
+        document.getElementById('select-all-days').addEventListener('click', function() {
+            document.querySelectorAll('input[name^="valid_"]').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        });
+
+        document.getElementById('select-weekdays-only').addEventListener('click', function() {
+            document.querySelectorAll('input[name^="valid_"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            // Monday to Friday
+            document.querySelector('input[name="valid_monday"]').checked = true;
+            document.querySelector('input[name="valid_tuesday"]').checked = true;
+            document.querySelector('input[name="valid_wednesday"]').checked = true;
+            document.querySelector('input[name="valid_thursday"]').checked = true;
+            document.querySelector('input[name="valid_friday"]').checked = true;
+        });
+
+        document.getElementById('select-weekend-only').addEventListener('click', function() {
+            document.querySelectorAll('input[name^="valid_"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            // Saturday and Sunday
+            document.querySelector('input[name="valid_saturday"]').checked = true;
+            document.querySelector('input[name="valid_sunday"]').checked = true;
+        });
+
+        // Blackout date validation
+        document.getElementById('blackout_start_date').addEventListener('change', function() {
+            const startDate = this.value;
+            const endDateInput = document.getElementById('blackout_end_date');
+            if (startDate) {
+                endDateInput.min = startDate;
+            }
+        });
+
+        document.getElementById('blackout_end_date').addEventListener('change', function() {
+            const endDate = this.value;
+            const startDateInput = document.getElementById('blackout_start_date');
+            if (endDate) {
+                startDateInput.max = endDate;
+            }
+        });
+
         // Lắng nghe sự kiện submit của form
         form.addEventListener('submit', function(event) {
             // Ngăn chặn việc gửi form mặc định
@@ -203,7 +290,18 @@ include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
                 max_stay: formData.get('max_stay') || null,
                 booking_days_in_advance: formData.get('booking_days_in_advance') || null,
                 is_active: +formData.get('is_active'),
-                roomtypes: selectedRoomtypes
+                roomtypes: selectedRoomtypes,
+                // Blackout dates
+                blackout_start_date: formData.get('blackout_start_date') || null,
+                blackout_end_date: formData.get('blackout_end_date') || null,
+                // Valid weekdays
+                valid_monday: formData.get('valid_monday') ? 1 : 0,
+                valid_tuesday: formData.get('valid_tuesday') ? 1 : 0,
+                valid_wednesday: formData.get('valid_wednesday') ? 1 : 0,
+                valid_thursday: formData.get('valid_thursday') ? 1 : 0,
+                valid_friday: formData.get('valid_friday') ? 1 : 0,
+                valid_saturday: formData.get('valid_saturday') ? 1 : 0,
+                valid_sunday: formData.get('valid_sunday') ? 1 : 0
             };
 
             // Gửi dữ liệu bằng jQuery.ajax hoặc Fetch API

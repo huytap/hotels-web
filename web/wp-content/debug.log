@@ -26,3 +26,425 @@
 [24-Sep-2025 14:37:50 UTC] API returned error: HTTP 422
 [24-Sep-2025 14:39:37 UTC] API Call success: PUT promotions/update-status - HTTP 422
 [24-Sep-2025 14:39:37 UTC] API returned error: HTTP 422
+[25-Sep-2025 09:11:20 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('hotel-management_page_hotel-room-rates'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->room_rates_page, include('/plugins/hotel-management-extension/views/room-rates.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[25-Sep-2025 09:11:24 UTC] API Call success: GET dashboard/stats - HTTP 200
+[25-Sep-2025 09:11:24 UTC] API Call success: GET dashboard/stats - HTTP 200
+[25-Sep-2025 09:11:24 UTC] API Call success: GET room-types - HTTP 200
+[25-Sep-2025 09:11:24 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('hotel-management_page_hotel-room-rates'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->room_rates_page, include('/plugins/hotel-management-extension/views/room-rates.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[25-Sep-2025 09:11:24 UTC] PHP Warning:  Undefined array key "name" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\views\room-rates.php on line 298
+[25-Sep-2025 09:11:24 UTC] PHP Stack trace:
+[25-Sep-2025 09:11:24 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:0
+[25-Sep-2025 09:11:24 UTC] PHP   2. do_action($hook_name = 'hotel-management_page_hotel-room-rates') D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:260
+[25-Sep-2025 09:11:24 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[25-Sep-2025 09:11:24 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[25-Sep-2025 09:11:24 UTC] PHP   5. Hotel_Management_Extension->room_rates_page('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[25-Sep-2025 09:11:24 UTC] PHP   6. include() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:434
+[25-Sep-2025 09:11:24 UTC] PHP Warning:  Undefined array key "name" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\views\room-rates.php on line 388
+[25-Sep-2025 09:11:24 UTC] PHP Stack trace:
+[25-Sep-2025 09:11:24 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:0
+[25-Sep-2025 09:11:24 UTC] PHP   2. do_action($hook_name = 'hotel-management_page_hotel-room-rates') D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:260
+[25-Sep-2025 09:11:24 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[25-Sep-2025 09:11:24 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[25-Sep-2025 09:11:24 UTC] PHP   5. Hotel_Management_Extension->room_rates_page('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[25-Sep-2025 09:11:24 UTC] PHP   6. include() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:434
+[25-Sep-2025 09:11:24 UTC] Automatic updates starting...
+[25-Sep-2025 09:11:28 UTC] Automatic updates complete.
+[25-Sep-2025 09:11:52 UTC] API Call success: GET promotions - HTTP 200
+[25-Sep-2025 09:11:55 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('quan-ly-khach-san_page_hotel-room-rates'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->room_rates_page, include('/plugins/hotel-management-extension/views/room-rates.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[25-Sep-2025 09:11:56 UTC] API Call success: GET room-types - HTTP 200
+[25-Sep-2025 09:11:56 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('quan-ly-khach-san_page_hotel-room-rates'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->room_rates_page, include('/plugins/hotel-management-extension/views/room-rates.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[25-Sep-2025 09:11:56 UTC] PHP Warning:  Undefined array key "name" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\views\room-rates.php on line 298
+[25-Sep-2025 09:11:56 UTC] PHP Stack trace:
+[25-Sep-2025 09:11:56 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:0
+[25-Sep-2025 09:11:56 UTC] PHP   2. do_action($hook_name = 'quan-ly-khach-san_page_hotel-room-rates') D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:260
+[25-Sep-2025 09:11:56 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[25-Sep-2025 09:11:56 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[25-Sep-2025 09:11:56 UTC] PHP   5. Hotel_Management_Extension->room_rates_page('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[25-Sep-2025 09:11:56 UTC] PHP   6. include() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:434
+[25-Sep-2025 09:11:56 UTC] PHP Warning:  Undefined array key "name" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\views\room-rates.php on line 388
+[25-Sep-2025 09:11:56 UTC] PHP Stack trace:
+[25-Sep-2025 09:11:56 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:0
+[25-Sep-2025 09:11:56 UTC] PHP   2. do_action($hook_name = 'quan-ly-khach-san_page_hotel-room-rates') D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:260
+[25-Sep-2025 09:11:56 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[25-Sep-2025 09:11:56 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[25-Sep-2025 09:11:56 UTC] PHP   5. Hotel_Management_Extension->room_rates_page('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[25-Sep-2025 09:11:56 UTC] PHP   6. include() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:434
+[25-Sep-2025 09:12:03 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 09:12:09 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 09:12:37 UTC] API Call success: GET bookings - HTTP 404
+[25-Sep-2025 09:12:37 UTC] API returned error: HTTP 404 - The route api/sync/bookings could not be found.
+[25-Sep-2025 09:12:45 UTC] API Call success: GET bookings - HTTP 404
+[25-Sep-2025 09:12:45 UTC] API returned error: HTTP 404 - The route api/sync/bookings could not be found.
+[25-Sep-2025 09:13:18 UTC] API Call success: GET dashboard/stats - HTTP 200
+[25-Sep-2025 09:15:57 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('quan-ly-khach-san_page_hotel-room-rates'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->room_rates_page, include('/plugins/hotel-management-extension/views/room-rates.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[25-Sep-2025 09:15:59 UTC] API Call success: GET room-types - HTTP 200
+[25-Sep-2025 09:15:59 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('quan-ly-khach-san_page_hotel-room-rates'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->room_rates_page, include('/plugins/hotel-management-extension/views/room-rates.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[25-Sep-2025 09:15:59 UTC] PHP Warning:  Undefined array key "name" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\views\room-rates.php on line 389
+[25-Sep-2025 09:15:59 UTC] PHP Stack trace:
+[25-Sep-2025 09:15:59 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:0
+[25-Sep-2025 09:15:59 UTC] PHP   2. do_action($hook_name = 'quan-ly-khach-san_page_hotel-room-rates') D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:260
+[25-Sep-2025 09:15:59 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[25-Sep-2025 09:15:59 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[25-Sep-2025 09:15:59 UTC] PHP   5. Hotel_Management_Extension->room_rates_page('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[25-Sep-2025 09:15:59 UTC] PHP   6. include() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:434
+[25-Sep-2025 09:22:58 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('quan-ly-khach-san_page_hotel-room-rates'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->room_rates_page, include('/plugins/hotel-management-extension/views/room-rates.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[25-Sep-2025 09:22:59 UTC] API Call success: GET room-types - HTTP 200
+[25-Sep-2025 09:22:59 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('quan-ly-khach-san_page_hotel-room-rates'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->room_rates_page, include('/plugins/hotel-management-extension/views/room-rates.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[25-Sep-2025 09:22:59 UTC] PHP Warning:  Undefined array key "name" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\views\room-rates.php on line 389
+[25-Sep-2025 09:22:59 UTC] PHP Stack trace:
+[25-Sep-2025 09:22:59 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:0
+[25-Sep-2025 09:22:59 UTC] PHP   2. do_action($hook_name = 'quan-ly-khach-san_page_hotel-room-rates') D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:260
+[25-Sep-2025 09:22:59 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[25-Sep-2025 09:22:59 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[25-Sep-2025 09:22:59 UTC] PHP   5. Hotel_Management_Extension->room_rates_page('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[25-Sep-2025 09:22:59 UTC] PHP   6. include() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:441
+[25-Sep-2025 09:23:05 UTC] API Call success: GET room-management/calendar - HTTP 400
+[25-Sep-2025 09:23:05 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 09:24:54 UTC] API Call success: GET room-management/templates - HTTP 404
+[25-Sep-2025 09:24:54 UTC] API returned error: HTTP 404 - The route api/sync/room-management/templates could not be found.
+[25-Sep-2025 12:37:11 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('quan-ly-khach-san_page_hotel-room-rates'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->room_rates_page, include('/plugins/hotel-management-extension/views/room-rates.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[25-Sep-2025 12:37:12 UTC] API Call success: GET room-types - HTTP 200
+[25-Sep-2025 12:37:12 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('quan-ly-khach-san_page_hotel-room-rates'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->room_rates_page, include('/plugins/hotel-management-extension/views/room-rates.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[25-Sep-2025 12:37:12 UTC] PHP Warning:  Undefined array key "name" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\views\room-rates.php on line 389
+[25-Sep-2025 12:37:12 UTC] PHP Stack trace:
+[25-Sep-2025 12:37:12 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:0
+[25-Sep-2025 12:37:12 UTC] PHP   2. do_action($hook_name = 'quan-ly-khach-san_page_hotel-room-rates') D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:260
+[25-Sep-2025 12:37:12 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[25-Sep-2025 12:37:12 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[25-Sep-2025 12:37:12 UTC] PHP   5. Hotel_Management_Extension->room_rates_page('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[25-Sep-2025 12:37:12 UTC] PHP   6. include() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:441
+[25-Sep-2025 12:37:26 UTC] API Call success: GET room-management/calendar - HTTP 400
+[25-Sep-2025 12:37:26 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 12:37:37 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('quan-ly-khach-san_page_hotel-room-rates'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->room_rates_page, include('/plugins/hotel-management-extension/views/room-rates.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[25-Sep-2025 12:37:38 UTC] API Call success: GET room-types - HTTP 200
+[25-Sep-2025 12:37:38 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('quan-ly-khach-san_page_hotel-room-rates'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->room_rates_page, include('/plugins/hotel-management-extension/views/room-rates.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[25-Sep-2025 12:37:38 UTC] PHP Warning:  Undefined array key "name" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\views\room-rates.php on line 389
+[25-Sep-2025 12:37:38 UTC] PHP Stack trace:
+[25-Sep-2025 12:37:38 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:0
+[25-Sep-2025 12:37:38 UTC] PHP   2. do_action($hook_name = 'quan-ly-khach-san_page_hotel-room-rates') D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:260
+[25-Sep-2025 12:37:38 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[25-Sep-2025 12:37:38 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[25-Sep-2025 12:37:38 UTC] PHP   5. Hotel_Management_Extension->room_rates_page('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[25-Sep-2025 12:37:38 UTC] PHP   6. include() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:441
+[25-Sep-2025 12:37:42 UTC] API Call success: GET room-management/calendar - HTTP 400
+[25-Sep-2025 12:37:42 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 12:38:32 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SELECT cache_value FROM wp_2_hme_api_cache WHERE cache_key = 'room_types_2' AND blog_id = 2 AND expires_at > NOW() made by do_action('quan-ly-khach-san_page_hotel-room-rates'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->room_rates_page, include('/plugins/hotel-management-extension/views/room-rates.php'), HME_Room_Rate_Manager::get_room_types, hme_get_cached_api_response
+[25-Sep-2025 12:38:33 UTC] API Call success: GET room-types - HTTP 200
+[25-Sep-2025 12:38:33 UTC] WordPress database error Table 'webkhachsan.wp_2_hme_api_cache' doesn't exist for query SHOW FULL COLUMNS FROM `wp_2_hme_api_cache` made by do_action('quan-ly-khach-san_page_hotel-room-rates'), WP_Hook->do_action, WP_Hook->apply_filters, Hotel_Management_Extension->room_rates_page, include('/plugins/hotel-management-extension/views/room-rates.php'), HME_Room_Rate_Manager::get_room_types, hme_set_cached_api_response
+[25-Sep-2025 12:38:33 UTC] PHP Warning:  Undefined array key "name" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\views\room-rates.php on line 389
+[25-Sep-2025 12:38:33 UTC] PHP Stack trace:
+[25-Sep-2025 12:38:33 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:0
+[25-Sep-2025 12:38:33 UTC] PHP   2. do_action($hook_name = 'quan-ly-khach-san_page_hotel-room-rates') D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:260
+[25-Sep-2025 12:38:33 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[25-Sep-2025 12:38:33 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[25-Sep-2025 12:38:33 UTC] PHP   5. Hotel_Management_Extension->room_rates_page('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[25-Sep-2025 12:38:33 UTC] PHP   6. include() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:441
+[25-Sep-2025 12:38:37 UTC] API Call success: GET room-management/calendar - HTTP 400
+[25-Sep-2025 12:38:37 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 12:43:37 UTC] API Call success: GET roomtypes - HTTP 404
+[25-Sep-2025 12:43:37 UTC] API returned error: HTTP 404 - The route api/sync/roomtypes could not be found.
+[25-Sep-2025 12:45:56 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 12:45:56 UTC] PHP Warning:  Undefined array key "name" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\views\room-rates.php on line 389
+[25-Sep-2025 12:45:56 UTC] PHP Stack trace:
+[25-Sep-2025 12:45:56 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:0
+[25-Sep-2025 12:45:56 UTC] PHP   2. do_action($hook_name = 'quan-ly-khach-san_page_hotel-room-rates') D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:260
+[25-Sep-2025 12:45:56 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[25-Sep-2025 12:45:56 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[25-Sep-2025 12:45:56 UTC] PHP   5. Hotel_Management_Extension->room_rates_page('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[25-Sep-2025 12:45:56 UTC] PHP   6. include() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:441
+[25-Sep-2025 12:46:02 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 12:46:17 UTC] API Call success: POST room-management/inventory - HTTP 400
+[25-Sep-2025 12:46:17 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 12:46:18 UTC] API Call success: POST room-management/inventory - HTTP 400
+[25-Sep-2025 12:46:18 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 12:46:19 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 12:46:20 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 12:46:22 UTC] API Call success: POST room-management/inventory - HTTP 400
+[25-Sep-2025 12:46:22 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 12:46:24 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 12:46:32 UTC] API Call success: POST room-management/inventory - HTTP 400
+[25-Sep-2025 12:46:32 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 12:46:34 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 12:47:46 UTC] API Call success: POST room-management/update-both - HTTP 200
+[25-Sep-2025 12:47:47 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 12:48:01 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 12:48:01 UTC] PHP Warning:  Undefined array key "name" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\views\room-rates.php on line 389
+[25-Sep-2025 12:48:01 UTC] PHP Stack trace:
+[25-Sep-2025 12:48:01 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:0
+[25-Sep-2025 12:48:01 UTC] PHP   2. do_action($hook_name = 'quan-ly-khach-san_page_hotel-room-rates') D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:260
+[25-Sep-2025 12:48:01 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[25-Sep-2025 12:48:01 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[25-Sep-2025 12:48:01 UTC] PHP   5. Hotel_Management_Extension->room_rates_page('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[25-Sep-2025 12:48:01 UTC] PHP   6. include() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:441
+[25-Sep-2025 12:48:09 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 12:48:36 UTC] API Call success: GET room-management/templates - HTTP 404
+[25-Sep-2025 12:48:36 UTC] API returned error: HTTP 404 - The route api/sync/room-management/templates could not be found.
+[25-Sep-2025 12:51:05 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 12:51:05 UTC] PHP Warning:  Undefined array key "name" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\views\room-rates.php on line 389
+[25-Sep-2025 12:51:05 UTC] PHP Stack trace:
+[25-Sep-2025 12:51:05 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:0
+[25-Sep-2025 12:51:05 UTC] PHP   2. do_action($hook_name = 'quan-ly-khach-san_page_hotel-room-rates') D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:260
+[25-Sep-2025 12:51:05 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[25-Sep-2025 12:51:05 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[25-Sep-2025 12:51:05 UTC] PHP   5. Hotel_Management_Extension->room_rates_page('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[25-Sep-2025 12:51:05 UTC] PHP   6. include() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:441
+[25-Sep-2025 12:51:08 UTC] API Call success: GET room-management/templates - HTTP 404
+[25-Sep-2025 12:51:08 UTC] API returned error: HTTP 404 - The route api/sync/room-management/templates could not be found.
+[25-Sep-2025 12:55:43 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 12:55:43 UTC] PHP Warning:  Undefined array key "name" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\views\room-rates.php on line 389
+[25-Sep-2025 12:55:43 UTC] PHP Stack trace:
+[25-Sep-2025 12:55:43 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:0
+[25-Sep-2025 12:55:43 UTC] PHP   2. do_action($hook_name = 'quan-ly-khach-san_page_hotel-room-rates') D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:260
+[25-Sep-2025 12:55:43 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[25-Sep-2025 12:55:43 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[25-Sep-2025 12:55:43 UTC] PHP   5. Hotel_Management_Extension->room_rates_page('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[25-Sep-2025 12:55:43 UTC] PHP   6. include() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:441
+[25-Sep-2025 12:55:46 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 12:58:38 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 12:58:38 UTC] PHP Warning:  Undefined array key "name" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\views\room-rates.php on line 389
+[25-Sep-2025 12:58:38 UTC] PHP Stack trace:
+[25-Sep-2025 12:58:38 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:0
+[25-Sep-2025 12:58:38 UTC] PHP   2. do_action($hook_name = 'quan-ly-khach-san_page_hotel-room-rates') D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:260
+[25-Sep-2025 12:58:38 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[25-Sep-2025 12:58:38 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[25-Sep-2025 12:58:38 UTC] PHP   5. Hotel_Management_Extension->room_rates_page('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[25-Sep-2025 12:58:38 UTC] PHP   6. include() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:441
+[25-Sep-2025 12:58:44 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 12:58:48 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 12:58:56 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:00:11 UTC] API Call success: GET promotions - HTTP 200
+[25-Sep-2025 13:00:20 UTC] API Call success: GET promotions/4 - HTTP 200
+[25-Sep-2025 13:01:23 UTC] API Call success: GET promotions - HTTP 200
+[25-Sep-2025 13:01:26 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 13:01:26 UTC] PHP Warning:  Undefined array key "name" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\views\room-rates.php on line 389
+[25-Sep-2025 13:01:26 UTC] PHP Stack trace:
+[25-Sep-2025 13:01:26 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:0
+[25-Sep-2025 13:01:26 UTC] PHP   2. do_action($hook_name = 'quan-ly-khach-san_page_hotel-room-rates') D:\projects\hotels\hotels-web.com\web\wp-admin\admin.php:260
+[25-Sep-2025 13:01:26 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[25-Sep-2025 13:01:26 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[25-Sep-2025 13:01:26 UTC] PHP   5. Hotel_Management_Extension->room_rates_page('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[25-Sep-2025 13:01:26 UTC] PHP   6. include() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\includes\class-hotel-management-extension.php:441
+[25-Sep-2025 13:01:31 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:03:39 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 13:03:42 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:04:42 UTC] API Call success: POST room-management/templates - HTTP 400
+[25-Sep-2025 13:04:42 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 13:04:43 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:04:50 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:05:19 UTC] API Call success: POST room-management/templates - HTTP 400
+[25-Sep-2025 13:05:19 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 13:05:20 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:09:24 UTC] API Call success: POST room-management/templates - HTTP 400
+[25-Sep-2025 13:09:24 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 13:09:25 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:16:17 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 13:17:10 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:17:22 UTC] API Call success: POST room-management/templates - HTTP 400
+[25-Sep-2025 13:17:22 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 13:17:23 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:18:28 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:21:37 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 13:21:41 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:21:51 UTC] API Call success: POST room-management/templates - HTTP 500
+[25-Sep-2025 13:21:51 UTC] API returned error: HTTP 500
+[25-Sep-2025 13:21:52 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:22:11 UTC] API Call success: POST room-management/templates - HTTP 200
+[25-Sep-2025 13:22:12 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:22:43 UTC] API Call success: GET room-management/templates/1 - HTTP 200
+[25-Sep-2025 13:23:28 UTC] API Call success: POST room-management/apply-template - HTTP 400
+[25-Sep-2025 13:23:28 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 13:23:51 UTC] API Call success: DELETE room-management/templates/1 - HTTP 200
+[25-Sep-2025 13:23:52 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:23:54 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 13:24:04 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:24:12 UTC] API Call success: POST room-management/templates - HTTP 200
+[25-Sep-2025 13:24:14 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:24:34 UTC] API Call success: POST room-management/apply-template - HTTP 400
+[25-Sep-2025 13:24:34 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 13:24:49 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 13:24:55 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:25:14 UTC] API Call success: POST room-management/apply-template - HTTP 400
+[25-Sep-2025 13:25:14 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 13:25:15 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 13:26:06 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 13:26:57 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 13:27:02 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 13:27:08 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:27:19 UTC] API Call success: POST room-management/apply-template - HTTP 400
+[25-Sep-2025 13:27:19 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 13:33:22 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 13:33:52 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:34:39 UTC] API Call success: POST room-management/apply-template - HTTP 400
+[25-Sep-2025 13:34:39 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 13:34:56 UTC] API Call success: POST room-management/apply-template - HTTP 400
+[25-Sep-2025 13:34:56 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 13:38:06 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 13:38:13 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:38:17 UTC] API Call success: GET room-management/templates/2 - HTTP 200
+[25-Sep-2025 13:38:29 UTC] API Call success: POST room-management/apply-template - HTTP 400
+[25-Sep-2025 13:38:29 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 13:38:57 UTC] API Call success: GET room-management/templates/2 - HTTP 200
+[25-Sep-2025 13:39:39 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 13:39:43 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:39:44 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 13:39:47 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:40:56 UTC] API Call success: GET room-management/templates/2 - HTTP 200
+[25-Sep-2025 13:41:00 UTC] API Call success: POST room-management/apply-template - HTTP 400
+[25-Sep-2025 13:41:00 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 13:41:11 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 13:41:14 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:41:19 UTC] API Call success: GET room-management/templates/2 - HTTP 200
+[25-Sep-2025 13:41:24 UTC] API Call success: POST room-management/apply-template - HTTP 400
+[25-Sep-2025 13:41:24 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 13:41:27 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 13:42:16 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:42:27 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:42:31 UTC] API Call success: GET room-management/templates/2 - HTTP 200
+[25-Sep-2025 13:42:34 UTC] API Call success: POST room-management/apply-template - HTTP 400
+[25-Sep-2025 13:42:34 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 13:42:37 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 13:43:05 UTC] API Call success: GET room-management/templates/2 - HTTP 200
+[25-Sep-2025 13:43:10 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 13:44:26 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 13:44:30 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:44:34 UTC] API Call success: GET room-management/templates/2 - HTTP 200
+[25-Sep-2025 13:44:52 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 13:45:08 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 13:45:11 UTC] API Call success: GET room-management/templates/2 - HTTP 200
+[25-Sep-2025 13:45:16 UTC] API Call success: POST room-management/apply-template - HTTP 200
+[25-Sep-2025 13:45:17 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 13:53:21 UTC] API Call success: POST room-management/rates/copy - HTTP 400
+[25-Sep-2025 13:53:21 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 13:53:23 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 14:11:48 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 14:11:48 UTC] Automatic updates starting...
+[25-Sep-2025 14:11:54 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 14:11:56 UTC] Automatic updates complete.
+[25-Sep-2025 14:16:38 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 14:16:44 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 14:16:53 UTC] API Call success: POST room-management/update-both - HTTP 500
+[25-Sep-2025 14:16:53 UTC] API returned error: HTTP 500 - Class "App\Services\RoomInventory" not found
+[25-Sep-2025 14:16:54 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 14:17:09 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 14:17:11 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 14:18:18 UTC] API Call success: POST room-management/update-both - HTTP 500
+[25-Sep-2025 14:18:18 UTC] API returned error: HTTP 500 - Class "App\Services\RoomInventory" not found
+[25-Sep-2025 14:18:20 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 14:25:15 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 14:25:21 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 14:25:30 UTC] API Call success: POST room-management/update-both - HTTP 200
+[25-Sep-2025 14:25:33 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 14:26:08 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 14:26:11 UTC] API Call success: GET room-management/templates/2 - HTTP 200
+[25-Sep-2025 14:30:19 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 14:30:24 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 14:30:30 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 14:30:36 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 14:31:29 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 14:31:36 UTC] API Call success: GET room-management/calendar - HTTP 200
+[25-Sep-2025 14:31:43 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 14:31:46 UTC] API Call success: GET room-management/templates/2 - HTTP 200
+[25-Sep-2025 14:37:11 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 14:37:14 UTC] API Call success: GET room-management/templates - HTTP 200
+[25-Sep-2025 14:37:17 UTC] API Call success: GET room-management/templates/2 - HTTP 200
+[25-Sep-2025 14:44:53 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 14:45:18 UTC] API Call success: POST room-management/restrictions/copy - HTTP 400
+[25-Sep-2025 14:45:18 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 14:45:18 UTC] API Call success: POST room-management/rates/copy - HTTP 400
+[25-Sep-2025 14:45:18 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 14:45:18 UTC] API Call success: POST room-management/inventory/copy - HTTP 400
+[25-Sep-2025 14:45:18 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 14:45:29 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 14:45:49 UTC] API Call success: POST room-management/restrictions/copy - HTTP 400
+[25-Sep-2025 14:45:49 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 14:45:49 UTC] API Call success: POST room-management/rates/copy - HTTP 400
+[25-Sep-2025 14:45:49 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 14:45:49 UTC] API Call success: POST room-management/inventory/copy - HTTP 400
+[25-Sep-2025 14:45:49 UTC] API returned error: HTTP 400 - Validation failed
+[25-Sep-2025 14:49:48 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 14:52:15 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 14:52:36 UTC] API Call success: POST room-management/inventory/copy - HTTP 200
+[25-Sep-2025 14:52:36 UTC] API Call success: POST room-management/restrictions/copy - HTTP 200
+[25-Sep-2025 14:52:36 UTC] API Call success: POST room-management/rates/copy - HTTP 200
+[25-Sep-2025 14:54:57 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 14:56:16 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 15:02:53 UTC] API Call success: GET promotions - HTTP 200
+[25-Sep-2025 15:02:57 UTC] API Call success: GET bookings - HTTP 404
+[25-Sep-2025 15:02:57 UTC] API returned error: HTTP 404 - The route api/sync/bookings could not be found.
+[25-Sep-2025 15:03:00 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 15:03:08 UTC] API Call success: GET dashboard/stats - HTTP 200
+[25-Sep-2025 15:03:11 UTC] API Call success: GET roomtypes - HTTP 200
+[25-Sep-2025 15:03:14 UTC] API Call success: GET dashboard/stats - HTTP 200
+[26-Sep-2025 01:06:36 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 01:06:43 UTC] API Call success: GET room-management/calendar - HTTP 200
+[26-Sep-2025 01:06:58 UTC] API Call success: GET room-management/calendar - HTTP 200
+[26-Sep-2025 01:07:38 UTC] API Call success: POST room-management/update-both - HTTP 200
+[26-Sep-2025 01:07:39 UTC] API Call success: GET room-management/calendar - HTTP 200
+[26-Sep-2025 01:07:55 UTC] API Call success: GET room-management/templates - HTTP 200
+[26-Sep-2025 01:08:01 UTC] PHP Warning:  Undefined array key "nonce" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-management-extension\includes\class-room-rate-manager.php on line 230
+[26-Sep-2025 01:08:01 UTC] PHP Stack trace:
+[26-Sep-2025 01:08:01 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\web\wp-admin\admin-ajax.php:0
+[26-Sep-2025 01:08:01 UTC] PHP   2. do_action($hook_name = 'wp_ajax_hme_export_rates') D:\projects\hotels\hotels-web.com\web\wp-admin\admin-ajax.php:192
+[26-Sep-2025 01:08:01 UTC] PHP   3. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[26-Sep-2025 01:08:01 UTC] PHP   4. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[26-Sep-2025 01:08:01 UTC] PHP   5. HME_Room_Rate_Manager::ajax_export_rates('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[26-Sep-2025 01:08:06 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 01:09:18 UTC] API Call success: GET room-management/calendar - HTTP 200
+[26-Sep-2025 01:09:42 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 01:10:31 UTC] API Call success: POST room-management/copy-all - HTTP 400
+[26-Sep-2025 01:10:31 UTC] API returned error: HTTP 400 - Validation failed
+[26-Sep-2025 01:12:19 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 01:12:41 UTC] API Call success: POST room-management/copy-all - HTTP 200
+[26-Sep-2025 01:17:40 UTC] API Call success: POST room-management/copy-all - HTTP 200
+[26-Sep-2025 01:17:52 UTC] API Call success: GET room-management/calendar - HTTP 200
+[26-Sep-2025 01:17:57 UTC] API Call success: GET room-management/calendar - HTTP 200
+[26-Sep-2025 01:18:25 UTC] API Call success: POST room-management/copy-all - HTTP 200
+[26-Sep-2025 01:18:26 UTC] API Call success: GET room-management/calendar - HTTP 200
+[26-Sep-2025 01:18:43 UTC] API Call success: POST room-management/copy-all - HTTP 200
+[26-Sep-2025 01:18:44 UTC] API Call success: GET room-management/calendar - HTTP 200
+[26-Sep-2025 01:19:04 UTC] API Call success: GET room-management/calendar - HTTP 200
+[26-Sep-2025 01:22:46 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 01:23:09 UTC] API Call success: POST room-management/copy-all - HTTP 400
+[26-Sep-2025 01:23:09 UTC] API returned error: HTTP 400 - Validation failed
+[26-Sep-2025 01:32:01 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 01:32:36 UTC] API Call success: POST room-management/copy-all - HTTP 200
+[26-Sep-2025 01:32:38 UTC] API Call success: GET room-management/calendar - HTTP 200
+[26-Sep-2025 01:32:46 UTC] API Call success: GET room-management/calendar - HTTP 200
+[26-Sep-2025 01:33:27 UTC] API Call success: GET room-management/templates - HTTP 200
+[26-Sep-2025 01:33:30 UTC] API Call success: GET room-management/templates/2 - HTTP 200
+[26-Sep-2025 01:38:22 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:38:24 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:38:26 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:38:26 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:38:27 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:38:27 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:38:27 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:38:28 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:38:28 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:38:31 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:44:27 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:44:31 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 01:44:32 UTC] API Call success: GET promotions/4 - HTTP 200
+[26-Sep-2025 01:44:34 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:46:09 UTC] API Call success: GET dashboard/stats - HTTP 200
+[26-Sep-2025 01:46:14 UTC] API Call success: GET bookings - HTTP 404
+[26-Sep-2025 01:46:14 UTC] API returned error: HTTP 404 - The route api/sync/bookings could not be found.
+[26-Sep-2025 01:46:17 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 01:51:01 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:51:07 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 01:51:20 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:52:46 UTC] API Call success: PUT promotions/0 - HTTP 404
+[26-Sep-2025 01:52:46 UTC] API returned error: HTTP 404 - No query results for model [App\Models\Promotion] 0
+[26-Sep-2025 01:52:51 UTC] API Call success: PUT promotions/0 - HTTP 404
+[26-Sep-2025 01:52:51 UTC] API returned error: HTTP 404 - No query results for model [App\Models\Promotion] 0
+[26-Sep-2025 01:52:51 UTC] API Call success: PUT promotions/0 - HTTP 404
+[26-Sep-2025 01:52:51 UTC] API returned error: HTTP 404 - No query results for model [App\Models\Promotion] 0
+[26-Sep-2025 01:52:51 UTC] API Call success: PUT promotions/0 - HTTP 500
+[26-Sep-2025 01:52:51 UTC] API returned error: HTTP 500 - Server Error
+[26-Sep-2025 01:52:51 UTC] API Call success: PUT promotions/0 - HTTP 404
+[26-Sep-2025 01:52:51 UTC] API returned error: HTTP 404 - No query results for model [App\Models\Promotion] 0
+[26-Sep-2025 01:58:20 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:58:43 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:58:50 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 01:59:23 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 01:59:24 UTC] API Call success: GET promotions/4 - HTTP 200

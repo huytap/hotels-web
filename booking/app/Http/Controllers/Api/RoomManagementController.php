@@ -263,7 +263,7 @@ class RoomManagementController extends BaseApiController
         $validator = Validator::make($requestData, [
             'roomtype_id' => 'required|integer|exists:roomtypes,id',
             'date' => 'required|date',
-            'date_to' => 'required|date|after_or_equal:date_to',
+            'date_to' => 'required|date|after_or_equal:date',  // Fixed: should reference 'date' not 'date_to'
             'total_for_sale' => 'nullable|integer|min:0',
             'is_available' => 'nullable|boolean',
             //'weekdays' => 'nullable|array',
@@ -278,17 +278,16 @@ class RoomManagementController extends BaseApiController
             $data = [];
 
             if (array_key_exists('total_for_sale', $requestData)) {
-                $inventoryData['total_for_sale'] = $requestData['total_for_sale'];
+                $data['total_for_sale'] = $requestData['total_for_sale'];  // Fixed variable name
             }
             if (array_key_exists('is_available', $requestData)) {
-                $inventoryData['is_available'] = $requestData['is_available'];
+                $data['is_available'] = $requestData['is_available'];  // Fixed variable name
             }
 
-            $updatedCount = $this->roomService->updateInventory(
+            $updatedCount = $this->roomService->bulkUpdateInventory(  // Fixed method name
                 $hotel->id,
                 $requestData['roomtype_id'],
-                $request->date,
-                $request->date_to,
+                $requestData['date'],  // Fixed variable reference
                 $data,
                 //$request->weekdays
             );
@@ -300,94 +299,6 @@ class RoomManagementController extends BaseApiController
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to bulk update inventory',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Copy rates từ period này sang period khác
-     */
-    public function copyRates(Request $request): JsonResponse
-    {
-        $hotel = $this->validateHotelAccess($request);
-        if ($hotel instanceof JsonResponse) {
-            return $hotel;
-        }
-
-        $validator = Validator::make($request->all(), [
-            'roomtype_id' => 'required|integer|exists:roomtypes,id',
-            'source_start' => 'required|date',
-            'source_end' => 'required|date|after_or_equal:source_start',
-            'target_start' => 'required|date',
-            'target_end' => 'required|date|after_or_equal:target_start',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->errorResponse('Validation failed', 400, $validator->errors());
-        }
-
-        try {
-            $copiedCount = $this->roomService->copyRates(
-                $hotel->id,
-                $request->roomtype_id,
-                $request->source_start,
-                $request->source_end,
-                $request->target_start,
-                $request->target_end
-            );
-
-            return $this->successResponse([
-                'copied_count' => $copiedCount
-            ], "Successfully copied {$copiedCount} rates");
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to copy rates',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Copy inventory từ period này sang period khác
-     */
-    public function copyInventory(Request $request): JsonResponse
-    {
-        $hotel = $this->validateHotelAccess($request);
-        if ($hotel instanceof JsonResponse) {
-            return $hotel;
-        }
-
-        $validator = Validator::make($request->all(), [
-            'roomtype_id' => 'required|integer|exists:roomtypes,id',
-            'source_start' => 'required|date',
-            'source_end' => 'required|date|after_or_equal:source_start',
-            'target_start' => 'required|date',
-            'target_end' => 'required|date|after_or_equal:target_start',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->errorResponse('Validation failed', 400, $validator->errors());
-        }
-
-        try {
-            $copiedCount = $this->roomService->copyInventory(
-                $hotel->id,
-                $request->roomtype_id,
-                $request->source_start,
-                $request->source_end,
-                $request->target_start,
-                $request->target_end
-            );
-
-            return $this->successResponse([
-                'copied_count' => $copiedCount
-            ], "Successfully copied {$copiedCount} inventory records");
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to copy inventory',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -506,6 +417,310 @@ class RoomManagementController extends BaseApiController
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to cancel booking',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Lấy danh sách templates
+     */
+    public function getTemplates(Request $request): JsonResponse
+    {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+
+        try {
+            $roomtypeId = $request->get('roomtype_id');
+            $templates = $this->roomService->getTemplates($hotel->id, $roomtypeId);
+
+            return $this->successResponse($templates);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get templates',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Tạo template mới
+     */
+    public function createTemplate(Request $request): JsonResponse
+    {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+
+        $requestData = $request->json('data', $request->all());
+
+        if (!is_array($requestData)) {
+            return $this->errorResponse('Invalid data format. Expected array data.', 400);
+        }
+
+        $validator = Validator::make($requestData, [
+            'roomtype_id' => 'required|integer|exists:roomtypes,id',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'rates' => 'required|array',
+            'rates.monday' => 'required|numeric|min:0|max:99999999',
+            'rates.tuesday' => 'required|numeric|min:0|max:99999999',
+            'rates.wednesday' => 'required|numeric|min:0|max:99999999',
+            'rates.thursday' => 'required|numeric|min:0|max:99999999',
+            'rates.friday' => 'required|numeric|min:0|max:99999999',
+            'rates.saturday' => 'required|numeric|min:0|max:99999999',
+            'rates.sunday' => 'required|numeric|min:0|max:99999999',
+            'min_stay' => 'nullable|integer|min:1|max:365',
+            'max_stay' => 'nullable|integer|min:1|max:365|gte:min_stay',
+            'is_active' => 'nullable|boolean',
+            // Restrictions
+            'close_to_arrival' => 'nullable|boolean',
+            'close_to_departure' => 'nullable|boolean',
+            'is_closed' => 'nullable|boolean',
+        ]);
+        if ($validator->fails()) {
+            return $this->errorResponse('Validation failed', 400, $validator->errors());
+        }
+
+        try {
+            $template = $this->roomService->createTemplate($hotel->id, $requestData);
+
+            return $this->successResponse($template, 'Template created successfully');
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create template',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Lấy thông tin template
+     */
+    public function getTemplate(Request $request, $id): JsonResponse
+    {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+
+        try {
+            $template = $this->roomService->getTemplate($hotel->id, $id);
+
+            return $this->successResponse($template);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Template not found',
+                'error' => $e->getMessage()
+            ], 404);
+        }
+    }
+
+    /**
+     * Cập nhật template
+     */
+    public function updateTemplate(Request $request, $id): JsonResponse
+    {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+
+        $requestData = $request->json('data', $request->all());
+
+        if (!is_array($requestData)) {
+            return $this->errorResponse('Invalid data format. Expected array data.', 400);
+        }
+
+        $validator = Validator::make($requestData, [
+            'roomtype_id' => 'nullable|integer|exists:roomtypes,id',
+            'name' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'rates' => 'nullable|array',
+            'rates.monday' => 'nullable|numeric|min:0|max:99999999',
+            'rates.tuesday' => 'nullable|numeric|min:0|max:99999999',
+            'rates.wednesday' => 'nullable|numeric|min:0|max:99999999',
+            'rates.thursday' => 'nullable|numeric|min:0|max:99999999',
+            'rates.friday' => 'nullable|numeric|min:0|max:99999999',
+            'rates.saturday' => 'nullable|numeric|min:0|max:99999999',
+            'rates.sunday' => 'nullable|numeric|min:0|max:99999999',
+            'min_stay' => 'nullable|integer|min:1|max:365',
+            'max_stay' => 'nullable|integer|min:1|max:365|gte:min_stay',
+            'is_active' => 'nullable|boolean',
+            // Restrictions
+            'close_to_arrival' => 'nullable|boolean',
+            'close_to_departure' => 'nullable|boolean',
+            'is_closed' => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('Validation failed', 400, $validator->errors());
+        }
+
+        try {
+            $template = $this->roomService->updateTemplate($hotel->id, $id, $requestData);
+
+            return $this->successResponse($template, 'Template updated successfully');
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update template',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Xóa template
+     */
+    public function deleteTemplate(Request $request, $id): JsonResponse
+    {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+
+        try {
+            $this->roomService->deleteTemplate($hotel->id, $id);
+
+            return $this->successResponse(null, 'Template deleted successfully');
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete template',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Áp dụng template
+     */
+    public function applyTemplate(Request $request): JsonResponse
+    {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+
+        $requestData = $request->json('data', $request->all());
+
+        if (!is_array($requestData)) {
+            return $this->errorResponse('Invalid data format. Expected array data.', 400);
+        }
+
+        $validator = Validator::make($requestData, [
+            'template_id' => 'required|integer|exists:rate_templates,id',
+            'roomtype_id' => 'required|integer|exists:roomtypes,id',
+            'date_from' => 'required|date',
+            'date_to' => 'required|date|after_or_equal:date_from',
+            'overwrite_existing' => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('Validation failed', 400, $validator->errors());
+        }
+
+        try {
+            $appliedCount = $this->roomService->applyTemplate(
+                $hotel->id,
+                $requestData['template_id'],
+                $requestData['roomtype_id'],
+                $requestData['date_from'],
+                $requestData['date_to'],
+                $requestData['overwrite_existing'] ?? false
+            );
+
+            return $this->successResponse([
+                'applied_count' => $appliedCount
+            ], "Successfully applied template to {$appliedCount} dates");
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to apply template',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Copy all data (rates, inventory, restrictions) trong một API call
+     */
+    public function copyAll(Request $request): JsonResponse
+    {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+
+        $requestData = $request->json('data', $request->all());
+
+        if (!is_array($requestData)) {
+            return $this->errorResponse('Invalid data format. Expected array data.', 400);
+        }
+
+        $validator = Validator::make($requestData, [
+            'roomtype_id' => 'required|integer|exists:roomtypes,id',
+            'source_start_date' => 'required|date',
+            'source_end_date' => 'required|date|after_or_equal:source_start_date',
+            'target_start_date' => 'required|date',
+            'target_end_date' => 'required|date|after_or_equal:target_start_date',
+            'copy_rates' => 'nullable|boolean',
+            'copy_availability' => 'nullable|boolean',
+            'copy_restrictions' => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('Validation failed', 400, $validator->errors());
+        }
+
+        // Validate at least one copy option is selected
+        $copyOptions = [
+            'copy_rates' => boolval($requestData['copy_rates']) ?? false,
+            'copy_availability' => boolval($requestData['copy_availability']) ?? false,
+            'copy_restrictions' => boolval($requestData['copy_restrictions']) ?? false,
+        ];
+
+        if (!$copyOptions['copy_rates'] && !$copyOptions['copy_availability'] && !$copyOptions['copy_restrictions']) {
+            return $this->errorResponse('At least one copy option must be selected', 400);
+        }
+        try {
+            $results = $this->roomService->copyAll(
+                $hotel->id,
+                $requestData['roomtype_id'],
+                $requestData['source_start_date'],
+                $requestData['source_end_date'],
+                $requestData['target_start_date'],
+                $requestData['target_end_date'],
+                $copyOptions
+            );
+
+            $message = [];
+            if ($results['rates_copied'] > 0) {
+                $message[] = "{$results['rates_copied']} giá phòng";
+            }
+            if ($results['inventory_copied'] > 0) {
+                $message[] = "{$results['inventory_copied']} tình trạng phòng";
+            }
+            if ($results['restrictions_copied'] > 0) {
+                $message[] = "{$results['restrictions_copied']} hạn chế";
+            }
+
+            $successMessage = count($message) > 0
+                ? "Successfully copied " . implode(', ', $message)
+                : "Copy operation completed";
+
+            return $this->successResponse($results, $successMessage);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to copy data',
                 'error' => $e->getMessage()
             ], 500);
         }

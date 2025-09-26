@@ -99,8 +99,8 @@ class Hotel_Management_Extension
 
         // Menu chính
         add_menu_page(
-            'Hotel Management',
-            'Hotel Management',
+            __('Quản Lý Khách Sạn', 'hotel'),
+            __('Quản Lý Khách Sạn', 'hotel'),
             'manage_options',
             'hotel-dashboard',
             array($this, 'dashboard_page'),
@@ -111,8 +111,8 @@ class Hotel_Management_Extension
         // Submenu
         add_submenu_page(
             'hotel-dashboard',
-            'Dashboard',
-            'Dashboard',
+            __('Bảng Điều Khiển', 'hotel'),
+            __('Bảng Điều Khiển', 'hotel'),
             'manage_options',
             'hotel-dashboard',
             array($this, 'dashboard_page')
@@ -120,8 +120,8 @@ class Hotel_Management_Extension
 
         add_submenu_page(
             'hotel-dashboard',
-            'Bookings',
-            'Bookings',
+            __('Đặt Phòng', 'hotel'),
+            __('Đặt Phòng', 'hotel'),
             'manage_options',
             'hotel-bookings',
             array($this, 'bookings_page')
@@ -129,8 +129,8 @@ class Hotel_Management_Extension
 
         add_submenu_page(
             'hotel-dashboard',
-            'Room Rates',
-            'Room Rates',
+            __('Giá Phòng', 'hotel'),
+            __('Giá Phòng', 'hotel'),
             'manage_options',
             'hotel-room-rates',
             array($this, 'room_rates_page')
@@ -138,8 +138,8 @@ class Hotel_Management_Extension
 
         add_submenu_page(
             'hotel-dashboard',
-            'Promotions',
-            'Promotions',
+            __('Khuyến Mãi', 'hotel'),
+            __('Khuyến Mãi', 'hotel'),
             'manage_options',
             'hotel-promotions',
             array($this, 'promotions_page')
@@ -198,6 +198,13 @@ class Hotel_Management_Extension
                 '2.0.0'
             );
 
+            wp_enqueue_style(
+                'hme-room-management-css',
+                HME_PLUGIN_URL . 'assets/css/room-management.css',
+                array(),
+                '2.0.0'
+            );
+
             // Localize script với config
             wp_localize_script('hme-room-management-js', 'hme_admin', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
@@ -205,10 +212,21 @@ class Hotel_Management_Extension
                 'blog_id' => get_current_blog_id(),
                 'api_configured' => $this->is_api_configured(),
                 'strings' => array(
-                    'confirm_delete' => 'Are you sure you want to delete this item?',
-                    'loading' => 'Loading...',
-                    'error' => 'An error occurred. Please try again.',
-                    'success' => 'Operation completed successfully.'
+                    'confirm_delete' => __('Bạn có chắc chắn muốn xóa mục này không?', 'hotel'),
+                    'loading' => __('Đang tải...', 'hotel'),
+                    'error' => __('Đã xảy ra lỗi. Vui lòng thử lại.', 'hotel'),
+                    'success' => __('Thao tác hoàn thành thành công.', 'hotel'),
+                    'please_select_room_type' => __('Vui lòng chọn loại phòng', 'hotel'),
+                    'failed_to_load' => __('Không thể tải dữ liệu', 'hotel'),
+                    'updated_successfully' => __('Cập nhật thành công', 'hotel'),
+                    'failed_to_update' => __('Cập nhật thất bại', 'hotel'),
+                    'bulk_update_failed' => __('Cập nhật hàng loạt thất bại', 'hotel'),
+                    'copy_rates_coming_soon' => __('Chức năng sao chép giá sẽ có sớm...', 'hotel'),
+                    'rate_updated_successfully' => __('Giá phòng đã được cập nhật thành công', 'hotel'),
+                    'inventory_updated_successfully' => __('Tồn kho đã được cập nhật thành công', 'hotel'),
+                    'failed_to_toggle_availability' => __('Không thể thay đổi trạng thái phòng', 'hotel'),
+                    'room_opened_successfully' => __('Phòng đã được mở thành công', 'hotel'),
+                    'room_closed_successfully' => __('Phòng đã được đóng thành công', 'hotel')
                 )
             ));
         }

@@ -3,7 +3,6 @@
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\HotelController;
 use App\Http\Controllers\Api\PromotionController;
-use App\Http\Controllers\Api\RoomInventoryController;
 use App\Http\Controllers\Api\RoomRateController;
 use App\Http\Controllers\Api\RoomManagementController;
 use Illuminate\Http\Request;
@@ -25,11 +24,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::middleware(['auth.api_token'])->group(function () {
-    Route::put('/sync/hotels', [SyncController::class, 'updateHotel']);
-    Route::put('/sync/rooms', [SyncController::class, 'updateRooms']);
-    //get list
-    Route::get('/sync/room-types', [HotelController::class, 'getRooms']);
-    Route::get('/sync/room-rates', [HotelController::class, 'getRoomRates']);
+    Route::prefix('sync')->group(function () {
+        Route::put('/hotels', [SyncController::class, 'updateHotel']);
+        Route::put('/rooms', [SyncController::class, 'updateRooms']);
+        //get list
+        Route::get('/roomtypes', [HotelController::class, 'getRooms']);
+        Route::get('/room-rates', [HotelController::class, 'getRoomRates']);
+    });
     //promotion
     Route::prefix('sync/promotions')->group(function () {
         Route::get('/check-code', [PromotionController::class, 'generateCode']);
@@ -47,9 +48,6 @@ Route::middleware(['auth.api_token'])->group(function () {
     //booking
     Route::get('/sync/dashboard/stats', [BookingController::class, 'getDashboardStats']);
     Route::post('/hotel/find-rooms', [BookingController::class, 'getAvailableRoomCombinations']);
-    //inventory
-    Route::get('/room-inventories', [RoomInventoryController::class, 'index']);
-    Route::post('/room-inventories', [RoomInventoryController::class, 'storeOrUpdate']);
 
     // Room Management - Combined API for Rates & Inventory
     Route::prefix('sync/room-management')->group(function () {
@@ -59,12 +57,11 @@ Route::middleware(['auth.api_token'])->group(function () {
         // Rate management
         Route::post('/rates', [RoomManagementController::class, 'updateRate']);
         Route::post('/rates/bulk', [RoomManagementController::class, 'bulkUpdateRates']);
-        Route::post('/rates/copy', [RoomManagementController::class, 'copyRates']);
-
         // Inventory management
         Route::post('/inventory', [RoomManagementController::class, 'updateInventory']);
         Route::post('/inventory/bulk', [RoomManagementController::class, 'bulkUpdateInventory']);
-        Route::post('/inventory/copy', [RoomManagementController::class, 'copyInventory']);
+        // Bulk copy operations
+        Route::post('/copy-all', [RoomManagementController::class, 'copyAll']);
 
         // Combined operations
         Route::post('/update-both', [RoomManagementController::class, 'updateBoth']);
@@ -75,6 +72,14 @@ Route::middleware(['auth.api_token'])->group(function () {
 
         // Statistics
         Route::get('/statistics', [RoomManagementController::class, 'getStatistics']);
+
+        // Rate Templates
+        Route::get('/templates', [RoomManagementController::class, 'getTemplates']);
+        Route::post('/templates', [RoomManagementController::class, 'createTemplate']);
+        Route::get('/templates/{id}', [RoomManagementController::class, 'getTemplate']);
+        Route::put('/templates/{id}', [RoomManagementController::class, 'updateTemplate']);
+        Route::delete('/templates/{id}', [RoomManagementController::class, 'deleteTemplate']);
+        Route::post('/apply-template', [RoomManagementController::class, 'applyTemplate']);
     });
 });
 // GET /api/room-rates: Lấy danh sách giá phòng.

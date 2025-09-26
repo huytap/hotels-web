@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Enums\PromotionType;
 use App\Models\Hotel;
 use App\Models\Roomtype;
-use App\Models\RoomInventory;
 use App\Models\RoomRate;
 use App\Models\Promotion;
 use Carbon\Carbon;
@@ -98,14 +97,14 @@ class BookingService
         $period = CarbonPeriod::create($checkIn, '1 day', $endDate);
 
         foreach ($period as $date) {
-            $inventory = RoomInventory::where('roomtype_id', $roomTypeId)
+            $roomRate = RoomRate::where('roomtype_id', $roomTypeId)
                 ->where('date', $date->toDateString())
                 ->first();
 
-            if (!$inventory || $inventory->is_available === false) {
+            if (!$roomRate || $roomRate->is_available === false) {
                 return 0;
             } else {
-                $available = $inventory->total_for_sale - $inventory->booked_rooms;
+                $available = $roomRate->available_rooms;
             }
             if ($available < $minAvailable) {
                 $minAvailable = $available;

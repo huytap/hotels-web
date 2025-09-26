@@ -549,48 +549,7 @@ class HME_Promotion_Manager
             return;
         }
 
-        // Validate required fields
-        // $required_fields = ['code', 'title', 'discount_type', 'discount_value', 'start_date', 'end_date'];
-        // foreach ($required_fields as $field) {
-        //     if (empty($_POST[$field])) {
-        //         wp_send_json_error("Field {$field} is required");
-        //         return;
-        //     }
-        // }
-
-        // Sanitize data
-        // $promotion_data = array(
-        //     'promotion_code' => strtoupper(sanitize_text_field($_POST['promotion_code'])),
-        //     'title' => sanitize_text_field($_POST['title']),
-        //     'description' => sanitize_textarea_field($_POST['description'] ?? ''),
-        //     'discount_type' => sanitize_text_field($_POST['discount_type']), // 'percentage', 'fixed', 'free_nights'
-        //     'discount_value' => floatval($_POST['discount_value']),
-        //     'start_date' => sanitize_text_field($_POST['start_date']),
-        //     'end_date' => sanitize_text_field($_POST['end_date']),
-        //     'min_nights' => isset($_POST['min_nights']) ? intval($_POST['min_nights']) : 1,
-        //     'min_amount' => isset($_POST['min_amount']) ? floatval($_POST['min_amount']) : 0,
-        //     'max_discount' => isset($_POST['max_discount']) ? floatval($_POST['max_discount']) : 0,
-        //     'usage_limit' => isset($_POST['usage_limit']) ? intval($_POST['usage_limit']) : 0,
-        //     'usage_per_customer' => isset($_POST['usage_per_customer']) ? intval($_POST['usage_per_customer']) : 1,
-        //     'applicable_room_types' => isset($_POST['applicable_room_types']) ? array_map('intval', $_POST['applicable_room_types']) : [],
-        //     'applicable_days' => isset($_POST['applicable_days']) ? array_map('sanitize_text_field', $_POST['applicable_days']) : [],
-        //     'advance_booking_days' => isset($_POST['advance_booking_days']) ? intval($_POST['advance_booking_days']) : 0,
-        //     'blackout_dates' => isset($_POST['blackout_dates']) ? array_map('sanitize_text_field', $_POST['blackout_dates']) : [],
-        //     'is_active' => isset($_POST['is_active']) ? (bool)$_POST['is_active'] : true,
-        //     'is_combinable' => isset($_POST['is_combinable']) ? (bool)$_POST['is_combinable'] : false
-        // );
-
-        // Validate promotion data
-        // $validation_errors = self::validate_promotion_data($_POST);
-        // if (!empty($validation_errors)) {
-        //     wp_send_json_error(implode(', ', $validation_errors));
-        //     return;
-        // }
         // Gọi API để tạo promotion
-        // $data = $_POST;
-        // $data['is_active'] = $_POST['is_active'] ?? 1;
-        // print_r($_POST);
-        // die;
         $response = callApi('promotions', 'POST', $_POST);
         $result = handle_api_response($response);
 
@@ -616,87 +575,6 @@ class HME_Promotion_Manager
             return;
         }
 
-        // $promotion_id = intval($_POST['promotion_id']);
-        // if (empty($promotion_id)) {
-        //     wp_send_json_error('Promotion ID is required');
-        //     return;
-        // }
-
-        // // Sanitize data (similar to create but for update)
-        // $promotion_data = array();
-
-        // // Only update fields that are provided
-        // if (isset($_POST['title'])) {
-        //     $promotion_data['title'] = sanitize_text_field($_POST['title']);
-        // }
-
-        // if (isset($_POST['description'])) {
-        //     $promotion_data['description'] = sanitize_textarea_field($_POST['description']);
-        // }
-
-        // if (isset($_POST['discount_value'])) {
-        //     $promotion_data['discount_value'] = floatval($_POST['discount_value']);
-        // }
-
-        // if (isset($_POST['start_date'])) {
-        //     $promotion_data['start_date'] = sanitize_text_field($_POST['start_date']);
-        // }
-
-        // if (isset($_POST['end_date'])) {
-        //     $promotion_data['end_date'] = sanitize_text_field($_POST['end_date']);
-        // }
-
-        // if (isset($_POST['min_nights'])) {
-        //     $promotion_data['min_nights'] = intval($_POST['min_nights']);
-        // }
-
-        // if (isset($_POST['min_amount'])) {
-        //     $promotion_data['min_amount'] = floatval($_POST['min_amount']);
-        // }
-
-        // if (isset($_POST['max_discount'])) {
-        //     $promotion_data['max_discount'] = floatval($_POST['max_discount']);
-        // }
-
-        // if (isset($_POST['usage_limit'])) {
-        //     $promotion_data['usage_limit'] = intval($_POST['usage_limit']);
-        // }
-
-        // if (isset($_POST['usage_per_customer'])) {
-        //     $promotion_data['usage_per_customer'] = intval($_POST['usage_per_customer']);
-        // }
-
-        // if (isset($_POST['applicable_room_types'])) {
-        //     $promotion_data['applicable_room_types'] = array_map('intval', $_POST['applicable_room_types']);
-        // }
-
-        // if (isset($_POST['applicable_days'])) {
-        //     $promotion_data['applicable_days'] = array_map('sanitize_text_field', $_POST['applicable_days']);
-        // }
-
-        // if (isset($_POST['advance_booking_days'])) {
-        //     $promotion_data['advance_booking_days'] = intval($_POST['advance_booking_days']);
-        // }
-
-        // if (isset($_POST['blackout_dates'])) {
-        //     $promotion_data['blackout_dates'] = array_map('sanitize_text_field', $_POST['blackout_dates']);
-        // }
-
-        // if (isset($_POST['is_active'])) {
-        //     $promotion_data['is_active'] = (bool)$_POST['is_active'];
-        // }
-
-        // if (isset($_POST['is_combinable'])) {
-        //     $promotion_data['is_combinable'] = (bool)$_POST['is_combinable'];
-        // }
-
-        // // Validate if dates are provided
-        // if (isset($promotion_data['start_date']) && isset($promotion_data['end_date'])) {
-        //     if (strtotime($promotion_data['end_date']) <= strtotime($promotion_data['start_date'])) {
-        //         wp_send_json_error('End date must be after start date');
-        //         return;
-        //     }
-        // }
 
         // Gọi API
         $response = callApi("promotions/{$promotionId}", 'PUT', $_POST);
