@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Booking;
 use App\Models\BookingDetail;
+use App\Models\RoomType;
+use App\Models\Promotion;
 use Illuminate\Http\Request;
 use App\Helpers\HotelHelper;
 use Illuminate\Support\Facades\Validator;
 use App\Services\BookingService;
 use Illuminate\Http\JsonResponse;
+use Carbon\Carbon;
 
 class BookingController extends BaseApiController
 {

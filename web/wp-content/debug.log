@@ -448,3 +448,71 @@
 [26-Sep-2025 01:58:50 UTC] API Call success: GET promotions - HTTP 200
 [26-Sep-2025 01:59:23 UTC] API Call success: GET roomtypes - HTTP 200
 [26-Sep-2025 01:59:24 UTC] API Call success: GET promotions/4 - HTTP 200
+[26-Sep-2025 02:02:56 UTC] API Call success: PUT promotions/4 - HTTP 200
+[26-Sep-2025 02:02:56 UTC] Automatic updates starting...
+[26-Sep-2025 02:02:59 UTC] Automatic updates complete.
+[26-Sep-2025 02:02:59 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 02:03:01 UTC] API Call success: GET promotions/4 - HTTP 200
+[26-Sep-2025 02:03:12 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:03:16 UTC] API Call success: PUT promotions/0 - HTTP 404
+[26-Sep-2025 02:03:16 UTC] API returned error: HTTP 404 - No query results for model [App\Models\Promotion] 0
+[26-Sep-2025 02:08:58 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:09:06 UTC] API Call success: GET promotions/4 - HTTP 200
+[26-Sep-2025 02:09:26 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 02:09:27 UTC] API Call success: GET promotions/4 - HTTP 200
+[26-Sep-2025 02:09:34 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:09:40 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 02:09:41 UTC] API Call success: GET promotions/4 - HTTP 200
+[26-Sep-2025 02:09:48 UTC] API Call success: PUT promotions/4 - HTTP 200
+[26-Sep-2025 02:09:51 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 02:09:52 UTC] API Call success: GET promotions/4 - HTTP 200
+[26-Sep-2025 02:09:57 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:10:03 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 02:10:09 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:31:30 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:31:34 UTC] API Call success: GET dashboard/stats - HTTP 200
+[26-Sep-2025 02:31:37 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 02:32:06 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 02:32:09 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:32:14 UTC] API Call success: PUT promotions/0 - HTTP 404
+[26-Sep-2025 02:32:14 UTC] API returned error: HTTP 404 - No query results for model [App\Models\Promotion] 0
+[26-Sep-2025 02:35:17 UTC] API Call success: PUT promotions/0 - HTTP 404
+[26-Sep-2025 02:35:17 UTC] API returned error: HTTP 404 - No query results for model [App\Models\Promotion] 0
+[26-Sep-2025 02:40:51 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:40:56 UTC] API Call success: PUT promotions/update-status - HTTP 422
+[26-Sep-2025 02:40:56 UTC] API returned error: HTTP 422
+[26-Sep-2025 02:41:28 UTC] API Call success: PUT promotions/update-status - HTTP 200
+[26-Sep-2025 02:41:29 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:41:41 UTC] API Call success: PUT promotions/update-status - HTTP 422
+[26-Sep-2025 02:41:41 UTC] API returned error: HTTP 422
+[26-Sep-2025 02:41:42 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:41:50 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:42:04 UTC] API Call success: PUT promotions/update-status - HTTP 422
+[26-Sep-2025 02:42:04 UTC] API returned error: HTTP 422
+[26-Sep-2025 02:42:05 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:48:41 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:48:52 UTC] API Call success: PUT promotions/update-status - HTTP 422
+[26-Sep-2025 02:48:52 UTC] API returned error: HTTP 422
+[26-Sep-2025 02:49:49 UTC] API Call success: PUT promotions/update-status - HTTP 422
+[26-Sep-2025 02:49:49 UTC] API returned error: HTTP 422
+[26-Sep-2025 02:49:51 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:50:23 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:50:28 UTC] API Call success: PUT promotions/update-status - HTTP 200
+[26-Sep-2025 02:51:20 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:51:29 UTC] API Call success: PUT promotions/update-status - HTTP 200
+[26-Sep-2025 02:51:41 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:55:02 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:57:53 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 02:58:39 UTC] API Call success: PUT promotions/update-status - HTTP 200
+[26-Sep-2025 03:00:34 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 03:00:41 UTC] API Call success: PUT promotions/update-status - HTTP 200
+[26-Sep-2025 03:01:50 UTC] API Call success: PUT promotions/update-status - HTTP 200
+[26-Sep-2025 03:01:51 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 03:02:39 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 03:02:45 UTC] API Call success: PUT promotions/update-status - HTTP 200
+[26-Sep-2025 03:02:46 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 03:03:39 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 03:03:50 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 03:04:04 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 03:04:12 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 03:04:18 UTC] API Call success: GET promotions - HTTP 200

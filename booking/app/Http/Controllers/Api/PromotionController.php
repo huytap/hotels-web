@@ -34,8 +34,7 @@ class PromotionController extends BaseApiController
             'per_page' => 'nullable|integer|min:1|max:100',
             'status' => 'nullable|string|in:active,inactive',
             'search' => 'nullable|string',
-            'type' => 'nullable|string',
-            'wp_id' => 'required|integer',
+            'type' => 'nullable|string'
         ]);
 
         if ($validator->fails()) {
@@ -363,10 +362,10 @@ class PromotionController extends BaseApiController
 
             DB::commit();
 
-            return response()->json(['message' => 'Promotion statuses updated successfully.', 'updated_count' => $updatedCount], 200);
+            return $this->successResponse(['updated_count' => $updatedCount], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'An error occurred while updating the promotion statuses.', 'message' => $e->getMessage()], 500);
+            return $this->errorResponse(['message' => $e->getMessage()], 500);
         }
     }
     public function generateCode(Request $request): JsonResponse

@@ -207,30 +207,30 @@ $promotion_statuses = HME_Promotion_Manager::get_promotion_statuses();
 <div id="promotion-status-modal" class="hme-modal" style="display: none;">
     <div class="hme-modal-content hme-modal-small">
         <div class="hme-modal-header">
-            <h3>Change Promotion Status</h3>
+            <h3><?php _e('Thay đổi trạng thái', 'hotel'); ?></h3>
             <span class="hme-modal-close">&times;</span>
         </div>
-        <div class="hme-modal-body">
-            <form id="promotion-status-form">
+        <form id="promotion-status-form">
+            <div class="hme-modal-body">
                 <input type="hidden" id="status-promotion-id">
                 <table class="form-table">
                     <tr>
-                        <th><label for="promotion-is-active">Status:</label></th>
+                        <th><label for="promotion-is-active"><?php _e('Trạng thái', 'hotel'); ?>:</label></th>
                         <td>
                             <label>
                                 <input type="checkbox" id="promotion-is-active" name="is_active">
-                                Active
+                                <?php _e('Kích hoạt', 'hotel'); ?>
                             </label>
-                            <p class="description">Inactive promotions cannot be used by customers.</p>
+                            <p class="description"><?php _e('Các chương trình khuyến mãi không hoạt động (hoặc bị vô hiệu hóa) không thể được khách hàng sử dụng.', 'hotel'); ?></p>
                         </td>
                     </tr>
                 </table>
-            </form>
-        </div>
-        <div class="hme-modal-footer">
-            <button type="button" class="button hme-modal-close">Cancel</button>
-            <button type="submit" form="promotion-status-form" class="button button-primary">Update Status</button>
-        </div>
+            </div>
+            <div class="hme-modal-footer">
+                <button type="button" class="button hme-modal-close"><?php _e('Hủy', 'hotel'); ?></button>
+                <button type="submit" form="promotion-status-form" class="button button-primary"><?php _e('Cập nhật', 'hotel'); ?></button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -539,7 +539,7 @@ $promotion_statuses = HME_Promotion_Manager::get_promotion_statuses();
                         </th>
                         <td class="column-code">
                             <strong>${promotion.promotion_code}</strong>
-                            <div class="row-actions visible">
+                            <div class="row visible">
                                 <span class="view">
                                     <a href="#" class="view-promotion" data-id="${promotion.id}">View</a> |
                                 </span>
@@ -843,31 +843,31 @@ $promotion_statuses = HME_Promotion_Manager::get_promotion_statuses();
         }
 
         function showPromotionStatusModal(promotionId, currentStatus) {
+            const isChecked = !!currentStatus;
             $('#status-promotion-id').val(promotionId);
-            $('#promotion-is-active').prop('checked', currentStatus);
+            $('#promotion-is-active').prop('checked', isChecked);
             $('#promotion-status-modal').show();
         }
 
         function updatePromotionStatus() {
             const promotionId = $('#status-promotion-id').val();
-            const isActive = $('#promotion-is-active').prop('checked');
-
+            const isActive = +$('#promotion-is-active').prop('checked');
             $.ajax({
                 url: hme_admin.ajax_url,
                 type: 'POST',
                 data: {
-                    action: 'hme_update_promotion',
+                    action: 'hme_update_status_promotion',
                     nonce: hme_admin.nonce,
-                    promotion_id: promotionId,
+                    promotion_ids: [promotionId],
                     is_active: isActive
                 },
                 success: function(response) {
                     if (response.success) {
                         $('#promotion-status-modal').hide();
-                        showSuccess('Promotion status updated successfully');
+                        showSuccess('<?php _e('Cập nhật trạng thái thành công', 'hotel'); ?>');
                         loadPromotions(); // Reload table
                     } else {
-                        showError('Failed to update status: ' + response.data);
+                        showError('<?php _e('Cập nhật trạng thái thất bại', 'hotel'); ?>: ' + response.data);
                     }
                 },
                 error: function() {
@@ -1066,47 +1066,30 @@ $promotion_statuses = HME_Promotion_Manager::get_promotion_statuses();
         }
 
         // Utility functions
+        // Use shared utility functions from HME_Utils
         function formatCurrency(amount) {
-            return new Intl.NumberFormat('vi-VN').format(amount) + ' VNĐ';
+            return HME_Utils.formatCurrency(amount);
         }
 
         function formatDate(dateString) {
-            return new Date(dateString).toLocaleDateString('vi-VN');
+            return HME_Utils.formatDate(dateString);
         }
 
         function formatDateTime(dateString) {
-            return new Date(dateString).toLocaleString('vi-VN');
+            return HME_Utils.formatDateTime(dateString);
         }
 
         function formatDiscountValue(type, value) {
-            switch (type) {
-                case 'percentage':
-                    return value + '%';
-                case 'fixed':
-                    return formatCurrency(value);
-                case 'free_nights':
-                    return value + ' free night' + (value > 1 ? 's' : '');
-                default:
-                    return value;
-            }
-        }
-
-        function getPromotionTypeLabel(type) {
-            const types = {
-                'percentage': 'Percentage Discount',
-                'fixed': 'Fixed Amount Discount',
-                'free_nights': 'Free Nights'
-            };
-            return types[type] || type;
+            return HME_Utils.formatDiscountValue(type, value);
         }
 
         function getPromotionStatusLabel(status) {
             const statuses = {
-                0: 'Inactive',
-                1: 'Active',
-                2: 'Expired',
-                3: 'Upcoming',
-                4: 'Used Up'
+                0: 'Không hoạt động',
+                1: 'Hoạt động',
+                2: 'Hết hạn',
+                3: 'Sắp diễn ra',
+                4: 'Đã hết lượt'
             };
             return statuses[status] || status;
         }
@@ -1170,28 +1153,17 @@ $promotion_statuses = HME_Promotion_Manager::get_promotion_statuses();
             return validDays;
         }
 
+        // Use shared notification functions
         function showNotice(message, type) {
-            const noticeClass = type === 'success' ? 'notice-success' : 'notice-error';
-            const notice = $(`
-            <div class="notice ${noticeClass} is-dismissible">
-                <p>${message}</p>
-                <button type="button" class="notice-dismiss">
-                    <span class="screen-reader-text">Dismiss this notice.</span>
-                </button>
-            </div>
-        `);
+            HME_Utils.showNotice(message, type);
+        }
 
-            $('.wrap h1').after(notice);
+        function showSuccess(message) {
+            HME_Utils.showSuccess(message);
+        }
 
-            // Auto dismiss after 5 seconds
-            setTimeout(() => {
-                notice.fadeOut(() => notice.remove());
-            }, 5000);
-
-            // Manual dismiss
-            notice.find('.notice-dismiss').on('click', function() {
-                notice.fadeOut(() => notice.remove());
-            });
+        function showError(message) {
+            HME_Utils.showError(message);
         }
     });
 </script>

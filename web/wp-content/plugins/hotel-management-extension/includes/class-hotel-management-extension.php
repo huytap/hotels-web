@@ -169,17 +169,25 @@ class Hotel_Management_Extension
             wp_enqueue_style('jquery-ui-css', 'https://code.jquery.com/ui/1.13.2/themes/ui-lightness/jquery-ui.css');
 
             // Plugin scripts
+            // Utility functions first (as dependency for other scripts)
+            wp_enqueue_script(
+                'hme-utils-js',
+                HME_PLUGIN_URL . 'assets/js/hme-utils.js',
+                array('jquery'),
+                '2.0.0',
+                true
+            );
             wp_enqueue_script(
                 'hme-room-management-js',
                 HME_PLUGIN_URL . 'assets/js/room-management.js',
-                array('jquery', 'jquery-ui-datepicker', 'jquery-ui-dialog'),
+                array('jquery', 'jquery-ui-datepicker', 'jquery-ui-dialog', 'hme-utils-js'),
                 '2.0.0',
                 true
             );
             wp_enqueue_script(
                 'hme-admin-js',
                 HME_PLUGIN_URL . 'assets/js/admin.js',
-                array('jquery'),
+                array('jquery', 'hme-utils-js'),
                 '2.0.0',
                 true
             );
@@ -248,6 +256,7 @@ class Hotel_Management_Extension
         add_action('wp_ajax_hme_get_promotions', array('HME_Promotion_Manager', 'ajax_get_promotions'));
         add_action('wp_ajax_hme_create_promotion', array('HME_Promotion_Manager', 'ajax_create_promotion'));
         add_action('wp_ajax_hme_update_promotion', array('HME_Promotion_Manager', 'ajax_update_promotion'));
+        add_action('wp_ajax_hme_update_status_promotion', array('HME_Promotion_Manager', 'ajax_update_status_promotion'));
         add_action('wp_ajax_hme_delete_promotion', array('HME_Promotion_Manager', 'ajax_delete_promotion'));
         add_action('wp_ajax_hme_get_promotion', array('HME_Promotion_Manager', 'ajax_get_promotion'));
         add_action('wp_ajax_hme_validate_promotion', array('HME_Promotion_Manager', 'ajax_validate_promotion'));

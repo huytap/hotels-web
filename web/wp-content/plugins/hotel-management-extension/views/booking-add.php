@@ -734,61 +734,37 @@ $room_types = HME_Room_Rate_Manager::get_room_types();
             return Math.ceil((end - start) / (1000 * 60 * 60 * 24));
         }
 
+        // Use shared utility functions from HME_Utils
         function formatCurrency(amount) {
-            return new Intl.NumberFormat('vi-VN').format(amount) + ' VNĐ';
+            return HME_Utils.formatCurrency(amount);
         }
 
         function formatDate(dateString) {
-            return new Date(dateString).toLocaleDateString('vi-VN');
+            return HME_Utils.formatDate(dateString);
         }
 
         function isValidEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            return HME_Utils.isValidEmail(email);
         }
 
         function showFieldError($field, message) {
-            $field.addClass('error');
-            let $error = $field.next('.field-error');
-            if ($error.length === 0) {
-                $error = $('<p class="field-error"></p>');
-                $field.after($error);
-            }
-            $error.text(message);
+            HME_Utils.showFieldError($field, message);
         }
 
         function clearFieldError($field) {
-            $field.removeClass('error');
-            $field.next('.field-error').remove();
+            HME_Utils.clearFieldError($field);
         }
 
         function showSuccess(message) {
-            showNotice(message, 'success');
+            HME_Utils.showSuccess(message);
         }
 
         function showError(message) {
-            showNotice(message, 'error');
+            HME_Utils.showError(message);
         }
 
         function showNotice(message, type) {
-            const noticeClass = type === 'success' ? 'notice-success' : 'notice-error';
-            const notice = $(`
-            <div class="notice ${noticeClass} is-dismissible">
-                <p>${message}</p>
-                <button type="button" class="notice-dismiss">
-                    <span class="screen-reader-text">Dismiss this notice.</span>
-                </button>
-            </div>
-        `);
-
-            $('.wrap h1').after(notice);
-
-            setTimeout(() => {
-                notice.fadeOut(() => notice.remove());
-            }, 5000);
-
-            notice.find('.notice-dismiss').on('click', function() {
-                notice.fadeOut(() => notice.remove());
-            });
+            HME_Utils.showNotice(message, type);
         }
     });
 </script>

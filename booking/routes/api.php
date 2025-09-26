@@ -49,6 +49,17 @@ Route::middleware(['auth.api_token'])->group(function () {
     Route::get('/sync/dashboard/stats', [BookingController::class, 'getDashboardStats']);
     Route::post('/hotel/find-rooms', [BookingController::class, 'getAvailableRoomCombinations']);
 
+    // Booking CRUD operations
+    Route::prefix('bookings')->group(function () {
+        Route::get('/', [BookingController::class, 'index']);
+        Route::post('/', [BookingController::class, 'store']);
+        Route::get('/{id}', [BookingController::class, 'show']);
+        Route::put('/{id}', [BookingController::class, 'update']);
+        Route::delete('/{id}', [BookingController::class, 'destroy']);
+        Route::patch('/{id}/status', [BookingController::class, 'updateStatus']);
+        Route::get('/{id}/pricing', [BookingController::class, 'getPricing']);
+    });
+
     // Room Management - Combined API for Rates & Inventory
     Route::prefix('sync/room-management')->group(function () {
         // Calendar data (rates + inventory combined)

@@ -695,38 +695,25 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
         }
 
         // Utility functions
+        // Use shared utility functions from HME_Utils
         function formatCurrency(amount) {
-            return new Intl.NumberFormat('vi-VN').format(amount) + ' VNĐ';
+            return HME_Utils.formatCurrency(amount);
         }
 
         function formatDate(dateString) {
-            return new Date(dateString).toLocaleDateString('vi-VN');
+            return HME_Utils.formatDate(dateString);
         }
 
         function formatDateTime(dateString) {
-            return new Date(dateString).toLocaleString('vi-VN');
+            return HME_Utils.formatDateTime(dateString);
         }
 
         function getStatusClass(status) {
-            const classes = {
-                pending: 'hme-status-pending',
-                confirmed: 'hme-status-confirmed',
-                cancelled: 'hme-status-cancelled',
-                completed: 'hme-status-completed',
-                no_show: 'hme-status-no-show'
-            };
-            return classes[status] || 'hme-status-unknown';
+            return HME_Utils.getStatusClass(status);
         }
 
         function getStatusLabel(status) {
-            const labels = {
-                pending: 'Chờ xác nhận',
-                confirmed: 'Đã xác nhận',
-                cancelled: 'Đã hủy',
-                completed: 'Hoàn thành',
-                no_show: 'Không đến'
-            };
-            return labels[status] || status;
+            return HME_Utils.getStatusLabel(status);
         }
 
         function getEditUrl(bookingId) {
@@ -734,43 +721,23 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
         }
 
         function showLoading() {
-            $('#hme-loading').show();
+            HME_Utils.showLoading();
         }
 
         function hideLoading() {
-            $('#hme-loading').hide();
+            HME_Utils.hideLoading();
         }
 
         function showSuccess(message) {
-            showNotice(message, 'success');
+            HME_Utils.showSuccess(message);
         }
 
         function showError(message) {
-            showNotice(message, 'error');
+            HME_Utils.showError(message);
         }
 
         function showNotice(message, type) {
-            const noticeClass = type === 'success' ? 'notice-success' : 'notice-error';
-            const notice = $(`
-            <div class="notice ${noticeClass} is-dismissible">
-                <p>${message}</p>
-                <button type="button" class="notice-dismiss">
-                    <span class="screen-reader-text">Dismiss this notice.</span>
-                </button>
-            </div>
-        `);
-
-            $('.wrap h1').after(notice);
-
-            // Auto dismiss after 5 seconds
-            setTimeout(() => {
-                notice.fadeOut(() => notice.remove());
-            }, 5000);
-
-            // Manual dismiss
-            notice.find('.notice-dismiss').on('click', function() {
-                notice.fadeOut(() => notice.remove());
-            });
+            HME_Utils.showNotice(message, type);
         }
     });
 </script>

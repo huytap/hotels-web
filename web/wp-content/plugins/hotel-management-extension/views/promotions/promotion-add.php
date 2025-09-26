@@ -193,72 +193,55 @@ $current_lang = get_locale();
 include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
 ?>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('add-promotion-form');
-        const promotionCodeInput = document.getElementById('promotion_code');
-        const generateCodeBtn = document.getElementById('generate-code-btn');
+    jQuery(document).ready(function($) {
+        const form = $('#add-promotion-form');
 
         // Weekday selection buttons
-        document.getElementById('select-all-days').addEventListener('click', function() {
-            document.querySelectorAll('input[name^="valid_"]').forEach(checkbox => {
-                checkbox.checked = true;
-            });
+        $('#select-all-days').on('click', function() {
+            $('input[name^="valid_"]').prop('checked', true);
         });
 
-        document.getElementById('select-weekdays-only').addEventListener('click', function() {
-            document.querySelectorAll('input[name^="valid_"]').forEach(checkbox => {
-                checkbox.checked = false;
-            });
+        $('#select-weekdays-only').on('click', function() {
+            $('input[name^="valid_"]').prop('checked', false);
             // Monday to Friday
-            document.querySelector('input[name="valid_monday"]').checked = true;
-            document.querySelector('input[name="valid_tuesday"]').checked = true;
-            document.querySelector('input[name="valid_wednesday"]').checked = true;
-            document.querySelector('input[name="valid_thursday"]').checked = true;
-            document.querySelector('input[name="valid_friday"]').checked = true;
+            $('input[name="valid_monday"], input[name="valid_tuesday"], input[name="valid_wednesday"], input[name="valid_thursday"], input[name="valid_friday"]').prop('checked', true);
         });
 
-        document.getElementById('select-weekend-only').addEventListener('click', function() {
-            document.querySelectorAll('input[name^="valid_"]').forEach(checkbox => {
-                checkbox.checked = false;
-            });
+        $('#select-weekend-only').on('click', function() {
+            $('input[name^="valid_"]').prop('checked', false);
             // Saturday and Sunday
-            document.querySelector('input[name="valid_saturday"]').checked = true;
-            document.querySelector('input[name="valid_sunday"]').checked = true;
+            $('input[name="valid_saturday"], input[name="valid_sunday"]').prop('checked', true);
         });
 
         // Blackout date validation
-        document.getElementById('blackout_start_date').addEventListener('change', function() {
-            const startDate = this.value;
-            const endDateInput = document.getElementById('blackout_end_date');
+        $('#blackout_start_date').on('change', function() {
+            const startDate = $(this).val();
             if (startDate) {
-                endDateInput.min = startDate;
+                $('#blackout_end_date').attr('min', startDate);
             }
         });
 
-        document.getElementById('blackout_end_date').addEventListener('change', function() {
-            const endDate = this.value;
-            const startDateInput = document.getElementById('blackout_start_date');
+        $('#blackout_end_date').on('change', function() {
+            const endDate = $(this).val();
             if (endDate) {
-                startDateInput.max = endDate;
+                $('#blackout_start_date').attr('max', endDate);
             }
         });
 
-        // Lắng nghe sự kiện submit của form
-        form.addEventListener('submit', function(event) {
-            // Ngăn chặn việc gửi form mặc định
+        // Form submission
+        form.on('submit', function(event) {
             event.preventDefault();
-            // Gọi hàm xử lý AJAX
             ajax_create_promotion();
         });
+
         /**
-         * Hàm xử lý AJAX để tạo một khuyến mãi mới.
+         * AJAX function to create new promotion
          */
         function ajax_create_promotion() {
-            //showLoading();
-            const form = document.getElementById('add-promotion-form');
-            const formData = new FormData(form);
+            HME_Utils.showLoading();
+            const formData = new FormData(form[0]);
 
-            // Lấy dữ liệu đa ngôn ngữ từ form
+            // Extract multilingual data
             const names = {};
             const descriptions = {};
             for (const [key, value] of formData.entries()) {
@@ -270,11 +253,14 @@ include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
                     descriptions[lang] = value;
                 }
             }
+
+            // Get selected room types
             const selectedRoomtypes = [];
-            document.querySelectorAll('input[name="roomtypes[]"]:checked').forEach(checkbox => {
-                selectedRoomtypes.push(checkbox.value);
+            $('input[name="roomtypes[]"]:checked').each(function() {
+                selectedRoomtypes.push($(this).val());
             });
-            // Tạo đối tượng dữ liệu để gửi đi
+
+            // Prepare data
             const promotionData = {
                 action: 'hme_create_promotion',
                 nonce: hme_admin.nonce,
@@ -291,10 +277,8 @@ include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
                 booking_days_in_advance: formData.get('booking_days_in_advance') || null,
                 is_active: +formData.get('is_active'),
                 roomtypes: selectedRoomtypes,
-                // Blackout dates
                 blackout_start_date: formData.get('blackout_start_date') || null,
                 blackout_end_date: formData.get('blackout_end_date') || null,
-                // Valid weekdays
                 valid_monday: formData.get('valid_monday') ? 1 : 0,
                 valid_tuesday: formData.get('valid_tuesday') ? 1 : 0,
                 valid_wednesday: formData.get('valid_wednesday') ? 1 : 0,
@@ -304,24 +288,22 @@ include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
                 valid_sunday: formData.get('valid_sunday') ? 1 : 0
             };
 
-            // Gửi dữ liệu bằng jQuery.ajax hoặc Fetch API
-            // Ví dụ sử dụng jQuery.ajax()
-            jQuery.ajax({
+            // Send AJAX request
+            $.ajax({
                 url: hme_admin.ajax_url,
                 method: 'POST',
                 data: promotionData,
                 success: function(response) {
-                    //hideLoading();
-                    // Xử lý khi API thành công
+                    HME_Utils.hideLoading();
+                    HME_Utils.showSuccess('Khuyến mãi đã được tạo thành công!');
                     console.log('Promotion created successfully:', response);
-                    // Có thể chuyển hướng người dùng hoặc làm mới trang
-                    //window.location.reload();
+                    // Optional: redirect or reload page
+                    // window.location.reload();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    //hideLoading();
-                    // Xử lý khi có lỗi
+                    HME_Utils.hideLoading();
+                    HME_Utils.showError('Lỗi: Không thể tạo khuyến mãi.');
                     console.error('Error creating promotion:', textStatus, errorThrown);
-                    alert('Lỗi: Không thể tạo khuyến mãi.');
                 }
             });
         }

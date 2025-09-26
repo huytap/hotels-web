@@ -615,6 +615,32 @@ class HME_Promotion_Manager
         }
     }
     /**
+     * AJAX Handler: Cập nhật trạng thái promotion
+     */
+    public static function ajax_update_status_promotion()
+    {
+        $promotionId = 0;
+        if (isset($_POST['id']) && $_POST['id'] > 0) {
+            $promotionId = $_POST['id'];
+        }
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'hme_admin_nonce')) {
+            wp_send_json_error('Invalid nonce');
+            return;
+        }
+
+
+        // Gọi API
+        $response = callApi("promotions/update-status", 'PUT', $_POST);
+        $result = handle_api_response($response);
+
+        if ($result['success']) {
+            wp_send_json_success($result['data']);
+        } else {
+            wp_send_json_error($result['message']);
+        }
+    }
+    /**
      * AJAX Handler: Chi tiết promotion
      */
     public static function ajax_get_promotion()
