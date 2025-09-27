@@ -541,4 +541,144 @@ class HME_Booking_Manager
 
         return $csv_content;
     }
+
+    /**
+     * AJAX Handler: Lấy danh sách room types khả dụng cho booking
+     */
+    public static function ajax_get_available_room_types()
+    {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'hme_admin_nonce')) {
+            wp_send_json_error('Invalid nonce');
+            return;
+        }
+
+        // Sanitize input data
+        $check_in = sanitize_text_field($_POST['check_in']);
+        $check_out = sanitize_text_field($_POST['check_out']);
+        $guests = intval($_POST['guests']);
+
+        // Validate required fields
+        if (empty($check_in) || empty($check_out) || $guests < 1) {
+            wp_send_json_error('Missing required fields: check_in, check_out, guests');
+            return;
+        }
+
+        // Validate date format (YYYY-MM-DD)
+        if (!self::isValidDate($check_in) || !self::isValidDate($check_out)) {
+            wp_send_json_error('Invalid date format. Expected YYYY-MM-DD');
+            return;
+        }
+
+        // Check if check_out is after check_in
+        if (strtotime($check_out) <= strtotime($check_in)) {
+            wp_send_json_error('Check-out date must be after check-in date');
+            return;
+        }
+
+        try {
+            // Call API to get available rooms
+            // wp_id is automatically added by callApi function
+            $data = array(
+                'params' => array(
+                    'check_in' => $check_in,
+                    'check_out' => $check_out,
+                    'adults' => $guests,
+                    'children' => 0 // Default to 0, can be enhanced later
+                )
+            );
+
+            // API path - 'sync' prefix is already configured in WordPress
+            $response = callApi('hotel/find-rooms', 'POST', $data);
+            $result = handle_api_response($response);
+
+            if ($result['success']) {
+                // Transform the data for frontend compatibility
+                $room_types = array();
+
+                // API response could have different structure, handle various formats
+                $data = $result['data'];
+                $rooms_data = array();
+
+                // Check various possible response structures
+                if (isset($data['available_rooms'])) {
+                    $rooms_data = $data['available_rooms'];
+                } elseif (isset($data['room_combinations'])) {
+                    $rooms_data = $data['room_combinations'];
+                } elseif (isset($data['rooms'])) {
+                    $rooms_data = $data['rooms'];
+                } elseif (is_array($data)) {
+                    $rooms_data = $data;
+                }
+
+                foreach ($rooms_data as $room) {
+                    // Handle both nested room_type structure and flat structure
+                    $room_info = $room['room_type'] ?? $room;
+
+                    $room_types[] = array(
+                        'id' => $room_info['id'] ?? $room['room_type_id'] ?? 0,
+                        'name' => $room_info['name'] ?? $room['room_type_name'] ?? $room['title'] ?? 'Unknown Room',
+                        'rate' => $room['base_price'] ?? $room['rate'] ?? $room['price'] ?? $room_info['base_rate'] ?? 0,
+                        'max_guests' => $room_info['adult_capacity'] ?? $room_info['max_guests'] ?? $room['max_guests'] ?? $room['capacity'] ?? $guests,
+                        'description' => $room_info['description'] ?? $room['description'] ?? '',
+                        'available_rooms' => $room['available_count'] ?? $room['available'] ?? 1
+                    );
+                }
+
+                wp_send_json_success($room_types);
+            } else {
+                wp_send_json_error($result['message'] ?? 'Failed to get available rooms');
+            }
+        } catch (Exception $e) {
+            error_log('Error in ajax_get_available_room_types: ' . $e->getMessage());
+
+            // Fallback: Try to get all room types if API fails
+            $fallback_rooms = self::get_fallback_room_types();
+            if (!empty($fallback_rooms)) {
+                wp_send_json_success($fallback_rooms);
+            } else {
+                wp_send_json_error('Failed to get available room types: ' . $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Fallback method to get basic room types when API fails
+     */
+    private static function get_fallback_room_types()
+    {
+        try {
+            // Try to get room types from sync API or local cache
+            $response = callApi('sync/roomtypes', 'GET', array());
+            $result = handle_api_response($response);
+
+            if ($result['success'] && !empty($result['data'])) {
+                $room_types = array();
+                foreach ($result['data'] as $room) {
+                    $room_types[] = array(
+                        'id' => $room['id'],
+                        'name' => $room['title']['vi'] ?? $room['title']['en'] ?? $room['name'] ?? 'Unknown Room',
+                        'rate' => $room['base_rate'] ?? 100000, // Default rate
+                        'max_guests' => $room['max_guests'] ?? 2,
+                        'description' => $room['description'] ?? '',
+                        'available_rooms' => 1 // Assume 1 available
+                    );
+                }
+                return $room_types;
+            }
+        } catch (Exception $e) {
+            error_log('Fallback room types also failed: ' . $e->getMessage());
+        }
+
+        return array(); // Return empty array if everything fails
+    }
+
+    /**
+     * Helper method to validate date format
+     */
+    private static function isValidDate($date, $format = 'Y-m-d')
+    {
+        $d = DateTime::createFromFormat($format, $date);
+        return $d && $d->format($format) === $date;
+    }
 }

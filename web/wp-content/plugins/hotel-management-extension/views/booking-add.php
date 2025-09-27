@@ -404,9 +404,14 @@ $room_types = HME_Room_Rate_Manager::get_room_types();
             const checkOut = $('#check_out').val();
             const guests = $('#guests').val();
 
+            console.log('loadAvailableRooms called:', {checkIn, checkOut, guests});
+
             if (!checkIn || !checkOut || !guests) {
+                console.log('Missing required fields, not loading rooms');
                 return;
             }
+
+            console.log('Loading available rooms for:', {checkIn, checkOut, guests});
 
             $('#room-type-loading').show();
             $('#room_type_id').hide();
@@ -423,17 +428,22 @@ $room_types = HME_Room_Rate_Manager::get_room_types();
                     guests: guests
                 },
                 success: function(response) {
+                    console.log('Room types AJAX response:', response);
                     $('#room-type-loading').hide();
                     $('#room_type_id').show();
 
-                    if (response.success) {
+                    if (response.success && response.data && response.data.length > 0) {
+                        console.log('Available room types:', response.data);
                         populateRoomTypes(response.data);
                     } else {
-                        showError('Failed to load available rooms: ' + response.data);
+                        console.error('Room types error:', response.data);
+                        const errorMsg = response.data || 'No rooms available for selected dates and guest count';
+                        showError('Failed to load available rooms: ' + errorMsg);
                         $('#room_type_id').html('<option value="">No rooms available</option>');
                     }
                 },
-                error: function() {
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error('AJAX Error:', textStatus, errorThrown, jqXHR.responseText);
                     $('#room-type-loading').hide();
                     $('#room_type_id').show();
                     showError('Error loading available rooms');

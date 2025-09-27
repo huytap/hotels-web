@@ -35,6 +35,11 @@ class BookingService
             ->where('adult_capacity', '>=', $adults)
             ->get();
 
+        // Fallback: Return sample data if no valid room types found or corrupted data
+        // if ($roomTypes->isEmpty() || $roomTypes->every(function($rt) { return empty(trim($rt->name)); })) {
+        //     return $this->getSampleRoomCombinations($hotelId, $checkIn, $checkOut, $adults, $children);
+        // }
+
         $availableCombinations = [];
         $numberOfNights = (new Carbon($checkIn))->diffInDays($checkOut);
 
@@ -192,5 +197,64 @@ class BookingService
             return $basePrice * (1 - $promotion->value / 100);
         }
         return $basePrice;
+    }
+
+    /**
+     * Return sample room combinations when real data is not available
+     */
+    private function getSampleRoomCombinations($hotelId, $checkIn, $checkOut, $adults, $children)
+    {
+        $numberOfNights = (new Carbon($checkIn))->diffInDays($checkOut);
+
+        return [
+            [
+                'room_type' => [
+                    'id' => 1,
+                    'name' => 'Deluxe Double Room',
+                    'description' => 'Spacious room with city view, perfect for couples',
+                    'max_occupancy' => 2,
+                    'adult_capacity' => 2,
+                    'child_capacity' => 1,
+                ],
+                'available_count' => 5,
+                'base_price' => 1200000, // 1.2M VND per night
+                'total_price' => 1200000 * $numberOfNights,
+                'currency' => 'VND',
+                'nights' => $numberOfNights,
+                'applicable_promotions' => []
+            ],
+            [
+                'room_type' => [
+                    'id' => 2,
+                    'name' => 'Superior Twin Room',
+                    'description' => 'Comfortable room with twin beds, great for friends or business travelers',
+                    'max_occupancy' => 3,
+                    'adult_capacity' => 3,
+                    'child_capacity' => 1,
+                ],
+                'available_count' => 3,
+                'base_price' => 1500000, // 1.5M VND per night
+                'total_price' => 1500000 * $numberOfNights,
+                'currency' => 'VND',
+                'nights' => $numberOfNights,
+                'applicable_promotions' => []
+            ],
+            [
+                'room_type' => [
+                    'id' => 3,
+                    'name' => 'Family Suite',
+                    'description' => 'Large suite with separate living area, perfect for families',
+                    'max_occupancy' => 4,
+                    'adult_capacity' => 4,
+                    'child_capacity' => 2,
+                ],
+                'available_count' => 2,
+                'base_price' => 2200000, // 2.2M VND per night
+                'total_price' => 2200000 * $numberOfNights,
+                'currency' => 'VND',
+                'nights' => $numberOfNights,
+                'applicable_promotions' => []
+            ]
+        ];
     }
 }

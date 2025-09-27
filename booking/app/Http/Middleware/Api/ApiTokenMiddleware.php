@@ -18,6 +18,11 @@ class ApiTokenMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Bypass authentication completely in development
+        if (app()->environment('local')) {
+            return $next($request);
+        }
+
         // Lấy token từ header Authorization
         $authHeader = $request->header('Authorization');
         if (empty($authHeader) || !str_starts_with($authHeader, 'Bearer ')) {

@@ -516,3 +516,164 @@
 [26-Sep-2025 03:04:04 UTC] API Call success: GET promotions - HTTP 200
 [26-Sep-2025 03:04:12 UTC] API Call success: GET promotions - HTTP 200
 [26-Sep-2025 03:04:18 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 03:42:06 UTC] API Call success: GET bookings - HTTP 404
+[26-Sep-2025 03:42:06 UTC] API returned error: HTTP 404 - The route api/sync/bookings could not be found.
+[26-Sep-2025 03:42:09 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 05:41:06 UTC] API Call success: GET bookings - HTTP 404
+[26-Sep-2025 05:41:06 UTC] API returned error: HTTP 404 - The route api/sync/bookings could not be found.
+[26-Sep-2025 05:41:24 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 06:57:30 UTC] API Call success: GET bookings - HTTP 404
+[26-Sep-2025 06:57:30 UTC] API returned error: HTTP 404 - The route api/sync/bookings could not be found.
+[26-Sep-2025 06:57:37 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 06:57:41 UTC] API Call success: PUT promotions/update-status - HTTP 200
+[26-Sep-2025 06:57:43 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 06:57:46 UTC] API Call success: PUT promotions/update-status - HTTP 200
+[26-Sep-2025 06:57:47 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 06:57:51 UTC] API Call success: PUT promotions/update-status - HTTP 200
+[26-Sep-2025 06:57:52 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 06:57:57 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 06:57:59 UTC] API Call success: GET promotions - HTTP 200
+[26-Sep-2025 06:58:09 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 06:58:14 UTC] API Call success: GET bookings - HTTP 404
+[26-Sep-2025 06:58:14 UTC] API returned error: HTTP 404 - The route api/sync/bookings could not be found.
+[26-Sep-2025 07:58:27 UTC] API Call success: GET bookings - HTTP 404
+[26-Sep-2025 07:58:27 UTC] API returned error: HTTP 404 - The route api/sync/bookings could not be found.
+[26-Sep-2025 07:59:24 UTC] API Call success: GET bookings - HTTP 404
+[26-Sep-2025 07:59:24 UTC] API returned error: HTTP 404 - The route api/sync/bookings could not be found.
+[26-Sep-2025 08:01:31 UTC] API Call success: GET bookings - HTTP 200
+[26-Sep-2025 08:01:40 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 08:08:51 UTC] API Call success: POST hotel/find-rooms - HTTP 404
+[26-Sep-2025 08:08:51 UTC] API returned error: HTTP 404 - The route api/sync/hotel/find-rooms could not be found.
+[26-Sep-2025 08:09:02 UTC] API Call success: POST hotel/find-rooms - HTTP 404
+[26-Sep-2025 08:09:02 UTC] API returned error: HTTP 404 - The route api/sync/hotel/find-rooms could not be found.
+[26-Sep-2025 08:09:45 UTC] API Call success: POST hotel/find-rooms - HTTP 404
+[26-Sep-2025 08:09:45 UTC] API returned error: HTTP 404 - The route api/sync/hotel/find-rooms could not be found.
+[26-Sep-2025 08:17:44 UTC] PHP Warning:  Undefined array key "HTTP_HOST" in D:\projects\hotels\hotels-web.com\web\wp-includes\ms-settings.php on line 62
+[26-Sep-2025 08:17:44 UTC] PHP Stack trace:
+[26-Sep-2025 08:17:44 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:0
+[26-Sep-2025 08:17:44 UTC] PHP   2. require_once() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:4
+[26-Sep-2025 08:17:44 UTC] PHP   3. require_once() D:\projects\hotels\hotels-web.com\web\wp-config.php:116
+[26-Sep-2025 08:17:44 UTC] PHP   4. require() D:\projects\hotels\hotels-web.com\web\wp-settings.php:157
+[26-Sep-2025 08:17:44 UTC] PHP Deprecated:  stripslashes(): Passing null to parameter #1 ($string) of type string is deprecated in D:\projects\hotels\hotels-web.com\web\wp-includes\ms-settings.php on line 62
+[26-Sep-2025 08:17:44 UTC] PHP Stack trace:
+[26-Sep-2025 08:17:44 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:0
+[26-Sep-2025 08:17:44 UTC] PHP   2. require_once() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:4
+[26-Sep-2025 08:17:44 UTC] PHP   3. require_once() D:\projects\hotels\hotels-web.com\web\wp-config.php:116
+[26-Sep-2025 08:17:44 UTC] PHP   4. require() D:\projects\hotels\hotels-web.com\web\wp-settings.php:157
+[26-Sep-2025 08:17:44 UTC] PHP   5. stripslashes($string = NULL) D:\projects\hotels\hotels-web.com\web\wp-includes\ms-settings.php:62
+[26-Sep-2025 08:18:06 UTC] PHP Warning:  Undefined array key "HTTP_HOST" in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-sync-api\includes\api-config.php on line 6
+[26-Sep-2025 08:18:06 UTC] PHP Stack trace:
+[26-Sep-2025 08:18:06 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:0
+[26-Sep-2025 08:18:06 UTC] PHP   2. require_once() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:4
+[26-Sep-2025 08:18:06 UTC] PHP   3. require_once() D:\projects\hotels\hotels-web.com\web\wp-config.php:116
+[26-Sep-2025 08:18:06 UTC] PHP   4. include_once() D:\projects\hotels\hotels-web.com\web\wp-settings.php:476
+[26-Sep-2025 08:18:06 UTC] PHP   5. require_once() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-sync-api\hotel-sync-api.php:19
+[26-Sep-2025 08:18:06 UTC] PHP Deprecated:  str_contains(): Passing null to parameter #1 ($haystack) of type string is deprecated in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-sync-api\includes\api-config.php on line 7
+[26-Sep-2025 08:18:06 UTC] PHP Stack trace:
+[26-Sep-2025 08:18:06 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:0
+[26-Sep-2025 08:18:06 UTC] PHP   2. require_once() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:4
+[26-Sep-2025 08:18:06 UTC] PHP   3. require_once() D:\projects\hotels\hotels-web.com\web\wp-config.php:116
+[26-Sep-2025 08:18:06 UTC] PHP   4. include_once() D:\projects\hotels\hotels-web.com\web\wp-settings.php:476
+[26-Sep-2025 08:18:06 UTC] PHP   5. require_once() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-sync-api\hotel-sync-api.php:19
+[26-Sep-2025 08:18:06 UTC] PHP   6. str_contains($haystack = NULL, $needle = '.local') D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-sync-api\includes\api-config.php:7
+[26-Sep-2025 08:18:06 UTC] PHP Deprecated:  str_contains(): Passing null to parameter #1 ($haystack) of type string is deprecated in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-sync-api\includes\api-config.php on line 7
+[26-Sep-2025 08:18:06 UTC] PHP Stack trace:
+[26-Sep-2025 08:18:06 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:0
+[26-Sep-2025 08:18:06 UTC] PHP   2. require_once() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:4
+[26-Sep-2025 08:18:06 UTC] PHP   3. require_once() D:\projects\hotels\hotels-web.com\web\wp-config.php:116
+[26-Sep-2025 08:18:06 UTC] PHP   4. include_once() D:\projects\hotels\hotels-web.com\web\wp-settings.php:476
+[26-Sep-2025 08:18:06 UTC] PHP   5. require_once() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-sync-api\hotel-sync-api.php:19
+[26-Sep-2025 08:18:06 UTC] PHP   6. str_contains($haystack = NULL, $needle = 'localhost') D:\projects\hotels\hotels-web.com\web\wp-content\plugins\hotel-sync-api\includes\api-config.php:7
+[26-Sep-2025 08:18:06 UTC] PHP Notice:  $_SERVER['HTTP_HOST'] or $_SERVER['REQUEST_URI'] are required but not set. in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\functions.php on line 108
+[26-Sep-2025 08:18:06 UTC] PHP Stack trace:
+[26-Sep-2025 08:18:06 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:0
+[26-Sep-2025 08:18:06 UTC] PHP   2. require_once() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:4
+[26-Sep-2025 08:18:06 UTC] PHP   3. require_once() D:\projects\hotels\hotels-web.com\web\wp-config.php:116
+[26-Sep-2025 08:18:06 UTC] PHP   4. include_once() D:\projects\hotels\hotels-web.com\web\wp-settings.php:476
+[26-Sep-2025 08:18:06 UTC] PHP   5. Polylang->__construct() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\polylang.php:75
+[26-Sep-2025 08:18:06 UTC] PHP   6. PLL_OLT_Manager::instance() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\class-polylang.php:57
+[26-Sep-2025 08:18:06 UTC] PHP   7. PLL_OLT_Manager->__construct() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\olt-manager.php:55
+[26-Sep-2025 08:18:06 UTC] PHP   8. Polylang::is_rest_request() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\olt-manager.php:34
+[26-Sep-2025 08:18:06 UTC] PHP   9. pll_get_requested_url() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\class-polylang.php:106
+[26-Sep-2025 08:18:06 UTC] PHP  10. trigger_error($message = '$_SERVER[\'HTTP_HOST\'] or $_SERVER[\'REQUEST_URI\'] are required but not set.') D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\functions.php:108
+[26-Sep-2025 08:18:06 UTC] PHP Notice:  $_SERVER['HTTP_HOST'] or $_SERVER['REQUEST_URI'] are required but not set. in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\functions.php on line 108
+[26-Sep-2025 08:18:06 UTC] PHP Stack trace:
+[26-Sep-2025 08:18:06 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:0
+[26-Sep-2025 08:18:06 UTC] PHP   2. require_once() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:4
+[26-Sep-2025 08:18:06 UTC] PHP   3. require_once() D:\projects\hotels\hotels-web.com\web\wp-config.php:116
+[26-Sep-2025 08:18:06 UTC] PHP   4. include_once() D:\projects\hotels\hotels-web.com\web\wp-settings.php:476
+[26-Sep-2025 08:18:06 UTC] PHP   5. Polylang->__construct() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\polylang.php:75
+[26-Sep-2025 08:18:06 UTC] PHP   6. PLL_OLT_Manager::instance() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\class-polylang.php:57
+[26-Sep-2025 08:18:06 UTC] PHP   7. PLL_OLT_Manager->__construct() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\olt-manager.php:55
+[26-Sep-2025 08:18:06 UTC] PHP   8. Polylang::is_rest_request() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\olt-manager.php:34
+[26-Sep-2025 08:18:06 UTC] PHP   9. pll_get_requested_url() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\class-polylang.php:114
+[26-Sep-2025 08:18:06 UTC] PHP  10. trigger_error($message = '$_SERVER[\'HTTP_HOST\'] or $_SERVER[\'REQUEST_URI\'] are required but not set.') D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\functions.php:108
+[26-Sep-2025 08:18:13 UTC] PHP Notice:  $_SERVER['HTTP_HOST'] or $_SERVER['REQUEST_URI'] are required but not set. in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\functions.php on line 108
+[26-Sep-2025 08:18:13 UTC] PHP Stack trace:
+[26-Sep-2025 08:18:13 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:0
+[26-Sep-2025 08:18:13 UTC] PHP   2. require_once() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:4
+[26-Sep-2025 08:18:13 UTC] PHP   3. require_once() D:\projects\hotels\hotels-web.com\web\wp-config.php:116
+[26-Sep-2025 08:18:13 UTC] PHP   4. do_action($hook_name = 'plugins_loaded') D:\projects\hotels\hotels-web.com\web\wp-settings.php:578
+[26-Sep-2025 08:18:13 UTC] PHP   5. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[26-Sep-2025 08:18:13 UTC] PHP   6. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[26-Sep-2025 08:18:13 UTC] PHP   7. Polylang->init('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[26-Sep-2025 08:18:13 UTC] PHP   8. Polylang::is_rest_request() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\class-polylang.php:217
+[26-Sep-2025 08:18:13 UTC] PHP   9. pll_get_requested_url() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\class-polylang.php:106
+[26-Sep-2025 08:18:13 UTC] PHP  10. trigger_error($message = '$_SERVER[\'HTTP_HOST\'] or $_SERVER[\'REQUEST_URI\'] are required but not set.') D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\functions.php:108
+[26-Sep-2025 08:18:13 UTC] PHP Notice:  $_SERVER['HTTP_HOST'] or $_SERVER['REQUEST_URI'] are required but not set. in D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\functions.php on line 108
+[26-Sep-2025 08:18:13 UTC] PHP Stack trace:
+[26-Sep-2025 08:18:13 UTC] PHP   1. {main}() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:0
+[26-Sep-2025 08:18:13 UTC] PHP   2. require_once() D:\projects\hotels\hotels-web.com\test_ajax_rooms.php:4
+[26-Sep-2025 08:18:13 UTC] PHP   3. require_once() D:\projects\hotels\hotels-web.com\web\wp-config.php:116
+[26-Sep-2025 08:18:13 UTC] PHP   4. do_action($hook_name = 'plugins_loaded') D:\projects\hotels\hotels-web.com\web\wp-settings.php:578
+[26-Sep-2025 08:18:13 UTC] PHP   5. WP_Hook->do_action($args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\plugin.php:517
+[26-Sep-2025 08:18:13 UTC] PHP   6. WP_Hook->apply_filters($value = '', $args = [0 => '']) D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:348
+[26-Sep-2025 08:18:13 UTC] PHP   7. Polylang->init('') D:\projects\hotels\hotels-web.com\web\wp-includes\class-wp-hook.php:324
+[26-Sep-2025 08:18:13 UTC] PHP   8. Polylang::is_rest_request() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\class-polylang.php:217
+[26-Sep-2025 08:18:13 UTC] PHP   9. pll_get_requested_url() D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\class-polylang.php:114
+[26-Sep-2025 08:18:13 UTC] PHP  10. trigger_error($message = '$_SERVER[\'HTTP_HOST\'] or $_SERVER[\'REQUEST_URI\'] are required but not set.') D:\projects\hotels\hotels-web.com\web\wp-content\plugins\polylang\include\functions.php:108
+[26-Sep-2025 08:18:18 UTC] API Call skipped: Main site (ID: 1)
+[26-Sep-2025 08:21:20 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 08:21:33 UTC] API Call success: POST hotel/find-rooms - HTTP 404
+[26-Sep-2025 08:21:33 UTC] API returned error: HTTP 404 - The route api/sync/hotel/find-rooms could not be found.
+[26-Sep-2025 08:21:45 UTC] API Call success: POST hotel/find-rooms - HTTP 422
+[26-Sep-2025 08:21:45 UTC] API returned error: HTTP 422
+[26-Sep-2025 08:34:16 UTC] API Call success: POST hotel/find-rooms - HTTP 422
+[26-Sep-2025 08:34:16 UTC] API returned error: HTTP 422 - Validation failed
+[26-Sep-2025 08:34:25 UTC] API Call success: POST hotel/find-rooms - HTTP 422
+[26-Sep-2025 08:34:25 UTC] API returned error: HTTP 422 - Validation failed
+[26-Sep-2025 08:34:36 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 08:34:51 UTC] API Call success: POST hotel/find-rooms - HTTP 422
+[26-Sep-2025 08:34:51 UTC] API returned error: HTTP 422 - Validation failed
+[26-Sep-2025 08:40:29 UTC] API Call success: POST hotel/find-rooms - HTTP 200
+[26-Sep-2025 08:51:48 UTC] API Call success: POST bookings/calculate-total - HTTP 422
+[26-Sep-2025 08:51:48 UTC] API returned error: HTTP 422 - Validation failed
+[26-Sep-2025 08:51:52 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 08:52:06 UTC] API Call success: POST hotel/find-rooms - HTTP 200
+[26-Sep-2025 08:52:12 UTC] API Call success: POST bookings/calculate-total - HTTP 422
+[26-Sep-2025 08:52:12 UTC] API returned error: HTTP 422 - Validation failed
+[26-Sep-2025 09:02:35 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 09:03:05 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 09:03:10 UTC] API Call success: GET room-management/calendar - HTTP 200
+[26-Sep-2025 09:03:40 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 09:03:42 UTC] API Call success: GET room-management/templates - HTTP 200
+[26-Sep-2025 09:03:46 UTC] API Call success: GET room-management/templates/2 - HTTP 200
+[26-Sep-2025 09:03:51 UTC] API Call success: GET room-management/templates/2 - HTTP 200
+[26-Sep-2025 09:03:57 UTC] API Call success: GET room-management/templates/2 - HTTP 200
+[26-Sep-2025 09:04:45 UTC] API Call success: GET bookings - HTTP 200
+[26-Sep-2025 09:04:46 UTC] API Call success: GET roomtypes - HTTP 200
+[26-Sep-2025 09:05:11 UTC] API Call success: POST hotel/find-rooms - HTTP 200
+[26-Sep-2025 09:05:20 UTC] API Call success: POST bookings/calculate-total - HTTP 422
+[26-Sep-2025 09:05:20 UTC] API returned error: HTTP 422 - Validation failed
+[26-Sep-2025 09:06:40 UTC] API Call success: POST hotel/find-rooms - HTTP 200
+[26-Sep-2025 09:06:48 UTC] API Call success: POST bookings/calculate-total - HTTP 200
+[26-Sep-2025 09:06:53 UTC] API Call success: POST bookings - HTTP 400
+[26-Sep-2025 09:06:53 UTC] API returned error: HTTP 400 - Validation failed
+[26-Sep-2025 09:07:01 UTC] API Call success: POST bookings - HTTP 400
+[26-Sep-2025 09:07:01 UTC] API returned error: HTTP 400 - Validation failed
+[26-Sep-2025 09:10:11 UTC] API Call success: POST bookings - HTTP 400
+[26-Sep-2025 09:10:11 UTC] API returned error: HTTP 400 - Validation failed
+[26-Sep-2025 09:10:55 UTC] API Call success: POST bookings - HTTP 500
+[26-Sep-2025 09:10:55 UTC] API returned error: HTTP 500 - SQLSTATE[42S02]: Base table or view not found: 1146 Table 'booking.room_types' doesn't exist (Connection: mysql, SQL: select count(*) as aggregate from `room_types` where `id` = 1)
+[26-Sep-2025 09:18:30 UTC] API Call success: POST hotel/find-rooms - HTTP 200
+[26-Sep-2025 09:20:32 UTC] API Call success: POST hotel/find-rooms - HTTP 200

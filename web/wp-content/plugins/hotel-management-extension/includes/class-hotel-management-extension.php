@@ -248,6 +248,8 @@ class Hotel_Management_Extension
         add_action('wp_ajax_hme_update_booking', array('HME_Booking_Manager', 'ajax_update_booking'));
         add_action('wp_ajax_hme_delete_booking', array('HME_Booking_Manager', 'ajax_delete_booking'));
         add_action('wp_ajax_hme_get_booking_details', array('HME_Booking_Manager', 'ajax_get_booking_details'));
+        add_action('wp_ajax_hme_get_available_room_types', array('HME_Booking_Manager', 'ajax_get_available_room_types'));
+        add_action('wp_ajax_hme_calculate_booking_total', array('HME_Booking_Manager', 'ajax_calculate_booking_total'));
 
         // Room Rate AJAX handlers - removed old handlers as they're not used anymore
         // All room rate functionality now goes through hme_api_call

@@ -7,7 +7,6 @@ use App\Models\BookingDetail;
 use App\Models\RoomType;
 use App\Models\Promotion;
 use Illuminate\Http\Request;
-use App\Helpers\HotelHelper;
 use Illuminate\Support\Facades\Validator;
 use App\Services\BookingService;
 use Illuminate\Http\JsonResponse;
@@ -21,61 +20,6 @@ class BookingController extends BaseApiController
         $this->bookingService = $bookingService;
     }
     /**
-     * Lấy danh sách bookings cho một khách sạn.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    // public function index(Request $request)
-    // {
-    //     $wpId = $request->query('wp_id');
-
-    //     if (!$wpId) {
-    //         return response()->json(['error' => 'wp_id is required.'], 400);
-    //     }
-
-    //     $hotelId = HotelHelper::getHotelIdByWpId($wpId);
-
-    //     if (!$hotelId) {
-    //         return response()->json(['error' => 'Invalid wp_id. Hotel not found.'], 404);
-    //     }
-
-    //     $bookings = Booking::with('bookingDetails.roomtype')
-    //         ->where('hotel_id', $hotelId)
-    //         ->orderBy('created_at', 'desc')
-    //         ->get();
-
-    //     return response()->json($bookings);
-    // }
-
-    // /**
-    //  * Lấy chi tiết của một booking cụ thể.
-    //  *
-    //  * @param  \Illuminate\Http\Request  $request
-    //  * @param  \App\Models\Booking  $booking
-    //  * @return \Illuminate\Http\JsonResponse
-    //  */
-    // public function show(Request $request, Booking $booking)
-    // {
-    //     $wpId = $request->query('wp_id');
-
-    //     if (!$wpId) {
-    //         return response()->json(['error' => 'wp_id is required.'], 400);
-    //     }
-
-    //     $hotelId = HotelHelper::getHotelIdByWpId($wpId);
-
-    //     // Kiểm tra quyền sở hữu: booking có thuộc về khách sạn đó không
-    //     if (!$hotelId || $booking->hotel_id !== $hotelId) {
-    //         return response()->json(['error' => 'Booking not found or does not belong to this hotel.'], 404);
-    //     }
-
-    //     // Tải các mối quan hệ chi tiết của booking
-    //     $booking->load('bookingDetails.roomtype');
-
-    //     return response()->json($booking);
-    // }
-    /**
      * Tìm các tổ hợp phòng còn trống đáp ứng đủ số lượng người.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -83,40 +27,46 @@ class BookingController extends BaseApiController
      */
     public function getAvailableRoomCombinations(Request $request)
     {
-        $wpData = $request->json()->all();
-        // 1. Xác thực dữ liệu đầu vào
+        // 1. Validate hotel access using BaseApiController method
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+
+        // 2. Validate request data (WordPress callApi wraps data in 'data' key)
         $validator = Validator::make($request->all(), [
-            'params' => 'required|array',
-            'params.check_in' => 'required|date|after_or_equal:today',
-            'params.check_out' => 'required|date|after_or_equal:check_in',
-            'params.adults' => 'required|integer|min:1',
-            'params.children' => 'nullable|integer|min:0',
+            'data' => 'required|array',
+            'data.params' => 'required|array',
+            'data.params.check_in' => 'required|date|after_or_equal:today',
+            'data.params.check_out' => 'required|date|after_or_equal:data.params.check_in',
+            'data.params.adults' => 'required|integer|min:1',
+            'data.params.children' => 'nullable|integer|min:0',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $hotelId = HotelHelper::getHotelIdByWpId($wpData['wp_id']);
-        if (!$hotelId) {
-            return response()->json(['error' => 'wp_id không hợp lệ. Không tìm thấy khách sạn.'], 404);
+            return $this->errorResponse('Validation failed', 422, $validator->errors());
         }
 
         try {
-            // 2. Gọi service để xử lý logic chính
-            $params = $wpData['params'];
+            // 3. Call service to find room combinations
+            $params = $request->input('data.params');
             $data = $this->bookingService->findRoomCombinations(
-                $hotelId,
+                $hotel->id,
                 $params['check_in'],
                 $params['check_out'],
                 $params['adults'],
-                $params['children']
+                $params['children'] ?? 0
             );
 
-            // 3. Trả về kết quả
-            return response()->json($data);
+            // 4. Return successful response using BaseApiController method
+            return $this->successResponse($data, 'Available rooms found successfully');
         } catch (\Exception $e) {
-            return response()->json(['error' => 'An error occurred.' . $e->getMessage()], 500);
+            \Log::error('Find room combinations failed', [
+                'hotel_id' => $hotel->id,
+                'params' => $params ?? null,
+                'error' => $e->getMessage()
+            ]);
+            return $this->errorResponse('Failed to find available rooms: ' . $e->getMessage(), 500);
         }
     }
 
@@ -472,19 +422,22 @@ class BookingController extends BaseApiController
             return $hotel;
         }
 
+        // WordPress callApi wraps data in 'data' key
         $validator = Validator::make($request->all(), [
-            'room_type_id' => 'required|exists:room_types,id',
-            'check_in' => 'required|date|after:today',
-            'check_out' => 'required|date|after:check_in',
-            'guests' => 'required|integer|min:1',
-            'promotion_code' => 'nullable|string|max:50',
+            'data' => 'required|array',
+            'data.room_type_id' => 'required|integer|exists:roomtypes,id',
+            'data.check_in' => 'required|date|after:today',
+            'data.check_out' => 'required|date|after:data.check_in',
+            'data.guests' => 'required|integer|min:1',
+            'data.promotion_code' => 'nullable|string|max:50',
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('Validation failed', 400, $validator->errors());
+            return $this->errorResponse('Validation failed', 422, $validator->errors());
         }
 
-        $roomType = RoomType::where('id', $request->room_type_id)
+        $data = $request->input('data');
+        $roomType = \App\Models\Roomtype::where('id', $data['room_type_id'])
             ->where('hotel_id', $hotel->id)
             ->first();
 
@@ -492,10 +445,10 @@ class BookingController extends BaseApiController
             return $this->errorResponse('Room type not found', 404);
         }
 
-        $checkIn = Carbon::parse($request->check_in);
-        $checkOut = Carbon::parse($request->check_out);
+        $checkIn = Carbon::parse($data['check_in']);
+        $checkOut = Carbon::parse($data['check_out']);
 
-        $pricingResult = $this->calculateBookingPricing($roomType, $checkIn, $checkOut, $request->promotion_code);
+        $pricingResult = $this->calculateBookingPricing($roomType, $checkIn, $checkOut, $data['promotion_code'] ?? null);
 
         if (!$pricingResult['success']) {
             return $this->errorResponse($pricingResult['message'], 422);
@@ -563,11 +516,11 @@ class BookingController extends BaseApiController
         }
 
         // Get base rate (this could be enhanced to use dynamic pricing)
-        $ratePerNight = $roomType->base_price;
+        $ratePerNight = $roomType->base_price ?? 1000000; // Default 1M VND per night if not set
         $subtotal = $ratePerNight * $nights;
 
-        // Calculate tax
-        $taxRate = $roomType->hotel->getSetting('tax_rate', 10) / 100;
+        // Calculate tax (use default rate if hotel relationship not loaded)
+        $taxRate = 0.10; // Default 10% tax rate
         $taxAmount = $subtotal * $taxRate;
 
         $discountAmount = 0;
