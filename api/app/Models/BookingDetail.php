@@ -30,6 +30,10 @@ class BookingDetail extends Model
         'quantity',
         'price_per_night',
         'sub_total',
+        'nights',
+        'tax_amount',
+        'discount_amount',
+        'total_amount',
         'promotion_id',
     ];
 
@@ -39,6 +43,11 @@ class BookingDetail extends Model
      * @var array
      */
     protected $casts = [
+        'price_per_night' => 'decimal:2',
+        'sub_total' => 'decimal:2',
+        'tax_amount' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'total_amount' => 'decimal:2',
         'is_extra_bed_requested' => 'boolean',
     ];
 
@@ -53,9 +62,9 @@ class BookingDetail extends Model
     /**
      * Quan hệ với Roomtype.
      */
-    public function roomtype()
+    public function roomType()
     {
-        return $this->belongsTo(Roomtype::class);
+        return $this->belongsTo(Roomtype::class, 'roomtype_id');
     }
 
     /**

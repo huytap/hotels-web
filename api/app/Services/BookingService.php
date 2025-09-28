@@ -34,7 +34,6 @@ class BookingService
         $roomTypes = $hotel->roomtypes()
             ->where('adult_capacity', '>=', $adults)
             ->get();
-
         // Fallback: Return sample data if no valid room types found or corrupted data
         // if ($roomTypes->isEmpty() || $roomTypes->every(function($rt) { return empty(trim($rt->name)); })) {
         //     return $this->getSampleRoomCombinations($hotelId, $checkIn, $checkOut, $adults, $children);
@@ -150,7 +149,7 @@ class BookingService
     private function getApplicablePromotions($roomType, $checkIn, $checkOut)
     {
         $promotions = $roomType->promotions()
-            ->where('is_active', true)
+            ->where('is_active', 1)
             ->where('start_date', '<=', $checkIn)
             ->where('end_date', '>=', $checkIn)
             ->get();
@@ -158,7 +157,6 @@ class BookingService
         $today = Carbon::now()->startOfDay();
         $checkInDate = (new Carbon($checkIn))->startOfDay();
         $numberOfNights = (new Carbon($checkIn))->diffInDays($checkOut);
-
         return $promotions->filter(function ($promo) use ($today, $checkInDate, $numberOfNights) {
             $isConditionMet = true;
 

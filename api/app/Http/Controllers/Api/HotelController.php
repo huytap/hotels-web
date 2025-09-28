@@ -24,10 +24,42 @@ class HotelController extends BaseApiController
         if (!$hotelId) {
             return response()->json(['error' => 'Invalid wp_id. Hotel not found.'], 404);
         }
-        $roomtypes = Roomtype::select('id', 'title')->get();
+
+        $roomtypes = Roomtype::where('hotel_id', $hotelId)
+            ->where('is_active', true)
+            ->select([
+                'id', 'title', 'description', 'area', 'adult_capacity', 'child_capacity',
+                'bed_type', 'amenities', 'room_amenities', 'bathroom_amenities', 'view',
+                'gallery_images', 'featured_image', 'base_price', 'is_extra_bed_available'
+            ])
+            ->get();
 
         // Trả về dữ liệu
         return $this->successResponse($roomtypes, 'Lấy danh sách phòng thành công');
+    }
+
+    public function getRoomDetail($id, Request $request)
+    {
+        $wpId = $request->input('wp_id');
+        if (!$wpId) {
+            return response()->json(['error' => 'wp_id is required.'], 400);
+        }
+
+        $hotelId = HotelHelper::getHotelIdByWpId($wpId);
+        if (!$hotelId) {
+            return response()->json(['error' => 'Invalid wp_id. Hotel not found.'], 404);
+        }
+
+        $roomtype = Roomtype::where('id', $id)
+            ->where('hotel_id', $hotelId)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$roomtype) {
+            return response()->json(['error' => 'Room not found.'], 404);
+        }
+
+        return $this->successResponse($roomtype, 'Lấy thông tin chi tiết phòng thành công');
     }
 
     public function getRoomRates(Request $request)

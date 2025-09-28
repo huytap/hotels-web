@@ -113,7 +113,6 @@ function hotel_theme_excerpt_more($more)
     return '...';
 }
 add_filter('excerpt_more', 'hotel_theme_excerpt_more');
-
 /**
  * Add custom image sizes
  */
@@ -248,6 +247,716 @@ function hotel_theme_clean_wp()
     remove_action('wp_head', 'rsd_link');
 }
 add_action('init', 'hotel_theme_clean_wp');
+
+/**
+ * Rooms Grid Shortcode
+ */
+function hms_rooms_grid_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'limit' => 6,
+        'columns' => 3,
+    ), $atts);
+
+    // Mock data for demonstration - in real implementation, this would fetch from API
+    $rooms = [
+        [
+            'id' => 1,
+            'title' => ['vi' => 'Phòng Deluxe', 'en' => 'Deluxe Room'],
+            'description' => ['vi' => 'Phòng rộng rãi với view đẹp', 'en' => 'Spacious room with beautiful view'],
+            'featured_image' => 'https://via.placeholder.com/400x300',
+            'gallery_images' => [
+                'https://via.placeholder.com/800x600/1',
+                'https://via.placeholder.com/800x600/2',
+                'https://via.placeholder.com/800x600/3'
+            ],
+            'area' => ['vi' => '30m²', 'en' => '30m²'],
+            'adult_capacity' => 2,
+            'child_capacity' => 1,
+            'bed_type' => ['vi' => 'Giường đôi king size', 'en' => 'King size bed'],
+            'amenities' => ['vi' => 'WiFi miễn phí, TV LCD, Máy lạnh', 'en' => 'Free WiFi, LCD TV, Air conditioning'],
+            'room_amenities' => ['vi' => 'Minibar, Két sắt, Bàn làm việc', 'en' => 'Minibar, Safe box, Work desk'],
+            'bathroom_amenities' => ['vi' => 'Bồn tắm, Vòi sen, Máy sấy tóc', 'en' => 'Bathtub, Shower, Hair dryer'],
+            'view' => ['vi' => 'View thành phố', 'en' => 'City view'],
+            'base_price' => 1200000
+        ],
+        [
+            'id' => 2,
+            'title' => ['vi' => 'Phòng Superior', 'en' => 'Superior Room'],
+            'description' => ['vi' => 'Phòng thoải mái với đầy đủ tiện nghi', 'en' => 'Comfortable room with full amenities'],
+            'featured_image' => 'https://via.placeholder.com/400x300',
+            'gallery_images' => [
+                'https://via.placeholder.com/800x600/4',
+                'https://via.placeholder.com/800x600/5',
+                'https://via.placeholder.com/800x600/6'
+            ],
+            'area' => ['vi' => '25m²', 'en' => '25m²'],
+            'adult_capacity' => 2,
+            'child_capacity' => 0,
+            'bed_type' => ['vi' => 'Giường đôi', 'en' => 'Double bed'],
+            'amenities' => ['vi' => 'WiFi miễn phí, TV LCD, Máy lạnh', 'en' => 'Free WiFi, LCD TV, Air conditioning'],
+            'room_amenities' => ['vi' => 'Minibar, Bàn làm việc', 'en' => 'Minibar, Work desk'],
+            'bathroom_amenities' => ['vi' => 'Vòi sen, Máy sấy tóc', 'en' => 'Shower, Hair dryer'],
+            'view' => ['vi' => 'View sân vườn', 'en' => 'Garden view'],
+            'base_price' => 900000
+        ]
+    ];
+
+    $current_lang = function_exists('pll_current_language') ? pll_current_language() : 'vi';
+
+    ob_start();
+    ?>
+    <div class="rooms-grid-container">
+        <div class="row">
+            <?php foreach ($rooms as $room): ?>
+                <div class="col-md-<?php echo 12 / intval($atts['columns']); ?> mb-4">
+                    <div class="room-card" data-room-id="<?php echo $room['id']; ?>">
+                        <div class="room-image" onclick="openRoomPopup(<?php echo $room['id']; ?>)">
+                            <img src="<?php echo esc_url($room['featured_image']); ?>"
+                                 alt="<?php echo esc_attr($room['title'][$current_lang]); ?>"
+                                 class="img-fluid">
+                            <div class="room-overlay">
+                                <i class="fas fa-search-plus"></i>
+                                <span>Xem chi tiết</span>
+                            </div>
+                        </div>
+                        <div class="room-info">
+                            <h3 class="room-title" onclick="openRoomPopup(<?php echo $room['id']; ?>)">
+                                <?php echo esc_html($room['title'][$current_lang]); ?>
+                            </h3>
+                            <p class="room-description">
+                                <?php echo esc_html($room['description'][$current_lang]); ?>
+                            </p>
+                            <div class="room-details">
+                                <span class="room-capacity">
+                                    <i class="fas fa-user"></i> <?php echo $room['adult_capacity']; ?> người lớn
+                                    <?php if ($room['child_capacity'] > 0): ?>
+                                        + <?php echo $room['child_capacity']; ?> trẻ em
+                                    <?php endif; ?>
+                                </span>
+                                <span class="room-area">
+                                    <i class="fas fa-expand-arrows-alt"></i> <?php echo $room['area'][$current_lang]; ?>
+                                </span>
+                            </div>
+                            <div class="room-price">
+                                <span class="price"><?php echo number_format($room['base_price']); ?> VNĐ</span>
+                                <span class="price-unit">/đêm</span>
+                            </div>
+                        </div>
+
+                        <!-- Hidden data for popup -->
+                        <script type="application/json" class="room-data-<?php echo $room['id']; ?>">
+                            <?php echo json_encode($room); ?>
+                        </script>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <!-- Room Detail Popup Modal -->
+    <div id="roomPopup" class="room-popup-modal">
+        <div class="room-popup-content">
+            <span class="room-popup-close">&times;</span>
+            <div class="room-popup-body">
+                <div class="room-gallery-section">
+                    <div class="room-main-gallery">
+                        <div class="main-image-container">
+                            <img id="roomMainImage" src="" alt="" class="room-main-image">
+                            <div class="gallery-nav">
+                                <button class="gallery-prev" onclick="changeGalleryImage(-1)">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <button class="gallery-next" onclick="changeGalleryImage(1)">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="gallery-thumbnails" id="roomGalleryThumbs">
+                            <!-- Thumbnails will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="room-info-section">
+                    <div class="room-header">
+                        <h2 id="roomPopupTitle"></h2>
+                        <div class="room-price-popup">
+                            <span id="roomPopupPrice"></span>
+                            <span class="price-unit">/đêm</span>
+                        </div>
+                    </div>
+
+                    <div class="room-description-popup">
+                        <p id="roomPopupDescription"></p>
+                    </div>
+
+                    <div class="room-basic-info">
+                        <div class="info-item">
+                            <i class="fas fa-bed"></i>
+                            <div>
+                                <strong>Loại giường:</strong>
+                                <span id="roomBedType"></span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                            <div>
+                                <strong>Diện tích:</strong>
+                                <span id="roomArea"></span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-users"></i>
+                            <div>
+                                <strong>Sức chứa:</strong>
+                                <span id="roomCapacity"></span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-mountain"></i>
+                            <div>
+                                <strong>View:</strong>
+                                <span id="roomView"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="room-amenities-popup">
+                        <h4><i class="fas fa-star"></i> Tiện ích chính</h4>
+                        <p id="roomAmenities"></p>
+
+                        <h4><i class="fas fa-couch"></i> Tiện ích phòng</h4>
+                        <p id="roomRoomAmenities"></p>
+
+                        <h4><i class="fas fa-bath"></i> Tiện ích phòng tắm</h4>
+                        <p id="roomBathroomAmenities"></p>
+                    </div>
+
+                    <div class="room-action-buttons">
+                        <button class="btn btn-primary btn-book-now">
+                            <i class="fas fa-calendar-check"></i> Đặt phòng ngay
+                        </button>
+                        <button class="btn btn-outline-secondary btn-contact">
+                            <i class="fas fa-phone"></i> Liên hệ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Room Card Styles */
+        .room-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .room-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .room-image {
+            position: relative;
+            overflow: hidden;
+            height: 250px;
+            cursor: pointer;
+        }
+
+        .room-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .room-image:hover img {
+            transform: scale(1.1);
+        }
+
+        .room-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            color: white;
+        }
+
+        .room-image:hover .room-overlay {
+            opacity: 1;
+        }
+
+        .room-overlay i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .room-info {
+            padding: 1.5rem;
+        }
+
+        .room-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            color: #333;
+            transition: color 0.3s ease;
+        }
+
+        .room-title:hover {
+            color: #007bff;
+        }
+
+        .room-description {
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .room-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .room-details i {
+            margin-right: 0.25rem;
+            color: #007bff;
+        }
+
+        .room-price {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #e74c3c;
+        }
+
+        .price-unit {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Popup Modal Styles */
+        .room-popup-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .room-popup-content {
+            position: relative;
+            background-color: white;
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 95%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .room-popup-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+            background: rgba(0,0,0,0.5);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+
+        .room-popup-close:hover {
+            background: rgba(0,0,0,0.8);
+        }
+
+        .room-popup-body {
+            display: flex;
+            height: 80vh;
+        }
+
+        .room-gallery-section {
+            width: 60%;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .room-main-gallery {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-image-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .room-main-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .gallery-prev, .gallery-next {
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background 0.3s ease;
+        }
+
+        .gallery-prev:hover, .gallery-next:hover {
+            background: rgba(0,0,0,0.8);
+        }
+
+        .gallery-thumbnails {
+            height: 120px;
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+
+        .gallery-thumb {
+            width: 100px;
+            height: 90px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: border-color 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .gallery-thumb.active {
+            border-color: #007bff;
+        }
+
+        .gallery-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .room-info-section {
+            width: 40%;
+            padding: 2rem;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .room-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .room-header h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .room-price-popup {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #e74c3c;
+        }
+
+        .room-description-popup {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .room-basic-info {
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .info-item i {
+            color: #007bff;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+            width: 20px;
+        }
+
+        .info-item strong {
+            display: block;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+
+        .room-amenities-popup h4 {
+            color: #333;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .room-amenities-popup h4 i {
+            margin-right: 0.5rem;
+            color: #007bff;
+        }
+
+        .room-amenities-popup p {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .room-action-buttons {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-book-now, .btn-contact {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-book-now {
+            background: #007bff;
+            color: white;
+            border: 2px solid #007bff;
+        }
+
+        .btn-book-now:hover {
+            background: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .btn-contact {
+            background: transparent;
+            color: #007bff;
+            border: 2px solid #007bff;
+        }
+
+        .btn-contact:hover {
+            background: #007bff;
+            color: white;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .room-popup-content {
+                width: 98%;
+                margin: 1% auto;
+                max-height: 95vh;
+            }
+
+            .room-popup-body {
+                flex-direction: column;
+                height: auto;
+                max-height: 90vh;
+            }
+
+            .room-gallery-section {
+                width: 100%;
+                height: 50vh;
+            }
+
+            .room-info-section {
+                width: 100%;
+                height: 40vh;
+                overflow-y: auto;
+            }
+
+            .room-action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+
+    <script>
+        let currentRoomData = null;
+        let currentImageIndex = 0;
+        let galleryImages = [];
+
+        function openRoomPopup(roomId) {
+            // Get room data from hidden script tag
+            const roomDataElement = document.querySelector('.room-data-' + roomId);
+            if (!roomDataElement) return;
+
+            currentRoomData = JSON.parse(roomDataElement.textContent);
+            const currentLang = '<?php echo $current_lang; ?>';
+
+            // Populate popup with room data
+            document.getElementById('roomPopupTitle').textContent = currentRoomData.title[currentLang];
+            document.getElementById('roomPopupDescription').textContent = currentRoomData.description[currentLang];
+            document.getElementById('roomPopupPrice').textContent = new Intl.NumberFormat('vi-VN').format(currentRoomData.base_price) + ' VNĐ';
+            document.getElementById('roomBedType').textContent = currentRoomData.bed_type[currentLang];
+            document.getElementById('roomArea').textContent = currentRoomData.area[currentLang];
+            document.getElementById('roomCapacity').textContent = currentRoomData.adult_capacity + ' người lớn' + (currentRoomData.child_capacity > 0 ? ' + ' + currentRoomData.child_capacity + ' trẻ em' : '');
+            document.getElementById('roomView').textContent = currentRoomData.view[currentLang];
+            document.getElementById('roomAmenities').textContent = currentRoomData.amenities[currentLang];
+            document.getElementById('roomRoomAmenities').textContent = currentRoomData.room_amenities[currentLang];
+            document.getElementById('roomBathroomAmenities').textContent = currentRoomData.bathroom_amenities[currentLang];
+
+            // Setup gallery
+            galleryImages = currentRoomData.gallery_images || [currentRoomData.featured_image];
+            currentImageIndex = 0;
+            loadGallery();
+
+            // Show popup
+            document.getElementById('roomPopup').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function loadGallery() {
+            if (galleryImages.length === 0) return;
+
+            // Set main image
+            document.getElementById('roomMainImage').src = galleryImages[currentImageIndex];
+
+            // Create thumbnails
+            const thumbsContainer = document.getElementById('roomGalleryThumbs');
+            thumbsContainer.innerHTML = '';
+
+            galleryImages.forEach((image, index) => {
+                const thumb = document.createElement('div');
+                thumb.className = 'gallery-thumb' + (index === currentImageIndex ? ' active' : '');
+                thumb.innerHTML = '<img src="' + image + '" alt="Room image ' + (index + 1) + '">';
+                thumb.onclick = () => changeGalleryImage(index - currentImageIndex);
+                thumbsContainer.appendChild(thumb);
+            });
+        }
+
+        function changeGalleryImage(direction) {
+            if (typeof direction === 'number') {
+                if (Math.abs(direction) > 1) {
+                    // Direct index change
+                    currentImageIndex = direction;
+                } else {
+                    // Relative change
+                    currentImageIndex += direction;
+                }
+            }
+
+            if (currentImageIndex < 0) currentImageIndex = galleryImages.length - 1;
+            if (currentImageIndex >= galleryImages.length) currentImageIndex = 0;
+
+            document.getElementById('roomMainImage').src = galleryImages[currentImageIndex];
+
+            // Update thumbnail active state
+            document.querySelectorAll('.gallery-thumb').forEach((thumb, index) => {
+                thumb.classList.toggle('active', index === currentImageIndex);
+            });
+        }
+
+        // Close popup
+        document.addEventListener('DOMContentLoaded', function() {
+            const popup = document.getElementById('roomPopup');
+            const closeBtn = document.querySelector('.room-popup-close');
+
+            closeBtn.onclick = function() {
+                popup.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+
+            window.onclick = function(event) {
+                if (event.target === popup) {
+                    popup.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            }
+
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (popup.style.display === 'block') {
+                    if (e.key === 'Escape') {
+                        popup.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    } else if (e.key === 'ArrowLeft') {
+                        changeGalleryImage(-1);
+                    } else if (e.key === 'ArrowRight') {
+                        changeGalleryImage(1);
+                    }
+                }
+            });
+        });
+    </script>
+    <?php
+
+    return ob_get_clean();
+}
+add_shortcode('hms_rooms_grid', 'hms_rooms_grid_shortcode');
 
 /**
  * Optimize WordPress for hotel theme

@@ -31,7 +31,7 @@ $current_lang = get_locale();
                         <tr>
                             <th scope="row"><label for="description_<?php echo esc_attr($lang_code); ?>">Mô tả (<?php echo esc_html(strtoupper($lang_code)); ?>)</label></th>
                             <td>
-                                <textarea name="description[<?php echo esc_attr($lang_code); ?>]" id="description_<?php echo esc_attr($lang_code); ?>" rows="4" cols="50"></textarea>
+                                <textarea name="description[<?php echo esc_attr($lang_code); ?>]" id="description_<?php echo esc_attr($lang_code); ?>" rows="4" cols="50" class="tinymce"></textarea>
                             </td>
                         </tr>
                     <?php endforeach; ?>

@@ -32,7 +32,24 @@ $current_lang = get_locale();
                         <tr>
                             <th scope="row"><label for="description_<?php echo esc_attr($lang_code); ?>">Mô tả (<?php echo esc_html(strtoupper($lang_code)); ?>)</label></th>
                             <td>
-                                <textarea name="description[<?php echo esc_attr($lang_code); ?>]" id="description_<?php echo esc_attr($lang_code); ?>" rows="4" cols="50"></textarea>
+                                <!-- <textarea name="description[<?php echo esc_attr($lang_code); ?>]" id="description_<?php echo esc_attr($lang_code); ?>" rows="4" cols="50"></textarea> -->
+                                <?php
+                                $content   = isset($description[$lang_code]) ? $description[$lang_code] : ''; // dữ liệu cũ nếu có
+                                $editor_id = 'description_' . sanitize_key($lang_code); // dùng sanitize_key cho id
+
+                                wp_editor(
+                                    $content,
+                                    $editor_id,
+                                    [
+                                        'textarea_name' => "description[{$lang_code}]", // name field
+                                        'textarea_rows' => 10,
+                                        'media_buttons' => true,   // Hiện nút Add Media
+                                        'teeny'         => false,  // true = toolbar đơn giản
+                                        'quicktags'     => true,   // bật tab Text
+                                    ]
+                                );
+                                ?>
+
                             </td>
                         </tr>
                     <?php endforeach; ?>

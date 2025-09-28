@@ -6,7 +6,7 @@ class PromotionType
 {
     public const EARLY_BIRD = 'early_bird';
     public const LAST_MINUTES = 'last_minutes';
-    public const OTHERS = 'others';
+    public const OTHERS = 'other';
     // Thêm loại mới khi cần
     //public const HOLIDAY_DEAL = 'holiday_deal';
     /**

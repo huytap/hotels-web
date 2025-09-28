@@ -37,11 +37,22 @@ class Hotel extends Model
      * @var array
      */
     public $translatable = [
+        // Các trường đa ngôn ngữ
         'name',
         'address',
-        'phone',
-        'email',
-        'map'
+        'policy',
+        'description',
+        'short_description',
+        'amenities',
+        'facilities',
+        'services',
+        'nearby_attractions',
+        'transportation',
+        'dining_options',
+        'room_features',
+        'cancellation_policy',
+        'terms_conditions',
+        'special_notes'
     ];
 
     /**
@@ -52,11 +63,38 @@ class Hotel extends Model
     protected $fillable = [
         'id',
         'wp_id',
+        // Các trường đa ngôn ngữ
         'name',
         'address',
-        'phone',
-        'email',
-        'map',
+        'policy',
+        'description',
+        'short_description',
+        'amenities',
+        'facilities',
+        'services',
+        'nearby_attractions',
+        'transportation',
+        'dining_options',
+        'room_features',
+        'cancellation_policy',
+        'terms_conditions',
+        'special_notes',
+        // Các trường chung (không đa ngôn ngữ)
+        'phone_number',
+        'email_address',
+        'google_map',
+        'domain_name',
+        'fax',
+        'website',
+        'tax_code',
+        'business_license',
+        'star_rating',
+        'established_year',
+        'total_rooms',
+        'check_in_time',
+        'check_out_time',
+        'currency',
+        'timezone',
         'is_active',
         'wp_updated_at'
     ];
@@ -67,11 +105,27 @@ class Hotel extends Model
      * @var array
      */
     protected $casts = [
-        'name'    => 'array',
+        // Các trường đa ngôn ngữ (JSON)
+        'name' => 'array',
         'address' => 'array',
-        'phone'   => 'array',
-        'email'   => 'array',
-        'map'     => 'array'
+        'policy' => 'array',
+        'description' => 'array',
+        'short_description' => 'array',
+        'amenities' => 'array',
+        'facilities' => 'array',
+        'services' => 'array',
+        'nearby_attractions' => 'array',
+        'transportation' => 'array',
+        'dining_options' => 'array',
+        'room_features' => 'array',
+        'cancellation_policy' => 'array',
+        'terms_conditions' => 'array',
+        'special_notes' => 'array',
+        // Các trường khác
+        'star_rating' => 'integer',
+        'established_year' => 'integer',
+        'total_rooms' => 'integer',
+        'wp_updated_at' => 'datetime'
     ];
     /**
      * Một khách sạn có thể có nhiều loại phòng.

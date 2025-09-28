@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Booking;
 use App\Models\BookingDetail;
-use App\Models\RoomType;
+use App\Models\Roomtype;
 use App\Models\Promotion;
+use App\Mail\BookingConfirmation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use App\Services\BookingService;
 use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
@@ -36,11 +39,11 @@ class BookingController extends BaseApiController
         // 2. Validate request data (WordPress callApi wraps data in 'data' key)
         $validator = Validator::make($request->all(), [
             'data' => 'required|array',
-            'data.params' => 'required|array',
-            'data.params.check_in' => 'required|date|after_or_equal:today',
-            'data.params.check_out' => 'required|date|after_or_equal:data.params.check_in',
-            'data.params.adults' => 'required|integer|min:1',
-            'data.params.children' => 'nullable|integer|min:0',
+            'data' => 'required|array',
+            'data.check_in' => 'required|date|after_or_equal:today',
+            'data.check_out' => 'required|date|after_or_equal:data.check_in',
+            'data.adults' => 'required|integer|min:1',
+            'data.children' => 'nullable|integer|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -49,7 +52,7 @@ class BookingController extends BaseApiController
 
         try {
             // 3. Call service to find room combinations
-            $params = $request->input('data.params');
+            $params = $request->input('data');
             $data = $this->bookingService->findRoomCombinations(
                 $hotel->id,
                 $params['check_in'],
@@ -169,89 +172,201 @@ class BookingController extends BaseApiController
         }
 
         $validator = Validator::make($request->all(), [
-            'customer_name' => 'required|string|max:255',
-            'customer_email' => 'required|email|max:255',
-            'customer_phone' => 'required|string|max:20',
-            'customer_nationality' => 'nullable|string|max:3',
-            'room_type_id' => 'required|exists:room_types,id',
-            'check_in' => 'required|date|after:today',
-            'check_out' => 'required|date|after:check_in',
-            'guests' => 'required|integer|min:1|max:10',
-            'promotion_code' => 'nullable|string|max:50',
-            'notes' => 'nullable|string|max:1000',
-            'special_requests' => 'nullable|string|max:1000',
+            'data' => 'required|array',
+            'data.guest' => 'required|array',
+            'data.guest.first_name' => 'required|string|max:255',
+            'data.guest.last_name' => 'required|string|max:255',
+            'data.guest.email' => 'required|email|max:255',
+            'data.guest.phone' => 'required|string|max:20',
+            'data.guest.nationality' => 'nullable|string|max:3',
+            'data.booking_details' => 'required|array',
+            'data.booking_details.check_in' => 'required|date|after_or_equal:today',
+            'data.booking_details.check_out' => 'required|date|after:data.booking_details.check_in',
+            'data.booking_details.adults' => 'required|integer|min:1|max:10',
+            'data.booking_details.children' => 'nullable|integer|min:0',
+            'data.booking_details.rooms' => 'required|integer|min:1',
+            'data.rooms' => 'required|array|min:1',
+            'data.rooms.*.room_id' => 'required|string',
+            'data.rooms.*.quantity' => 'required|integer|min:1',
+            'data.rooms.*.promotion_id' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
             return $this->errorResponse('Validation failed', 400, $validator->errors());
         }
 
-        // Verify room type belongs to hotel
-        $roomType = RoomType::where('id', $request->room_type_id)
+        // Extract data from request
+        $data = $request->input('data');
+        $guest = $data['guest'];
+        $bookingDetails = $data['booking_details'];
+        $rooms = $data['rooms'];
+
+        // SECURITY: Validate guest information integrity
+        $this->validateGuestSecurity($guest);
+
+        // Parse dates
+        $checkIn = Carbon::parse($bookingDetails['check_in']);
+        $checkOut = Carbon::parse($bookingDetails['check_out']);
+
+        // Validate all rooms exist and belong to hotel
+        $roomIds = collect($rooms)->pluck('room_id')->unique();
+        $roomTypes = Roomtype::whereIn('id', $roomIds)
             ->where('hotel_id', $hotel->id)
-            ->where('is_active', true)
-            ->first();
+            ->get()
+            ->keyBy('id');
 
-        if (!$roomType) {
-            return $this->errorResponse('Room type not found or inactive', 404);
+        if ($roomTypes->count() !== $roomIds->count()) {
+            return $this->errorResponse('One or more room types not found or inactive', 404);
         }
 
-        // Check availability
-        $checkIn = Carbon::parse($request->check_in);
-        $checkOut = Carbon::parse($request->check_out);
+        // Validate all promotions if specified
+        $promotionIds = collect($rooms)->pluck('promotion_id')->filter()->unique();
+        if ($promotionIds->isNotEmpty()) {
+            $promotions = Promotion::whereIn('id', $promotionIds)
+                ->active()
+                ->forHotel($hotel->id)
+                ->get()
+                ->keyBy('id');
 
-        if (!$roomType->isAvailable($checkIn->toDateString(), $checkOut->toDateString(), $request->guests)) {
-            return $this->errorResponse('Room type not available for selected dates', 422);
+            if ($promotions->count() !== $promotionIds->count()) {
+                return $this->errorResponse('One or more promotions not found or invalid', 404);
+            }
         }
 
-        DB::beginTransaction();
+        \DB::beginTransaction();
         try {
-            // Calculate pricing
-            $pricingResult = $this->calculateBookingPricing($roomType, $checkIn, $checkOut, $request->promotion_code);
+            // SECURITY: Re-validate all data to prevent tampering
+            $this->validateBookingIntegrity($rooms, $roomTypes, $checkIn, $checkOut, $bookingDetails);
 
-            if (!$pricingResult['success']) {
-                return $this->errorResponse($pricingResult['message'], 422);
+            // Calculate total pricing for all rooms
+            $totalAmount = 0;
+            $totalDiscount = 0;
+            $totalTax = 0;
+            $bookingDetails_array = [];
+
+            foreach ($rooms as $roomData) {
+                $roomType = $roomTypes[$roomData['room_id']];
+                $quantity = (int) $roomData['quantity'];
+                $promotionId = $roomData['promotion_id'] ?? null;
+
+                // SECURITY: Double-check availability at booking time
+                if (!$roomType->isAvailable($checkIn->toDateString(), $checkOut->toDateString(), $bookingDetails['adults'])) {
+                    throw new \Exception("Room type {$roomType->name} not available for selected dates");
+                }
+
+                // SECURITY: Check inventory limits to prevent overbooking
+                // Note: Inventory field doesn't exist in current database structure
+                // $bookedQuantity = $this->getBookedQuantity($roomType->id, $checkIn, $checkOut);
+                // $availableQuantity = $roomType->inventory - $bookedQuantity;
+                // if ($quantity > $availableQuantity) {
+                //     throw new \Exception("Only {$availableQuantity} rooms available for {$roomType->name}");
+                // }
+
+                // SECURITY: Re-calculate pricing server-side (never trust client)
+                $pricingResult = $this->calculateBookingPricing($roomType, $checkIn, $checkOut, null, $promotionId);
+
+                if (!$pricingResult['success']) {
+                    throw new \Exception($pricingResult['message']);
+                }
+
+                $pricing = $pricingResult['data'];
+
+                // SECURITY: Validate promotion is still active and valid
+                if ($promotionId) {
+                    $this->validatePromotionSecurity($promotionId, $roomType, $checkIn, $checkOut);
+                }
+
+                // Multiply by quantity
+                $roomTotal = $pricing['total_amount'] * $quantity;
+                $roomDiscount = $pricing['discount_amount'] * $quantity;
+                $roomTax = $pricing['tax_amount'] * $quantity;
+
+                $totalAmount += $roomTotal;
+                $totalDiscount += $roomDiscount;
+                $totalTax += $roomTax;
+
+                $bookingDetails_array[] = [
+                    'roomtype_id' => $roomType->id,
+                    'quantity' => $quantity,
+                    'adults' => $bookingDetails['adults'] ?? 2,
+                    'children' => $bookingDetails['children'] ?? 0,
+                    'is_extra_bed_requested' => false,
+                    'price_per_night' => $pricing['rate_per_night'],
+                    'sub_total' => $pricing['subtotal'] * $quantity,
+                    'nights' => $pricing['nights'],
+                    'tax_amount' => $roomTax,
+                    'discount_amount' => $roomDiscount,
+                    'total_amount' => $roomTotal,
+                    'promotion_id' => $promotionId,
+                ];
             }
 
-            $pricing = $pricingResult['data'];
-
-            // Create booking
-            $bookingData = [
+            // Create main booking record
+            $booking = Booking::create([
                 'hotel_id' => $hotel->id,
-                'room_type_id' => $roomType->id,
-                'customer_name' => $request->customer_name,
-                'customer_email' => $request->customer_email,
-                'customer_phone' => $request->customer_phone,
-                'customer_nationality' => $request->customer_nationality,
+                'first_name' => $guest['first_name'],
+                'last_name' => $guest['last_name'],
+                'email' => $guest['email'],
+                'phone_number' => $guest['phone'],
+                'nationality' => $guest['nationality'] ?? null,
                 'check_in' => $checkIn->toDateString(),
                 'check_out' => $checkOut->toDateString(),
-                'nights' => $pricing['nights'],
-                'guests' => $request->guests,
-                'room_rate' => $pricing['rate_per_night'],
-                'subtotal' => $pricing['subtotal'],
-                'tax_amount' => $pricing['tax_amount'],
-                'discount_amount' => $pricing['discount_amount'],
-                'total_amount' => $pricing['total_amount'],
-                'promotion_code' => $pricing['promotion_code'],
-                'promotion_id' => $pricing['promotion_id'],
+                'nights' => $checkIn->diffInDays($checkOut),
+                'guests' => $bookingDetails['adults'] + ($bookingDetails['children'] ?? 0),
+                'total_amount' => $totalAmount,
+                'discount_amount' => $totalDiscount,
+                'tax_amount' => $totalTax,
                 'status' => 'pending',
-                'notes' => $request->notes,
-                'special_requests' => $request->special_requests,
-            ];
+            ]);
 
-            $booking = Booking::create($bookingData);
+            // Create booking details for each room
+            foreach ($bookingDetails_array as $detail) {
+                BookingDetail::create(array_merge($detail, [
+                    'booking_id' => $booking->id,
+                ]));
+            }
 
-            DB::commit();
+            \DB::commit();
 
-            return $this->successResponse(
-                $this->transformBooking($booking->load(['roomType', 'promotion'])),
-                'Booking created successfully',
-                201
-            );
+            // Send booking confirmation email
+            try {
+                // Prepare booking details for email
+                $emailBookingDetails = [];
+                foreach ($bookingDetails_array as $detail) {
+                    $roomType = $roomTypes[$detail['roomtype_id']];
+                    $emailBookingDetails[] = array_merge($detail, [
+                        'roomtype_name' => $roomType->title ?? $roomType->name,
+                    ]);
+                }
+
+                // Send email in background queue
+                Mail::to($booking->email)->queue(
+                    new BookingConfirmation($booking, $hotel, $emailBookingDetails)
+                );
+
+                \Log::info('Booking confirmation email queued', [
+                    'booking_id' => $booking->id,
+                    'email' => $booking->email
+                ]);
+            } catch (\Exception $emailException) {
+                // Log email error but don't fail the booking
+                \Log::error('Failed to send booking confirmation email', [
+                    'booking_id' => $booking->id,
+                    'email' => $booking->email,
+                    'error' => $emailException->getMessage()
+                ]);
+            }
+
+            return $this->successResponse([
+                'booking_id' => $booking->id,
+                'booking_number' => $booking->booking_number,
+                'total_amount' => $totalAmount,
+                'status' => 'pending',
+            ], 'Booking created successfully', 201);
         } catch (\Exception $e) {
-            DB::rollBack();
+            \DB::rollBack();
             \Log::error('Booking creation failed', ['error' => $e->getMessage(), 'request' => $request->all()]);
-            return $this->errorResponse('Failed to create booking', 500);
+            return $this->errorResponse('Failed to create booking: ' . $e->getMessage(), 500);
         }
     }
 
@@ -508,7 +623,7 @@ class BookingController extends BaseApiController
     /**
      * Calculate booking pricing
      */
-    private function calculateBookingPricing($roomType, $checkIn, $checkOut, $promotionCode = null)
+    private function calculateBookingPricing($roomType, $checkIn, $checkOut, $promotionCode = null, $promotionIdParam = null)
     {
         $nights = $checkIn->diffInDays($checkOut);
         if ($nights <= 0) {
@@ -527,7 +642,7 @@ class BookingController extends BaseApiController
         $promotionId = null;
         $promotion = null;
 
-        // Apply promotion if provided
+        // Apply promotion if provided (either by code or ID)
         if ($promotionCode) {
             $promotion = Promotion::active()
                 ->forHotel($roomType->hotel_id)
@@ -549,6 +664,28 @@ class BookingController extends BaseApiController
                 }
             } else {
                 return ['success' => false, 'message' => 'Invalid promotion code'];
+            }
+        } elseif ($promotionIdParam) {
+            $promotion = Promotion::active()
+                ->forHotel($roomType->hotel_id)
+                ->where('id', $promotionIdParam)
+                ->first();
+
+            if ($promotion) {
+                $validationResult = $promotion->isValid(
+                    $checkIn->toDateString(),
+                    $checkOut->toDateString(),
+                    $roomType->id
+                );
+
+                if ($validationResult['valid']) {
+                    $discountAmount = $promotion->calculateDiscount($subtotal, $nights);
+                    $promotionId = $promotion->id;
+                } else {
+                    return ['success' => false, 'message' => $validationResult['message']];
+                }
+            } else {
+                return ['success' => false, 'message' => 'Invalid promotion ID'];
             }
         }
 
@@ -625,5 +762,179 @@ class BookingController extends BaseApiController
         }
 
         return $data;
+    }
+
+    /**
+     * SECURITY: Validate booking integrity to prevent data tampering
+     */
+    private function validateBookingIntegrity($rooms, $roomTypes, $checkIn, $checkOut, $bookingDetails)
+    {
+        // Validate date ranges haven't been manipulated
+        if ($checkIn->toDateString() < now()->toDateString()) {
+            throw new \Exception('Check-in date cannot be in the past');
+        }
+
+        if ($checkOut->lte($checkIn)) {
+            throw new \Exception('Check-out must be after check-in');
+        }
+
+        // Validate reasonable date range (max 30 days)
+        if ($checkIn->diffInDays($checkOut) > 30) {
+            throw new \Exception('Booking period cannot exceed 30 days');
+        }
+
+        // Validate guest counts
+        if ($bookingDetails['adults'] < 1 || $bookingDetails['adults'] > 20) {
+            throw new \Exception('Invalid number of adults');
+        }
+
+        if (($bookingDetails['children'] ?? 0) < 0 || ($bookingDetails['children'] ?? 0) > 10) {
+            throw new \Exception('Invalid number of children');
+        }
+
+        // Validate room quantities
+        foreach ($rooms as $roomData) {
+            $quantity = (int) $roomData['quantity'];
+            if ($quantity < 1 || $quantity > 10) {
+                throw new \Exception('Invalid room quantity');
+            }
+
+            // Validate room capacity vs guest count
+            $roomType = $roomTypes[$roomData['room_id']];
+            $maxCapacity = $roomType->max_guests * $quantity;
+            $totalGuests = $bookingDetails['adults'] + ($bookingDetails['children'] ?? 0);
+
+            if ($totalGuests > $maxCapacity) {
+                throw new \Exception("Room {$roomType->name} cannot accommodate {$totalGuests} guests");
+            }
+        }
+
+        \Log::info('Booking integrity validation passed', [
+            'check_in' => $checkIn->toDateString(),
+            'check_out' => $checkOut->toDateString(),
+            'guests' => $bookingDetails['adults'] + ($bookingDetails['children'] ?? 0),
+            'rooms_count' => count($rooms)
+        ]);
+    }
+
+    /**
+     * SECURITY: Get current booked quantity for a room type
+     */
+    private function getBookedQuantity($roomTypeId, $checkIn, $checkOut)
+    {
+        return BookingDetail::whereHas('booking', function ($query) use ($checkIn, $checkOut) {
+            $query->where('status', '!=', 'cancelled')
+                ->where(function ($q) use ($checkIn, $checkOut) {
+                    $q->whereBetween('check_in', [$checkIn, $checkOut])
+                        ->orWhereBetween('check_out', [$checkIn, $checkOut])
+                        ->orWhere(function ($q2) use ($checkIn, $checkOut) {
+                            $q2->where('check_in', '<=', $checkIn)
+                                ->where('check_out', '>=', $checkOut);
+                        });
+                });
+        })
+            ->where('room_type_id', $roomTypeId)
+            ->sum('quantity');
+    }
+
+    /**
+     * SECURITY: Validate promotion security
+     */
+    private function validatePromotionSecurity($promotionId, $roomType, $checkIn, $checkOut)
+    {
+        $promotion = Promotion::find($promotionId);
+
+        if (!$promotion) {
+            throw new \Exception('Promotion not found');
+        }
+
+        if (!$promotion->is_active) {
+            throw new \Exception('Promotion is no longer active');
+        }
+
+        if ($promotion->hotel_id !== $roomType->hotel_id) {
+            throw new \Exception('Promotion does not belong to this hotel');
+        }
+
+        // Check date validity
+        $now = now();
+        if ($now->lt($promotion->start_date) || $now->gt($promotion->end_date)) {
+            throw new \Exception('Promotion is not valid for current date');
+        }
+
+        // Check usage limits
+        if ($promotion->max_uses && $promotion->current_uses >= $promotion->max_uses) {
+            throw new \Exception('Promotion usage limit exceeded');
+        }
+
+        // Check minimum stay requirements
+        $nights = $checkIn->diffInDays($checkOut);
+        if ($promotion->min_stay && $nights < $promotion->min_stay) {
+            throw new \Exception("Promotion requires minimum {$promotion->min_stay} nights stay");
+        }
+
+        \Log::info('Promotion security validation passed', [
+            'promotion_id' => $promotionId,
+            'promotion_code' => $promotion->code,
+            'room_type_id' => $roomType->id
+        ]);
+    }
+
+    /**
+     * SECURITY: Validate guest information security
+     */
+    private function validateGuestSecurity($guest)
+    {
+        // Sanitize and validate names
+        $firstName = trim($guest['first_name']);
+        $lastName = trim($guest['last_name']);
+
+        if (empty($firstName) || empty($lastName)) {
+            throw new \Exception('Guest name cannot be empty');
+        }
+
+        if (strlen($firstName) > 100 || strlen($lastName) > 100) {
+            throw new \Exception('Guest name too long');
+        }
+
+        // Check for suspicious characters in names
+        if (
+            !preg_match('/^[a-zA-ZÀ-ỹ\s\-\'\.]+$/u', $firstName) ||
+            !preg_match('/^[a-zA-ZÀ-ỹ\s\-\'\.]+$/u', $lastName)
+        ) {
+            throw new \Exception('Invalid characters in guest name');
+        }
+
+        // Validate email format
+        if (!filter_var($guest['email'], FILTER_VALIDATE_EMAIL)) {
+            throw new \Exception('Invalid email format');
+        }
+
+        // Check for disposable email domains (basic protection)
+        $disposableDomains = ['10minutemail.com', 'tempmail.org', 'guerrillamail.com'];
+        $emailDomain = substr(strrchr($guest['email'], "@"), 1);
+        if (in_array($emailDomain, $disposableDomains)) {
+            throw new \Exception('Disposable email addresses are not allowed');
+        }
+
+        // Validate phone number format
+        $phone = preg_replace('/[^\d+]/', '', $guest['phone']);
+        if (strlen($phone) < 10 || strlen($phone) > 15) {
+            throw new \Exception('Invalid phone number format');
+        }
+
+        // Validate nationality code if provided
+        if (!empty($guest['nationality'])) {
+            if (!preg_match('/^[A-Z]{2,3}$/', $guest['nationality'])) {
+                throw new \Exception('Invalid nationality code format');
+            }
+        }
+
+        // Log guest validation
+        \Log::info('Guest security validation passed', [
+            'email_domain' => $emailDomain,
+            'phone_length' => strlen($phone),
+            'nationality' => $guest['nationality'] ?? 'not_provided'
+        ]);
     }
 }

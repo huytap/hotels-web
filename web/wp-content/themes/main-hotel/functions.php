@@ -92,7 +92,6 @@ function custom_menu_link_attributes($atts, $item, $args, $depth)
 }
 add_filter('nav_menu_link_attributes', 'custom_menu_link_attributes', 10, 4);
 
-
 ///cấu hình site con
 // ======== Thêm menu chính & submenu ========
 add_action('admin_menu', function () {

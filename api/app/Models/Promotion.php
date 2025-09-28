@@ -39,6 +39,30 @@ class Promotion extends Model
 
     public $translatable = ['name', 'description'];
 
+    /**
+     * Scope to get only active promotions
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true)
+                    ->where(function ($q) {
+                        $q->whereNull('start_date')
+                          ->orWhere('start_date', '<=', now());
+                    })
+                    ->where(function ($q) {
+                        $q->whereNull('end_date')
+                          ->orWhere('end_date', '>=', now());
+                    });
+    }
+
+    /**
+     * Scope to filter promotions by hotel
+     */
+    public function scopeForHotel($query, $hotelId)
+    {
+        return $query->where('hotel_id', $hotelId);
+    }
+
     // Quan hệ một-một với Hotel
     public function hotel()
     {
@@ -73,6 +97,123 @@ class Promotion extends Model
         $validDayField = 'valid_' . $dayOfWeek;
 
         return $this->getAttribute($validDayField) ?? true;
+    }
+
+    /**
+     * Validate promotion for booking dates and room type
+     */
+    public function isValid($checkIn, $checkOut, $roomTypeId = null)
+    {
+        $checkInDate = is_string($checkIn) ? \Carbon\Carbon::parse($checkIn) : $checkIn;
+        $checkOutDate = is_string($checkOut) ? \Carbon\Carbon::parse($checkOut) : $checkOut;
+
+        // Check if promotion is active
+        if (!$this->is_active) {
+            return [
+                'valid' => false,
+                'reason' => 'Promotion is not active'
+            ];
+        }
+
+        // Check promotion date range
+        if ($this->start_date && $checkInDate->lt(\Carbon\Carbon::parse($this->start_date))) {
+            return [
+                'valid' => false,
+                'reason' => 'Check-in date is before promotion start date'
+            ];
+        }
+
+        if ($this->end_date && $checkOutDate->gt(\Carbon\Carbon::parse($this->end_date))) {
+            return [
+                'valid' => false,
+                'reason' => 'Check-out date is after promotion end date'
+            ];
+        }
+
+        // Check each date in the stay period
+        $currentDate = $checkInDate->copy();
+        while ($currentDate->lt($checkOutDate)) {
+            if (!$this->isValidForDate($currentDate)) {
+                return [
+                    'valid' => false,
+                    'reason' => 'Promotion not valid for date: ' . $currentDate->format('Y-m-d')
+                ];
+            }
+            $currentDate->addDay();
+        }
+
+        // Check room type eligibility if specified
+        if ($roomTypeId) {
+            $isEligible = $this->roomtypes()->where('roomtypes.id', $roomTypeId)->exists();
+            if (!$isEligible) {
+                return [
+                    'valid' => false,
+                    'reason' => 'Promotion not applicable to this room type'
+                ];
+            }
+        }
+
+        // Check minimum/maximum stay requirements
+        $nights = $checkInDate->diffInDays($checkOutDate);
+        if ($this->min_stay && $nights < $this->min_stay) {
+            return [
+                'valid' => false,
+                'reason' => "Minimum stay requirement: {$this->min_stay} nights"
+            ];
+        }
+
+        if ($this->max_stay && $nights > $this->max_stay) {
+            return [
+                'valid' => false,
+                'reason' => "Maximum stay limit: {$this->max_stay} nights"
+            ];
+        }
+
+        return [
+            'valid' => true,
+            'reason' => null
+        ];
+    }
+
+    /**
+     * Calculate discount amount based on promotion type and value
+     */
+    public function calculateDiscount($subtotal, $nights = 1)
+    {
+        switch ($this->type) {
+            case 'percentage':
+                // Percentage discount
+                $discountAmount = ($subtotal * $this->value) / 100;
+                break;
+
+            case 'fixed':
+                // Fixed amount discount
+                $discountAmount = $this->value;
+                break;
+
+            case 'fixed_per_night':
+                // Fixed amount per night
+                $discountAmount = $this->value * $nights;
+                break;
+
+            case 'buy_x_get_y':
+                // Buy X nights get Y nights free (simplified calculation)
+                if ($nights >= 3) { // Example: stay 3+ nights get 1 night free
+                    $freeNights = floor($nights / 3);
+                    $nightlyRate = $subtotal / $nights;
+                    $discountAmount = $freeNights * $nightlyRate;
+                } else {
+                    $discountAmount = 0;
+                }
+                break;
+
+            default:
+                $discountAmount = 0;
+                break;
+        }
+
+        // Ensure discount doesn't exceed subtotal
+        return min($discountAmount, $subtotal);
     }
 
     /**

@@ -24,12 +24,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // Temporary bypass middleware for development testing
+// Route::middleware('auth.api_token')->group([], function () {
 Route::group([], function () {
     Route::prefix('sync')->group(function () {
         Route::put('/hotels', [SyncController::class, 'updateHotel']);
         Route::put('/rooms', [SyncController::class, 'updateRooms']);
         //get list
         Route::get('/roomtypes', [HotelController::class, 'getRooms']);
+        Route::get('/roomtypes/{id}', [HotelController::class, 'getRoomDetail']);
         Route::get('/room-rates', [HotelController::class, 'getRoomRates']);
     });
     //promotion

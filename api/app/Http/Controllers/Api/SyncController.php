@@ -29,25 +29,73 @@ class SyncController extends Controller
             // Lấy WP_ID và thời gian cập nhật cuối cùng từ API
             $wpId = $wpData['wp_id'] ?? null;
             $wpUpdatedAt = $wpData['last_updated'] ?? null;
-            // Xây dựng mảng dữ liệu dịch thuật từ dữ liệu API
+            // Danh sách các trường đa ngôn ngữ
+            $translatableFields = [
+                'name', 'address', 'policy', 'description', 'short_description',
+                'amenities', 'facilities', 'services', 'nearby_attractions',
+                'transportation', 'dining_options', 'room_features',
+                'cancellation_policy', 'terms_conditions', 'special_notes'
+            ];
+
+            // Khởi tạo mảng dữ liệu đa ngôn ngữ
             $translatableData = [];
-            foreach (['name', 'address', 'phone', 'email', 'map'] as $key) {
+            foreach ($translatableFields as $key) {
                 $translatableData[$key] = [];
             }
 
-            foreach ($wpData['data'] as $hotel) {
-                $lang = $hotel['lang'];
-                foreach (['name', 'address', 'phone', 'email', 'map'] as $key) {
-                    $translatableData[$key][$lang] = $hotel[$key];
+            // Dữ liệu chung (không đa ngôn ngữ) - lấy từ record đầu tiên
+            $commonData = [];
+            if (!empty($wpData['data'])) {
+                $firstRecord = $wpData['data'][0];
+                $commonData = [
+                    'phone_number' => $firstRecord['phone_number'] ?? null,
+                    'email_address' => $firstRecord['email_address'] ?? null,
+                    'google_map' => $firstRecord['google_map'] ?? null,
+                    'domain_name' => $firstRecord['domain_name'] ?? null,
+                    'fax' => $firstRecord['fax'] ?? null,
+                    'website' => $firstRecord['website'] ?? null,
+                    'tax_code' => $firstRecord['tax_code'] ?? null,
+                    'business_license' => $firstRecord['business_license'] ?? null,
+                    'star_rating' => $firstRecord['star_rating'] ?? null,
+                    'established_year' => $firstRecord['established_year'] ?? null,
+                    'total_rooms' => $firstRecord['total_rooms'] ?? null,
+                    'check_in_time' => $firstRecord['check_in_time'] ?? '14:00',
+                    'check_out_time' => $firstRecord['check_out_time'] ?? '12:00',
+                    'currency' => $firstRecord['currency'] ?? 'VND',
+                    'timezone' => $firstRecord['timezone'] ?? 'Asia/Ho_Chi_Minh',
+                ];
+            }
+
+            // Xử lý dữ liệu đa ngôn ngữ từ tất cả các record
+            foreach ($wpData['data'] as $record) {
+                $lang = $record['lang'] ?? 'vi';
+                foreach ($translatableFields as $key) {
+                    if (isset($record[$key])) {
+                        $translatableData[$key][$lang] = $record[$key];
+                    }
                 }
             }
-            // 2. Tìm hoặc tạo mới bản ghi khách sạn
+
+            // Tìm hoặc tạo mới bản ghi khách sạn
             $hotel = Hotel::firstOrNew(['wp_id' => $wpId]);
-            // Gán dữ liệu có thể dịch
+
+            // Gán dữ liệu đa ngôn ngữ
             foreach ($translatableData as $key => $translations) {
-                $hotel->setTranslations($key, $translations);
+                if (!empty($translations)) {
+                    $hotel->setTranslations($key, $translations);
+                }
             }
+
+            // Gán dữ liệu chung
+            foreach ($commonData as $key => $value) {
+                if ($value !== null) {
+                    $hotel->$key = $value;
+                }
+            }
+
+            // Gán các trường bắt buộc
             $hotel->wp_id = $wpId;
+
             // Gán thời gian cập nhật từ WordPress nếu có
             if ($wpUpdatedAt) {
                 $hotel->wp_updated_at = Carbon::parse($wpUpdatedAt);
@@ -55,7 +103,7 @@ class SyncController extends Controller
                 $hotel->wp_updated_at = now();
             }
 
-            // 3. Lưu bản ghi
+            // Lưu bản ghi
             $hotel->save();
 
             return response()->json(['message' => 'Hotel information synchronized successfully.'], 200);

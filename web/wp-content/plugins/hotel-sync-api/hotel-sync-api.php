@@ -20,6 +20,7 @@ require_once(HOTEL_SYNC_API_PATH . 'includes/api-config.php');
 require_once(HOTEL_SYNC_API_PATH . 'includes/api-call.php');
 require_once(HOTEL_SYNC_API_PATH . 'includes/api-hotels.php');
 require_once(HOTEL_SYNC_API_PATH . 'includes/api-rooms.php');
+//require_once(HOTEL_SYNC_API_PATH . 'includes/api-return-fe.php');
 // 1. Đảm bảo header Authorization được truyền qua, đặc biệt trên Apache
 add_filter('rest_pre_serve_request', function ($value) {
     if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
@@ -56,6 +57,13 @@ function hotel_sync_register_rest_routes()
         'methods' => 'GET',
         'callback' => 'hotel_sync_get_rooms',
         'permission_callback' => 'hotel_sync_verify_api_permission_callback',
+    ]);
+
+    // Endpoint mới cho React frontend: domain → wp_id + token
+    register_rest_route('hotel-info/v1', '/domain-config', [
+        'methods' => 'GET',
+        'callback' => 'get_hotel_config_by_domain',
+        'permission_callback' => '__return_true', // Public endpoint for frontend
     ]);
 }
 add_action('rest_api_init', 'hotel_sync_register_rest_routes');
