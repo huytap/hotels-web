@@ -10,27 +10,34 @@ use App\Models\Hotel;
 use App\Models\Promotion;
 use App\Models\RoomRate;
 use App\Models\Roomtype;
+use Illuminate\Http\JsonResponse;
 
 class HotelController extends BaseApiController
 {
     public function getRooms(Request $request)
     {
-        $wpId = $request->input('wp_id');
-        if (!$wpId) {
-            return response()->json(['error' => 'wp_id is required.'], 400);
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
         }
 
-        $hotelId = HotelHelper::getHotelIdByWpId($wpId);
-        if (!$hotelId) {
-            return response()->json(['error' => 'Invalid wp_id. Hotel not found.'], 404);
-        }
-
-        $roomtypes = Roomtype::where('hotel_id', $hotelId)
-            ->where('is_active', true)
+        $roomtypes = Roomtype::where('hotel_id', $hotel->id)
             ->select([
-                'id', 'title', 'description', 'area', 'adult_capacity', 'child_capacity',
-                'bed_type', 'amenities', 'room_amenities', 'bathroom_amenities', 'view',
-                'gallery_images', 'featured_image', 'base_price', 'is_extra_bed_available'
+                'id',
+                'title',
+                'description',
+                'area',
+                'adult_capacity',
+                'child_capacity',
+                'bed_type',
+                'amenities',
+                'room_amenities',
+                'bathroom_amenities',
+                'view',
+                'gallery_images',
+                'featured_image',
+                'price',
+                'is_extra_bed_available'
             ])
             ->get();
 

@@ -55,10 +55,10 @@ function callApi($endpoint, $method, $data = [])
             $api_url = add_query_arg($query_data, $api_url);
             $args = [
                 'method' => strtoupper($method),
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $token,
-                    'Accept' => 'application/json',
-                ],
+                // 'headers' => [
+                //     'Authorization' => 'Bearer ' . $token,
+                //     'Accept' => 'application/json',
+                // ],
                 'timeout' => 45,
             ];
             $response = wp_remote_request($api_url, $args);
@@ -80,18 +80,18 @@ function callApi($endpoint, $method, $data = [])
                 error_log('API Call failed: JSON encoding failed - ' . json_last_error_msg());
                 return new WP_Error('json_encode_failed', 'Failed to encode data to JSON: ' . json_last_error_msg());
             }
-            // print_r($json_body);
-            // die;
             $args = [
                 'method' => strtoupper($method), // Use the actual method passed
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $token,
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                ],
+                // 'headers' => [
+                //     'Authorization' => 'Bearer ' . $token,
+                //     'Content-Type' => 'application/json',
+                //     'Accept' => 'application/json',
+                // ],
                 'body' => $json_body,
                 'timeout' => 45
             ];
+            // print_r($json_body);
+            // die;
             $response = wp_remote_request($api_url, $args);
         } else {
             // Unsupported method

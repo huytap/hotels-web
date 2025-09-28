@@ -32,12 +32,13 @@ function hotel_sync_get_rooms($post_id)
         return;
     }
     // Lấy ID đồng bộ chung từ post meta
-    $sync_id = get_post_meta($post_id, '_hotel_room_sync_id', true);
-    // Nếu chưa có ID đồng bộ, tạo một cái mới
-    if (empty($sync_id)) {
-        $sync_id = wp_generate_uuid4(); // Hoặc hàm tạo ID khác
-        update_post_meta($post_id, '_hotel_room_sync_id', $sync_id);
-    }
+    // $sync_id = get_post_meta($post_id, '_hotel_room_sync_id', true);
+    // // Nếu chưa có ID đồng bộ, tạo một cái mới
+    // if (empty($sync_id)) {
+    //     $sync_id = wp_generate_uuid4(); // Hoặc hàm tạo ID khác
+    //     update_post_meta($post_id, '_hotel_room_sync_id', $sync_id);
+    // }
+    $sync_id = get_translation_sync_id_polylang($post_id);
     $current_blog_id = get_current_blog_id();
     $last_updated = $post->post_modified_gmt;
 
@@ -109,4 +110,13 @@ function hotel_sync_get_rooms($post_id)
         'common'  => $common_data,
     ];
     callApi('rooms', 'PUT', $data);
+}
+function get_translation_sync_id_polylang($post_id, $target_lang = 'en')
+{
+    if (function_exists('pll_get_post')) {
+        // pll_get_post sẽ tìm ID của post có cùng nhóm dịch
+        $translated_post_id = pll_get_post($post_id, $target_lang);
+        return $translated_post_id;
+    }
+    return $post_id; // Trả về ID hiện tại nếu Polylang không khả dụng
 }

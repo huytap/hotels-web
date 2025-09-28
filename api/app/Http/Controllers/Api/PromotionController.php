@@ -87,7 +87,6 @@ class PromotionController extends BaseApiController
             return $hotel;
         }
         $wpData = $request->json()->all();
-
         $validator = Validator::make($wpData, [
             'data' => 'required|array',
             'data.promotion_code' => 'required|string|unique:promotions,promotion_code',
@@ -139,21 +138,20 @@ class PromotionController extends BaseApiController
                 'end_date' => $wpData['end_date'],
                 'is_active' => $wpData['is_active'] ?? true,
                 'booking_days_in_advance' => $wpData['booking_days_in_advance'] ?? null,
-                'min_stay' => $wpData['min_stay'] ?? null,
-                'max_stay' => $wpData['max_stay'] ?? null,
+                'min_stay' => empty($wpData['min_stay']) ? null : $wpData['min_stay'],
+                'max_stay' => empty($wpData['max_stay']) ? null : $wpData['max_stay'],
                 // Blackout dates
-                'blackout_start_date' => $wpData['blackout_start_date'] ?? null,
-                'blackout_end_date' => $wpData['blackout_end_date'] ?? null,
+                'blackout_start_date' => empty($wpData['blackout_start_date']) ? null : $wpData['blackout_start_date'],
+                'blackout_end_date' => empty($wpData['blackout_end_date']) ? null : $wpData['blackout_end_date'],
                 // Valid weekdays
-                'valid_monday' => $wpData['valid_monday'] ?? true,
-                'valid_tuesday' => $wpData['valid_tuesday'] ?? true,
-                'valid_wednesday' => $wpData['valid_wednesday'] ?? true,
-                'valid_thursday' => $wpData['valid_thursday'] ?? true,
-                'valid_friday' => $wpData['valid_friday'] ?? true,
-                'valid_saturday' => $wpData['valid_saturday'] ?? true,
-                'valid_sunday' => $wpData['valid_sunday'] ?? true,
+                'valid_monday' => empty($wpData['valid_monday']) ? false : $wpData['valid_monday'],
+                'valid_tuesday' => empty($wpData['valid_tuesday']) ? false : $wpData['valid_tuesday'],
+                'valid_wednesday' => empty($wpData['valid_wednesday']) ? false : $wpData['valid_wednesday'],
+                'valid_thursday' => empty($wpData['valid_thursday']) ? false : $wpData['valid_thursday'],
+                'valid_friday' => empty($wpData['valid_friday']) ? false : $wpData['valid_friday'],
+                'valid_saturday' => empty($wpData['valid_saturday']) ? false : $wpData['valid_saturday'],
+                'valid_sunday' => empty($wpData['valid_sunday']) ? false : $wpData['valid_sunday'],
             ]);
-
             $promotion->roomtypes()->sync($wpData['roomtypes']);
 
             DB::commit();
@@ -213,6 +211,8 @@ class PromotionController extends BaseApiController
 
         // Xác thực dữ liệu đầu vào:
         $wpData = $request->json()->all();
+        //\Log::info($wpData);
+
         $validator = Validator::make($wpData, [
             //'promotion_code' => ['required', 'string', Rule::unique('promotions')->ignore($promotion->id)],
             'data' => 'required|array',
@@ -259,19 +259,19 @@ class PromotionController extends BaseApiController
                 'end_date' => $wpData['end_date'],
                 'is_active' => $wpData['is_active'] ?? true,
                 'booking_days_in_advance' => $wpData['booking_days_in_advance'] ?? null,
-                'min_stay' => $wpData['min_stay'] ?? null,
-                'max_stay' => $wpData['max_stay'] ?? null,
+                'min_stay' => empty($wpData['min_stay']) ? null : $wpData['min_stay'],
+                'max_stay' => empty($wpData['max_stay']) ? null : $wpData['max_stay'],
                 // Blackout dates
-                'blackout_start_date' => $wpData['blackout_start_date'] ?? null,
-                'blackout_end_date' => $wpData['blackout_end_date'] ?? null,
+                'blackout_start_date' => empty($wpData['blackout_start_date']) ? null : $wpData['blackout_start_date'],
+                'blackout_end_date' => empty($wpData['blackout_end_date']) ? null : $wpData['blackout_end_date'],
                 // Valid weekdays
-                'valid_monday' => $wpData['valid_monday'] ?? true,
-                'valid_tuesday' => $wpData['valid_tuesday'] ?? true,
-                'valid_wednesday' => $wpData['valid_wednesday'] ?? true,
-                'valid_thursday' => $wpData['valid_thursday'] ?? true,
-                'valid_friday' => $wpData['valid_friday'] ?? true,
-                'valid_saturday' => $wpData['valid_saturday'] ?? true,
-                'valid_sunday' => $wpData['valid_sunday'] ?? true,
+                'valid_monday' => empty($wpData['valid_monday']) ? false : $wpData['valid_monday'],
+                'valid_tuesday' => empty($wpData['valid_tuesday']) ? false : $wpData['valid_tuesday'],
+                'valid_wednesday' => empty($wpData['valid_wednesday']) ? false : $wpData['valid_wednesday'],
+                'valid_thursday' => empty($wpData['valid_thursday']) ? false : $wpData['valid_thursday'],
+                'valid_friday' => empty($wpData['valid_friday']) ? false : $wpData['valid_friday'],
+                'valid_saturday' => empty($wpData['valid_saturday']) ? false : $wpData['valid_saturday'],
+                'valid_sunday' => empty($wpData['valid_sunday']) ? false : $wpData['valid_sunday'],
             ]);
 
             // Cập nhật quan hệ nhiều-nhiều với bảng room_types

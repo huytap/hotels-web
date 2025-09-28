@@ -98,4 +98,9 @@ class Roomtype extends Model
     {
         return $this->adult_capacity + $this->child_capacity;
     }
+
+    // public function scopeActive($query)
+    // {
+    //     return $query->where('is_active', true);
+    // }
 }

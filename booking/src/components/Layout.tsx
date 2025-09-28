@@ -121,8 +121,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 />
               )}
               <div>
-                <h1 className="text-2xl font-bold" style={{ color: themeData?.primary_color || hotel?.settings.theme.primaryColor || '#3b82f6' }}>
-                  🏨 {hotelConfig?.hotel_name || hotel?.name || 'Hệ Thống Đặt Phòng Khách Sạn'}
+                <h1 className="text-2xl font-bold text-left" style={{ color: themeData?.primary_color || hotel?.settings.theme.primaryColor || '#3b82f6' }}>
+                  {hotelConfig?.hotel_name || hotel?.name || 'Hệ Thống Đặt Phòng Khách Sạn'}
                 </h1>
                 {(hotelConfig?.address || hotel?.settings.contact.address) && (
                   <p className="text-sm text-gray-600">{hotelConfig?.address || hotel?.settings.contact.address}</p>
@@ -147,26 +147,32 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       </option>
                     ))}
                   </select>
-                  {languageInfo.admin_language && (
-                    <span className="text-xs text-gray-500">
-                      (Admin: {languageInfo.admin_language.toUpperCase()})
-                    </span>
-                  )}
                 </div>
               )}
-
-              {/* Phone Contact */}
-              {(hotelConfig?.contact?.phone || hotel?.settings.contact.phone) && (
-                <div className="text-right">
-                  <p className="text-sm text-gray-600">Hotline</p>
-                  <a
-                    href={`tel:${hotelConfig?.contact?.phone || hotel?.settings.contact.phone}`}
-                    className="text-lg font-semibold text-blue-600 hover:text-blue-800"
-                  >
-                    {hotelConfig?.contact?.phone || hotel?.settings.contact.phone}
-                  </a>
-                </div>
-              )}
+              <div>
+                {/* Phone Contact */}
+                {(hotelConfig?.contact?.phone || hotel?.settings.contact.phone) && (
+                  <div className="text-right">
+                    <p className="text-sm text-gray-600">Hotline</p>
+                    <a
+                      href={`tel:${hotelConfig?.contact?.phone || hotel?.settings.contact.phone}`}
+                      className="text-lg font-semibold text-blue-600 hover:text-blue-800"
+                    >
+                      {hotelConfig?.contact?.phone || hotel?.settings.contact.phone}
+                    </a>
+                  </div>
+                )}{/* Phone Contact */}
+                {(hotelConfig?.contact?.email || hotel?.settings.contact.email) && (
+                  <div className="text-right">
+                    <a
+                      href={`tel:${hotelConfig?.contact?.email || hotel?.settings.contact.email}`}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      {hotelConfig?.contact?.email || hotel?.settings.contact.email}
+                    </a>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <nav className="mt-2">
@@ -187,8 +193,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        {children}
+      <main className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          {children}
+        </div>
       </main>
     </div>
   );

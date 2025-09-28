@@ -2033,3 +2033,82 @@
 [28-Sep-2025 02:30:41 UTC]   Automatic plugin updates starting...
 [28-Sep-2025 02:30:41 UTC]   Automatic plugin updates complete.
 [28-Sep-2025 02:30:41 UTC] Automatic updates complete.
+[28-Sep-2025 03:29:31 UTC] API Call success: PUT rooms - HTTP 200
+[28-Sep-2025 03:29:41 UTC] API Call success: PUT rooms - HTTP 200
+[28-Sep-2025 03:30:25 UTC] API Call success: GET promotions - HTTP 200
+[28-Sep-2025 03:30:28 UTC] API Call success: GET roomtypes - HTTP 500
+[28-Sep-2025 03:30:28 UTC] API returned error: HTTP 500 - SQLSTATE[42S22]: Column not found: 1054 Unknown column 'base_price' in 'field list' (Connection: mysql, SQL: select `id`, `title`, `description`, `area`, `adult_capacity`, `child_capacity`, `bed_type`, `amenities`, `room_amenities`, `bathroom_amenities`, `view`, `gallery_images`, `featured_image`, `base_price`, `is_extra_bed_available` from `roomtypes` where `hotel_id` = 1 and `is_active` = 1)
+[28-Sep-2025 03:30:29 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 03:31:04 UTC] API Call success: GET roomtypes - HTTP 500
+[28-Sep-2025 03:31:04 UTC] API returned error: HTTP 500 - SQLSTATE[42S22]: Column not found: 1054 Unknown column 'base_price' in 'field list' (Connection: mysql, SQL: select `id`, `title`, `description`, `area`, `adult_capacity`, `child_capacity`, `bed_type`, `amenities`, `room_amenities`, `bathroom_amenities`, `view`, `gallery_images`, `featured_image`, `base_price`, `is_extra_bed_available` from `roomtypes` where `hotel_id` = 1 and `is_active` = 1)
+[28-Sep-2025 03:31:05 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 03:31:57 UTC] API Call success: GET roomtypes - HTTP 500
+[28-Sep-2025 03:31:57 UTC] API returned error: HTTP 500
+[28-Sep-2025 03:31:57 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 03:33:50 UTC] API Call success: GET roomtypes - HTTP 500
+[28-Sep-2025 03:33:50 UTC] API returned error: HTTP 500
+[28-Sep-2025 03:33:50 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 03:46:03 UTC] API Call success: GET roomtypes - HTTP 500
+[28-Sep-2025 03:46:03 UTC] API returned error: HTTP 500
+[28-Sep-2025 03:46:04 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 03:46:20 UTC] API Call success: GET roomtypes - HTTP 500
+[28-Sep-2025 03:46:20 UTC] API returned error: HTTP 500
+[28-Sep-2025 03:46:21 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 03:51:09 UTC] API Call success: GET roomtypes - HTTP 200
+[28-Sep-2025 03:51:09 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 03:51:16 UTC] API Call success: PUT promotions/4 - HTTP 500
+[28-Sep-2025 03:51:16 UTC] API returned error: HTTP 500 - SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'max_stay' at row 1 (Connection: mysql, SQL: update `promotions` set `max_stay` = , `blackout_start_date` = , `blackout_end_date` = , `promotions`.`updated_at` = 2025-09-28 10:51:16 where `id` = 4)
+[28-Sep-2025 03:51:18 UTC] API Call success: GET roomtypes - HTTP 200
+[28-Sep-2025 03:51:19 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 03:51:36 UTC] API Call success: PUT promotions/4 - HTTP 500
+[28-Sep-2025 03:51:36 UTC] API returned error: HTTP 500 - SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'max_stay' at row 1 (Connection: mysql, SQL: update `promotions` set `max_stay` = , `blackout_start_date` = , `blackout_end_date` = , `promotions`.`updated_at` = 2025-09-28 10:51:36 where `id` = 4)
+[28-Sep-2025 03:51:55 UTC] API Call success: GET roomtypes - HTTP 200
+[28-Sep-2025 03:51:56 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 03:52:01 UTC] API Call success: PUT promotions/4 - HTTP 500
+[28-Sep-2025 03:52:01 UTC] API returned error: HTTP 500 - SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'max_stay' at row 1 (Connection: mysql, SQL: update `promotions` set `max_stay` = , `blackout_start_date` = , `blackout_end_date` = , `promotions`.`updated_at` = 2025-09-28 10:52:01 where `id` = 4)
+[28-Sep-2025 03:54:06 UTC] API Call success: GET roomtypes - HTTP 200
+[28-Sep-2025 03:54:07 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 03:56:11 UTC] API Call success: PUT promotions/4 - HTTP 500
+[28-Sep-2025 03:56:11 UTC] API returned error: HTTP 500 - SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'max_stay' at row 1 (Connection: mysql, SQL: update `promotions` set `max_stay` = , `blackout_start_date` = , `blackout_end_date` = , `promotions`.`updated_at` = 2025-09-28 10:56:11 where `id` = 4)
+[28-Sep-2025 03:59:47 UTC] API Call success: PUT promotions/4 - HTTP 500
+[28-Sep-2025 03:59:47 UTC] API returned error: HTTP 500 - SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'max_stay' at row 1 (Connection: mysql, SQL: update `promotions` set `max_stay` = , `blackout_start_date` = , `blackout_end_date` = , `promotions`.`updated_at` = 2025-09-28 10:59:47 where `id` = 4)
+[28-Sep-2025 04:00:22 UTC] API Call success: GET roomtypes - HTTP 200
+[28-Sep-2025 04:00:23 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 04:00:57 UTC] API Call success: PUT promotions/4 - HTTP 500
+[28-Sep-2025 04:00:57 UTC] API returned error: HTTP 500 - SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'max_stay' at row 1 (Connection: mysql, SQL: update `promotions` set `max_stay` = , `blackout_start_date` = , `blackout_end_date` = , `promotions`.`updated_at` = 2025-09-28 11:00:57 where `id` = 4)
+[28-Sep-2025 04:01:36 UTC] API Call success: GET roomtypes - HTTP 200
+[28-Sep-2025 04:01:36 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 04:01:40 UTC] API Call success: PUT promotions/4 - HTTP 500
+[28-Sep-2025 04:01:40 UTC] API returned error: HTTP 500 - SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'max_stay' at row 1 (Connection: mysql, SQL: update `promotions` set `max_stay` = , `blackout_start_date` = , `blackout_end_date` = , `promotions`.`updated_at` = 2025-09-28 11:01:40 where `id` = 4)
+[28-Sep-2025 04:01:42 UTC] API Call success: GET roomtypes - HTTP 200
+[28-Sep-2025 04:01:43 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 04:02:25 UTC] API Call success: PUT promotions/4 - HTTP 500
+[28-Sep-2025 04:02:25 UTC] API returned error: HTTP 500 - SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'max_stay' at row 1 (Connection: mysql, SQL: update `promotions` set `max_stay` = , `blackout_start_date` = , `blackout_end_date` = , `promotions`.`updated_at` = 2025-09-28 11:02:25 where `id` = 4)
+[28-Sep-2025 04:02:27 UTC] API Call success: GET roomtypes - HTTP 200
+[28-Sep-2025 04:02:28 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 04:02:47 UTC] API Call success: PUT promotions/4 - HTTP 500
+[28-Sep-2025 04:02:47 UTC] API returned error: HTTP 500 - SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'max_stay' at row 1 (Connection: mysql, SQL: update `promotions` set `max_stay` = , `blackout_start_date` = , `blackout_end_date` = , `promotions`.`updated_at` = 2025-09-28 11:02:47 where `id` = 4)
+[28-Sep-2025 04:02:49 UTC] API Call success: GET roomtypes - HTTP 200
+[28-Sep-2025 04:02:49 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 04:03:33 UTC] API Call success: PUT promotions/4 - HTTP 500
+[28-Sep-2025 04:03:33 UTC] API returned error: HTTP 500 - SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'max_stay' at row 1 (Connection: mysql, SQL: update `promotions` set `max_stay` = , `blackout_start_date` = , `blackout_end_date` = , `promotions`.`updated_at` = 2025-09-28 11:03:33 where `id` = 4)
+[28-Sep-2025 04:04:23 UTC] API Call success: PUT promotions/4 - HTTP 500
+[28-Sep-2025 04:04:23 UTC] API returned error: HTTP 500 - SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'max_stay' at row 1 (Connection: mysql, SQL: update `promotions` set `max_stay` = , `blackout_start_date` = , `blackout_end_date` = , `promotions`.`updated_at` = 2025-09-28 11:04:23 where `id` = 4)
+[28-Sep-2025 04:05:06 UTC] API Call success: GET roomtypes - HTTP 200
+[28-Sep-2025 04:05:06 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 04:05:10 UTC] API Call success: PUT promotions/4 - HTTP 500
+[28-Sep-2025 04:05:10 UTC] API returned error: HTTP 500 - SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect date value: '' for column 'blackout_start_date' at row 1 (Connection: mysql, SQL: update `promotions` set `blackout_start_date` = , `blackout_end_date` = , `promotions`.`updated_at` = 2025-09-28 11:05:10 where `id` = 4)
+[28-Sep-2025 04:05:54 UTC] API Call success: PUT promotions/4 - HTTP 500
+[28-Sep-2025 04:05:54 UTC] API returned error: HTTP 500 - SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect date value: '1' for column 'blackout_start_date' at row 1 (Connection: mysql, SQL: update `promotions` set `blackout_start_date` = 1, `blackout_end_date` = 1, `valid_monday` = 0, `valid_tuesday` = 0, `valid_wednesday` = 0, `valid_thursday` = 0, `valid_friday` = 0, `valid_saturday` = 0, `valid_sunday` = 0, `promotions`.`updated_at` = 2025-09-28 11:05:54 where `id` = 4)
+[28-Sep-2025 04:07:28 UTC] API Call success: PUT promotions/4 - HTTP 200
+[28-Sep-2025 04:07:37 UTC] API Call success: GET roomtypes - HTTP 200
+[28-Sep-2025 04:07:37 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 04:07:43 UTC] API Call success: PUT promotions/4 - HTTP 200
+[28-Sep-2025 04:07:44 UTC] API Call success: GET roomtypes - HTTP 200
+[28-Sep-2025 04:07:45 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 04:08:01 UTC] API Call success: PUT promotions/4 - HTTP 200
+[28-Sep-2025 04:08:02 UTC] API Call success: GET roomtypes - HTTP 200
+[28-Sep-2025 04:08:03 UTC] API Call success: GET promotions/4 - HTTP 200
+[28-Sep-2025 04:08:22 UTC] API Call success: PUT promotions/4 - HTTP 200
+[28-Sep-2025 04:08:23 UTC] API Call success: GET roomtypes - HTTP 200
+[28-Sep-2025 04:08:24 UTC] API Call success: GET promotions/4 - HTTP 200

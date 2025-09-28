@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User, Mail, Phone, Globe, MessageSquare, CreditCard } from 'lucide-react';
 import type { Guest } from '../types/api';
-
+import countriesData from '../data/countries.json';
 interface GuestFormProps {
   onSubmit: (guestData: Guest & { specialRequests: string }) => void;
   loading?: boolean;
@@ -71,23 +71,11 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
       }));
     }
   };
-
-  const countries = [
-    { code: 'VN', name: 'Việt Nam' },
-    { code: 'US', name: 'Hoa Kỳ' },
-    { code: 'JP', name: 'Nhật Bản' },
-    { code: 'KR', name: 'Hàn Quốc' },
-    { code: 'CN', name: 'Trung Quốc' },
-    { code: 'TH', name: 'Thái Lan' },
-    { code: 'SG', name: 'Singapore' },
-    { code: 'MY', name: 'Malaysia' },
-    { code: 'GB', name: 'Vương Quốc Anh' },
-    { code: 'FR', name: 'Pháp' },
-    { code: 'DE', name: 'Đức' },
-    { code: 'AU', name: 'Úc' },
-    { code: 'CA', name: 'Canada' },
-  ];
-
+  interface CountryOption {
+    code: string; // Mã ISO của quốc gia (ví dụ: 'VN')
+    name: string; // Tên quốc gia (ví dụ: 'Vietnam')
+  }
+  const countries: CountryOption[] = countriesData as CountryOption[];
   return (
     <div className="bg-white rounded-lg shadow-lg border p-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
@@ -95,7 +83,7 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
         Thông Tin Khách Hàng
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6 text-left">
         {/* Name Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -106,9 +94,8 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
               type="text"
               value={guestData.first_name}
               onChange={(e) => handleInputChange('first_name', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.first_name ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.first_name ? 'border-red-500' : 'border-gray-300'
+                }`}
               placeholder="Nhập tên của bạn"
             />
             {errors.first_name && (
@@ -124,9 +111,8 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
               type="text"
               value={guestData.last_name}
               onChange={(e) => handleInputChange('last_name', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.last_name ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.last_name ? 'border-red-500' : 'border-gray-300'
+                }`}
               placeholder="Nhập họ của bạn"
             />
             {errors.last_name && (
@@ -146,9 +132,8 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
               type="email"
               value={guestData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.email ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
+                }`}
               placeholder="example@email.com"
             />
             {errors.email && (
@@ -165,9 +150,8 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
               type="tel"
               value={guestData.phone}
               onChange={(e) => handleInputChange('phone', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.phone ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.phone ? 'border-red-500' : 'border-gray-300'
+                }`}
               placeholder="+84 123 456 789"
             />
             {errors.phone && (
@@ -185,9 +169,8 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
           <select
             value={guestData.nationality}
             onChange={(e) => handleInputChange('nationality', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.nationality ? 'border-red-500' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.nationality ? 'border-red-500' : 'border-gray-300'
+              }`}
           >
             <option value="">Chọn quốc tịch</option>
             {countries.map((country) => (

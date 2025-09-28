@@ -32,7 +32,7 @@ const BookingSearch: React.FC<BookingSearchProps> = ({ onSearch, loading = false
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg border">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end text-left">
           {/* Check-in Date */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
