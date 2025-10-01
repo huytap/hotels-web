@@ -101,6 +101,7 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
                 <th scope="col" class="manage-column column-id sortable" data-sort="id">
                     <a><span>ID</span><span class="sorting-indicator"></span></a>
                 </th>
+                <th scope="col" class="manage-column column-booking-number">Booking Number</th>
                 <th scope="col" class="manage-column column-customer">Customer</th>
                 <th scope="col" class="manage-column column-room">Room Type</th>
                 <th scope="col" class="manage-column column-dates sortable" data-sort="check_in">
@@ -378,6 +379,7 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
                 data.forEach(function(booking) {
                     const formatted = formatBookingRow(booking);
                     const customerId = booking.id || 'N/A';
+                    const bookingNumber = booking.booking_number
                     const customerName = booking.customer_name || booking.guest_name || 'Unknown';
                     const customerEmail = booking.customer_email || booking.guest_email || '';
                     const customerPhone = booking.customer_phone || booking.guest_phone || '';
@@ -395,6 +397,7 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
                             <input type="checkbox" value="${customerId}">
                         </th>
                         <td class="column-id"><strong>#${customerId}</strong></td>
+                        <td class="column-booking-number"><strong>#${bookingNumber}</strong></td>
                         <td class="column-customer">
                             <strong>${customerName}</strong><br>
                             ${customerEmail ? `<small><a href="mailto:${customerEmail}">${customerEmail}</a></small><br>` : ''}
@@ -411,8 +414,7 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
                         </td>
                         <td class="column-guests">${guests}</td>
                         <td class="column-amount">
-                            <strong>${formatted.total_amount_formatted}</strong>
-                            ${discountAmount > 0 ? `<br><small>-${formatCurrency(discountAmount)} ${promotionCodes ? `(${promotionCodes})` : ''}</small>` : ''}
+                            ${formatAmountWithTax(booking)}
                         </td>
                         <td class="column-status">
                             <span class="hme-status ${formatted.status_class}">${formatted.status_label}</span>
@@ -694,6 +696,36 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
         }
 
         function displayBookingDetails(booking) {
+            // Calculate price breakdown
+            const totalAmount = booking.total_amount || 0;
+            const taxAmount = booking.tax_amount || 0;
+            const discountAmount = booking.discount_amount || 0;
+            const subtotal = totalAmount - taxAmount;
+            const hotelTaxSettings = booking.hotel_tax_settings || {};
+            const pricesIncludeTax = hotelTaxSettings.prices_include_tax || false;
+
+            // Build price breakdown HTML
+            let priceBreakdownHtml = '';
+            if (taxAmount > 0) {
+                if (pricesIncludeTax) {
+                    priceBreakdownHtml = `
+                        <tr><td><strong>Total Amount:</strong></td><td><strong>${formatCurrency(totalAmount)}</strong><br><small style="color: #666;">*Đã bao gồm VAT & phí dịch vụ</small></td></tr>
+                    `;
+                } else {
+                    priceBreakdownHtml = `
+                        <tr><td><strong>Subtotal:</strong></td><td>${formatCurrency(subtotal)}</td></tr>
+                        ${discountAmount > 0 ? `<tr><td><strong>Discount:</strong></td><td style="color: #d63638;">-${formatCurrency(discountAmount)}</td></tr>` : ''}
+                        <tr><td><strong>Tax & Service:</strong></td><td>+${formatCurrency(taxAmount)}</td></tr>
+                        <tr><td><strong>Total Amount:</strong></td><td><strong>${formatCurrency(totalAmount)}</strong></td></tr>
+                    `;
+                }
+            } else {
+                priceBreakdownHtml = `
+                    ${discountAmount > 0 ? `<tr><td><strong>Discount:</strong></td><td style="color: #d63638;">-${formatCurrency(discountAmount)}</td></tr>` : ''}
+                    <tr><td><strong>Total Amount:</strong></td><td><strong>${formatCurrency(totalAmount)}</strong></td></tr>
+                `;
+            }
+
             const html = `
             <div class="hme-booking-details">
                 <div class="hme-detail-section">
@@ -704,16 +736,17 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
                         <tr><td><strong>Phone:</strong></td><td>${booking.customer_phone}</td></tr>
                     </table>
                 </div>
-                
+
                 <div class="hme-detail-section">
                     <h3>Booking Information</h3>
                     <table class="hme-detail-table">
+                        <tr><td><strong>Booking Number:</strong></td><td>${booking.booking_number || 'N/A'}</td></tr>
                         <tr><td><strong>Room Types:</strong></td><td>${booking.room_types || 'N/A'}</td></tr>
                         <tr><td><strong>Room Count:</strong></td><td>${booking.room_type_count || 0}</td></tr>
                         <tr><td><strong>Check-in:</strong></td><td>${formatDate(booking.check_in)}</td></tr>
                         <tr><td><strong>Check-out:</strong></td><td>${formatDate(booking.check_out)}</td></tr>
                         <tr><td><strong>Guests:</strong></td><td>${booking.guests}</td></tr>
-                        <tr><td><strong>Total Amount:</strong></td><td><strong>${formatCurrency(booking.total_amount)}</strong></td></tr>
+                        ${priceBreakdownHtml}
                         <tr><td><strong>Status:</strong></td><td><span class="hme-status ${getStatusClass(booking.status)}">${getStatusLabel(booking.status)}</span></td></tr>
                         <tr><td><strong>Created:</strong></td><td>${formatDateTime(booking.created_at)}</td></tr>
                     </table>
@@ -856,6 +889,51 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
             });
 
             window.location.href = `${hme_admin.ajax_url}?${params.toString()}`;
+        }
+
+        // Format amount with tax breakdown
+        function formatAmountWithTax(booking) {
+            const totalAmount = booking.total_amount || 0;
+            const taxAmount = booking.tax_amount || 0;
+            const discountAmount = booking.discount_amount || 0;
+            const promotionCodes = booking.promotion_codes || booking.promotion_code || '';
+
+            // If no tax_amount, display simple format
+            if (taxAmount === 0) {
+                let html = `<strong>${formatCurrency(totalAmount)}</strong>`;
+                if (discountAmount > 0) {
+                    html += `<br><small style="color: #d63638;">-${formatCurrency(discountAmount)} ${promotionCodes ? `(${promotionCodes})` : ''}</small>`;
+                }
+                return html;
+            }
+
+            // Calculate subtotal before tax (total - tax)
+            const subtotal = totalAmount - taxAmount;
+
+            // Get hotel tax settings to determine if we should show breakdown
+            const hotelTaxSettings = booking.hotel_tax_settings || {};
+            const pricesIncludeTax = hotelTaxSettings.prices_include_tax || false;
+
+            let html = '';
+
+            if (pricesIncludeTax) {
+                // Prices already include tax - show total with note
+                html = `<strong>${formatCurrency(totalAmount)}</strong>`;
+                html += `<br><small style="color: #666;">*Đã bao gồm thuế</small>`;
+                if (discountAmount > 0) {
+                    html += `<br><small style="color: #d63638;">-${formatCurrency(discountAmount)} ${promotionCodes ? `(${promotionCodes})` : ''}</small>`;
+                }
+            } else {
+                // Prices don't include tax - show breakdown
+                html = `<small>Tạm tính: ${formatCurrency(subtotal)}</small>`;
+                if (discountAmount > 0) {
+                    html += `<br><small style="color: #d63638;">Giảm giá: -${formatCurrency(discountAmount)} ${promotionCodes ? `(${promotionCodes})` : ''}</small>`;
+                }
+                html += `<br><small>Thuế & phí: +${formatCurrency(taxAmount)}</small>`;
+                html += `<br><strong>Tổng: ${formatCurrency(totalAmount)}</strong>`;
+            }
+
+            return html;
         }
 
         // Utility functions

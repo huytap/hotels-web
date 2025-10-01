@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Calendar, Users, Bed, Tag, CreditCard, X } from 'lucide-react';
-import type { BookingDetails, RoomAvailability } from '../types/api';
+import type { BookingDetails, RoomAvailability, TaxSettings } from '../types/api';
 import { useLocalizedText } from '../context/LanguageContext';
 
 interface SelectedRoom {
@@ -34,6 +34,19 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
   showButton = true
 }) => {
   const { t } = useLocalizedText();
+  const [taxSettings, setTaxSettings] = useState<TaxSettings | null>(null);
+
+  // Load tax settings from localStorage
+  useEffect(() => {
+    try {
+      const savedTaxSettings = localStorage.getItem('hotel_tax_settings');
+      if (savedTaxSettings) {
+        setTaxSettings(JSON.parse(savedTaxSettings));
+      }
+    } catch (error) {
+      console.error('Error loading tax settings:', error);
+    }
+  }, []);
   console.log('📋 BookingSummary render:', {
     selectedRooms,
     selectedRoomsLength: selectedRooms.length,
@@ -70,98 +83,98 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
       console.log('🔍 Looking for room with ID:', roomId);
       console.log('🔍 Raw available rooms:', availableRooms);
 
-    // The availableRooms might be a combination array, need to flatten it
-    let allRooms: any[] = [];
+      // The availableRooms might be a combination array, need to flatten it
+      let allRooms: any[] = [];
 
-    availableRooms.forEach((item: any, itemIndex: number) => {
-      if (item.combination_details && Array.isArray(item.combination_details)) {
-        // This is a combination object, extract rooms from combination_details
-        item.combination_details.forEach((detail: any, detailIndex: number) => {
-          const roomType = detail.room_type;
-          if (roomType) {
-            console.log(`🔍 Adding room from combination ${itemIndex}, detail ${detailIndex}:`, roomType.id, roomType.name);
+      availableRooms.forEach((item: any, itemIndex: number) => {
+        if (item.combination_details && Array.isArray(item.combination_details)) {
+          // This is a combination object, extract rooms from combination_details
+          item.combination_details.forEach((detail: any, detailIndex: number) => {
+            const roomType = detail.room_type;
+            if (roomType) {
+              console.log(`🔍 Adding room from combination ${itemIndex}, detail ${detailIndex}:`, roomType.id, roomType.name);
 
-            // Check if this room already exists in allRooms to avoid duplicates
-            const existingRoom = allRooms.find(r => r.room_id === roomType.id);
-            if (existingRoom) {
-              console.log(`⚠️ Room ${roomType.id} already exists, skipping duplicate`);
-              return;
+              // Check if this room already exists in allRooms to avoid duplicates
+              const existingRoom = allRooms.find(r => r.room_id === roomType.id);
+              if (existingRoom) {
+                console.log(`⚠️ Room ${roomType.id} already exists, skipping duplicate`);
+                return;
+              }
+
+              allRooms.push({
+                room_id: roomType.id,
+                room: {
+                  id: roomType.id,
+                  name: roomType.name,
+                  type: roomType.name,
+                  description: roomType.description || '',
+                  capacity: roomType.adult_capacity || 2,
+                  amenities: roomType.amenities ? roomType.amenities.split(', ') : [],
+                  images: roomType.gallery ? (typeof roomType.gallery === 'string' ? JSON.parse(roomType.gallery) : roomType.gallery) : [],
+                  base_price: detail.base_price_total,
+                  currency: 'VND'
+                },
+                available_inventory: detail.available_rooms,
+                rate_per_night: detail.pricing_breakdown ? (detail.pricing_breakdown.final_total / detail.quantity) : (detail.base_price_total / detail.quantity),
+                total_price: detail.pricing_breakdown ? (detail.pricing_breakdown.final_total / detail.quantity) : (detail.base_price_total / detail.quantity),
+                pricing_breakdown: detail.pricing_breakdown ? {
+                  ...detail.pricing_breakdown,
+                  // Normalize pricing breakdown to per-room values
+                  base_total: detail.pricing_breakdown.base_total / detail.quantity,
+                  adult_surcharge_total: detail.pricing_breakdown.adult_surcharge_total / detail.quantity,
+                  children_surcharge_total: detail.pricing_breakdown.children_surcharge_total / detail.quantity,
+                  promotion_applicable_amount: detail.pricing_breakdown.promotion_applicable_amount / detail.quantity,
+                  non_promotion_amount: detail.pricing_breakdown.non_promotion_amount / detail.quantity,
+                  final_total: detail.pricing_breakdown.final_total / detail.quantity,
+                  // Also normalize the new extra bed adult surcharge field
+                  extra_bed_adult_surcharge_total: (detail.pricing_breakdown.extra_bed_adult_surcharge_total || 0) / detail.quantity,
+                } : undefined, // Normalize pricing breakdown to per-room
+                effective_capacity: detail.effective_capacity, // Thêm effective capacity từ API
+                applicable_promotions: Object.values(detail.promotions || {}).map((promo: any) => {
+                  // Handle both promotion structures: with .details and without
+                  const promotionData = promo.details || promo;
+
+                  // Safety check to ensure promotionData exists and has required fields
+                  if (!promotionData || !promotionData.id) {
+                    console.warn('Invalid promotion data:', promo);
+                    return null;
+                  }
+
+                  return {
+                    id: promotionData.id,
+                    code: promotionData.promotion_code || '',
+                    name: promotionData.name?.vi || promotionData.name?.en || promotionData.name || '',
+                    description: promotionData.description?.vi || promotionData.description || '',
+                    type: promotionData.value_type === 'percentage' ? 'percentage' as const : 'fixed' as const,
+                    value: parseFloat(promotionData.value || '0'),
+                    start_date: promotionData.start_date || '',
+                    end_date: promotionData.end_date || '',
+                    min_nights: promotionData.min_stay || 1,
+                    applicable_room_types: [roomType.id],
+                    is_active: !!promotionData.is_active,
+                    max_uses: 999,
+                    current_uses: 0
+                  };
+                }).filter(Boolean) // Remove null values
+              });
             }
+          });
+        } else if (item.room_id) {
+          // This is already a proper room object
+          allRooms.push(item);
+        }
+      });
 
-            allRooms.push({
-              room_id: roomType.id,
-              room: {
-                id: roomType.id,
-                name: roomType.name,
-                type: roomType.name,
-                description: roomType.description || '',
-                capacity: roomType.adult_capacity || 2,
-                amenities: roomType.amenities ? roomType.amenities.split(', ') : [],
-                images: roomType.gallery ? (typeof roomType.gallery === 'string' ? JSON.parse(roomType.gallery) : roomType.gallery) : [],
-                base_price: detail.base_price_total,
-                currency: 'VND'
-              },
-              available_inventory: detail.available_rooms,
-              rate_per_night: detail.pricing_breakdown ? (detail.pricing_breakdown.final_total / detail.quantity) : (detail.base_price_total / detail.quantity),
-              total_price: detail.pricing_breakdown ? (detail.pricing_breakdown.final_total / detail.quantity) : (detail.base_price_total / detail.quantity),
-              pricing_breakdown: detail.pricing_breakdown ? {
-                ...detail.pricing_breakdown,
-                // Normalize pricing breakdown to per-room values
-                base_total: detail.pricing_breakdown.base_total / detail.quantity,
-                adult_surcharge_total: detail.pricing_breakdown.adult_surcharge_total / detail.quantity,
-                children_surcharge_total: detail.pricing_breakdown.children_surcharge_total / detail.quantity,
-                promotion_applicable_amount: detail.pricing_breakdown.promotion_applicable_amount / detail.quantity,
-                non_promotion_amount: detail.pricing_breakdown.non_promotion_amount / detail.quantity,
-                final_total: detail.pricing_breakdown.final_total / detail.quantity,
-                // Also normalize the new extra bed adult surcharge field
-                extra_bed_adult_surcharge_total: (detail.pricing_breakdown.extra_bed_adult_surcharge_total || 0) / detail.quantity,
-              } : undefined, // Normalize pricing breakdown to per-room
-              effective_capacity: detail.effective_capacity, // Thêm effective capacity từ API
-              applicable_promotions: Object.values(detail.promotions || {}).map((promo: any) => {
-                // Handle both promotion structures: with .details and without
-                const promotionData = promo.details || promo;
+      console.log('🔍 Flattened rooms:', allRooms);
 
-                // Safety check to ensure promotionData exists and has required fields
-                if (!promotionData || !promotionData.id) {
-                  console.warn('Invalid promotion data:', promo);
-                  return null;
-                }
+      // Now find the room
+      const room = allRooms.find(r =>
+        (r.room_id && r.room_id === roomId) ||
+        (r.room && r.room.id === roomId)
+      );
+      console.log('🔍 Found room:', room);
 
-                return {
-                  id: promotionData.id,
-                  code: promotionData.promotion_code || '',
-                  name: promotionData.name?.vi || promotionData.name?.en || promotionData.name || '',
-                  description: promotionData.description?.vi || promotionData.description || '',
-                  type: promotionData.value_type === 'percentage' ? 'percentage' as const : 'fixed' as const,
-                  value: parseFloat(promotionData.value || '0'),
-                  start_date: promotionData.start_date || '',
-                  end_date: promotionData.end_date || '',
-                  min_nights: promotionData.min_stay || 1,
-                  applicable_room_types: [roomType.id],
-                  is_active: !!promotionData.is_active,
-                  max_uses: 999,
-                  current_uses: 0
-                };
-              }).filter(Boolean) // Remove null values
-            });
-          }
-        });
-      } else if (item.room_id) {
-        // This is already a proper room object
-        allRooms.push(item);
-      }
-    });
-
-    console.log('🔍 Flattened rooms:', allRooms);
-
-    // Now find the room
-    const room = allRooms.find(r =>
-      (r.room_id && r.room_id === roomId) ||
-      (r.room && r.room.id === roomId)
-    );
-    console.log('🔍 Found room:', room);
-
-    return room;
+      return room;
     } catch (error) {
       console.error('Error in getRoomDetails:', error);
       return null;
@@ -295,6 +308,28 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
   const originalPrice = calculateOriginalPrice();
   const totalDiscount = originalPrice - totalPrice;
   const nights = calculateNights();
+
+  // Calculate tax and service charge
+  const calculateTaxAndFees = () => {
+    if (!taxSettings) {
+      return { vatAmount: 0, serviceChargeAmount: 0, grandTotal: totalPrice };
+    }
+
+    if (taxSettings.prices_include_tax) {
+      // Giá đã bao gồm thuế - không tính thêm
+      return { vatAmount: 0, serviceChargeAmount: 0, grandTotal: totalPrice };
+    }
+
+    // Giá chưa bao gồm thuế - tính thêm VAT và Service Charge
+    const vatAmount = Math.round(totalPrice * taxSettings.vat_rate / 100);
+    const subTotal = totalPrice + vatAmount;
+    const serviceChargeAmount = Math.round(subTotal * taxSettings.service_charge_rate / 100);
+    const grandTotal = subTotal + serviceChargeAmount;
+
+    return { vatAmount, serviceChargeAmount, grandTotal };
+  };
+
+  const { vatAmount, serviceChargeAmount, grandTotal } = calculateTaxAndFees();
 
   // Calculate total capacity and validate
   const calculateTotalCapacity = (): { current: number; required: number; sufficient: boolean } => {
@@ -501,10 +536,45 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
             </div>
           </>
         )}
-        <div className="flex justify-between text-lg font-bold text-blue-600">
-          <span>{t('summary.total_amount')}:</span>
-          <span>{totalPrice.toLocaleString('vi-VN')} VND</span>
+
+        <div className="flex justify-between text-base">
+          <span className="text-gray-700">
+            {t('subtotal')}
+            {taxSettings && !taxSettings.prices_include_tax && (
+              <span className="text-xs text-gray-500"> ({t('before_tax', 'Before tax')})</span>
+            )}:
+          </span>
+          <span className="font-semibold">{totalPrice.toLocaleString('vi-VN')} VND</span>
         </div>
+
+        {/* Show VAT and Service Charge if prices don't include tax */}
+        {taxSettings && !taxSettings.prices_include_tax && (vatAmount > 0 || serviceChargeAmount > 0) && (
+          <>
+            {vatAmount > 0 && (
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>VAT ({taxSettings.vat_rate}%):</span>
+                <span>{vatAmount.toLocaleString('vi-VN')} VND</span>
+              </div>
+            )}
+            {serviceChargeAmount > 0 && (
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>{t('service_charge', 'Service Charge')} ({taxSettings.service_charge_rate}%):</span>
+                <span>{serviceChargeAmount.toLocaleString('vi-VN')} VND</span>
+              </div>
+            )}
+          </>
+        )}
+
+        <div className="flex justify-between text-lg font-bold text-blue-600 pt-2 border-t">
+          <span>{t('summary.total_amount')}:</span>
+          <span>{grandTotal.toLocaleString('vi-VN')} VND</span>
+        </div>
+
+        {taxSettings && taxSettings.prices_include_tax && (
+          <p className="text-xs text-gray-500 italic mt-1">
+            {t('prices_include_tax_note', '* Prices include VAT and service charge')}
+          </p>
+        )}
       </div>
 
       {/* Capacity Status */}

@@ -127,7 +127,7 @@ const RoomsPage: React.FC = () => {
         <div className="mb-4">
           <h2 className="text-xl font-bold text-gray-800">Kết Quả Tìm Kiếm</h2>
           <p className="text-sm text-gray-600">
-            {availableRooms.length} phòng có sẵn từ {bookingDetails.check_in} đến {bookingDetails.check_out}
+            {availableRooms.length} phòng từ {bookingDetails.check_in} đến {bookingDetails.check_out}
           </p>
         </div>
 

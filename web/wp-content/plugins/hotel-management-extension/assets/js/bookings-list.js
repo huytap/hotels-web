@@ -160,6 +160,9 @@
                 <td class="column-id">
                     <strong>#${booking.id}</strong>
                 </td>
+                <td class="column-booking-number">
+                    <strong>${booking.booking_number || 'N/A'}</strong>
+                </td>
                 <td class="column-customer">
                     <div class="customer-info">
                         <strong class="customer-name">${escapeHtml(booking.customer_name)}</strong>

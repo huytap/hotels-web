@@ -88,9 +88,19 @@ class BookingController extends BaseApiController
                 $language
             );
 
-            // 4. Return successful response using BaseApiController method
+            // 4. Add hotel tax settings to response
+            $response = [
+                'rooms' => $data,
+                'hotel_tax_settings' => [
+                    'vat_rate' => $hotel->vat_rate ?? 10.00,
+                    'service_charge_rate' => $hotel->service_charge_rate ?? 5.00,
+                    'prices_include_tax' => $hotel->prices_include_tax ?? false,
+                ]
+            ];
+
+            // 5. Return successful response using BaseApiController method
             \Log::info("📦 Returning response - Data count: " . count($data));
-            return $this->successResponse($data, 'Available rooms found successfully');
+            return $this->successResponse($response, 'Available rooms found successfully');
         } catch (\Exception $e) {
             \Log::error('Find room combinations failed', [
                 'hotel_id' => $hotel->id,
@@ -722,7 +732,18 @@ class BookingController extends BaseApiController
         }
 
         $today = now()->toDateString();
-        $thisMonth = now()->format('Y-m');
+        $monthStart = now()->startOfMonth()->toDateString();
+        $monthEnd = now()->endOfMonth()->toDateString();
+
+        // Get room types for availability
+        $roomTypes = \App\Models\Roomtype::where('hotel_id', $hotel->id)->get();
+        $roomAvailability = $roomTypes->map(function ($roomType) {
+            return [
+                'name' => $roomType->name,
+                'total' => $roomType->total_inventory ?? 0,
+                'available' => $roomType->total_inventory ?? 0, // Simplified - can enhance later
+            ];
+        });
 
         $stats = [
             'total_bookings' => Booking::where('hotel_id', $hotel->id)->count(),
@@ -730,28 +751,33 @@ class BookingController extends BaseApiController
                 ->where('status', 'pending')
                 ->count(),
 
-            // ✅ Doanh thu hôm nay từ bảng booking_details
-            'today_revenue' => BookingDetail::whereHas('booking', function ($q) use ($hotel, $today) {
-                $q->where('hotel_id', $hotel->id)
-                    ->whereDate('created_at', $today)
-                    ->whereNotIn('status', ['cancelled']);
-            })
-                ->sum('sub_total'),
+            'total_rooms' => $roomTypes->sum('total_inventory'),
+            'available_rooms' => $roomTypes->sum('total_inventory'), // Simplified
 
-            // ✅ Doanh thu tháng này từ bảng booking_details
-            'month_revenue' => BookingDetail::whereHas('booking', function ($q) use ($hotel, $thisMonth) {
-                $q->where('hotel_id', $hotel->id)
-                    ->where('created_at', 'like', $thisMonth . '%')
-                    ->whereNotIn('status', ['cancelled']);
-            })
-                ->sum('sub_total'),
+            'active_promotions' => \App\Models\Promotion::where('hotel_id', $hotel->id)
+                ->where('is_active', true)
+                ->count(),
 
-            'recent_bookings' => Booking::with('roomType')
+            // ✅ Doanh thu hôm nay (total_amount đã trừ discount)
+            'today_revenue' => Booking::where('hotel_id', $hotel->id)
+                ->whereDate('created_at', $today)
+                ->whereNotIn('status', ['cancelled'])
+                ->sum('total_amount'),
+
+            // ✅ Doanh thu tháng này (total_amount đã trừ discount)
+            'month_revenue' => Booking::where('hotel_id', $hotel->id)
+                ->whereBetween('created_at', [$monthStart, $monthEnd])
+                ->whereNotIn('status', ['cancelled'])
+                ->sum('total_amount'),
+
+            'recent_bookings' => Booking::with('bookingDetails.roomtype')
                 ->where('hotel_id', $hotel->id)
                 ->orderBy('created_at', 'desc')
                 ->limit(5)
                 ->get()
-                ->map(fn($booking) => $this->transformBooking($booking)),
+                ->map(fn($booking) => $this->transformBookingForDashboard($booking)),
+
+            'room_availability' => $roomAvailability,
         ];
 
         return $this->successResponse($stats, 'Dashboard stats retrieved successfully');
@@ -866,6 +892,14 @@ class BookingController extends BaseApiController
             }
         }
 
+        // Get hotel tax settings
+        $hotel = $booking->hotel;
+        $hotelTaxSettings = [
+            'vat_rate' => $hotel->vat_rate ?? 10.00,
+            'service_charge_rate' => $hotel->service_charge_rate ?? 5.00,
+            'prices_include_tax' => $hotel->prices_include_tax ?? false,
+        ];
+
         $data = [
             'id' => $booking->id,
             'booking_number' => $booking->booking_number,
@@ -885,6 +919,7 @@ class BookingController extends BaseApiController
             'total_amount' => $booking->total_amount,
             'promotion_codes' => implode(', ', array_unique($promotionCodes)),
             'status' => $booking->status,
+            'hotel_tax_settings' => $hotelTaxSettings,
             'created_at' => $booking->created_at->toISOString(),
             'updated_at' => $booking->updated_at->toISOString(),
         ];
@@ -1266,5 +1301,93 @@ class BookingController extends BaseApiController
             ]);
             return $this->errorResponse('Failed to update room pricing policy: ' . $e->getMessage(), 500);
         }
+    }
+
+    /**
+     * Transform booking for dashboard (simplified)
+     */
+    private function transformBookingForDashboard($booking)
+    {
+        // Collect room types from booking details
+        $roomTypes = [];
+        foreach ($booking->bookingDetails as $detail) {
+            if ($detail->roomtype) {
+                $roomTypes[] = $detail->roomtype->name;
+            }
+        }
+
+        return [
+            'id' => $booking->id,
+            'customer_name' => trim(($booking->first_name ?? '') . ' ' . ($booking->last_name ?? '')),
+            'room_type' => implode(', ', array_unique($roomTypes)) ?: 'N/A',
+            'status' => $booking->status,
+            'check_in' => $booking->check_in->toDateString(),
+            'total_amount' => $booking->total_amount,
+        ];
+    }
+
+    /**
+     * Track booking by booking number or email
+     */
+    public function trackBooking(Request $request): JsonResponse
+    {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+
+        $bookingNumber = $request->input('booking_number');
+        $email = $request->input('email');
+
+        if (!$bookingNumber && !$email) {
+            return $this->errorResponse('Please provide booking number or email', 400);
+        }
+
+        $query = Booking::with('bookingDetails.roomtype')
+            ->where('hotel_id', $hotel->id);
+
+        if ($bookingNumber) {
+            $query->where('booking_number', $bookingNumber);
+        } elseif ($email) {
+            $query->where('email', $email);
+        }
+
+        $booking = $query->first();
+
+        if (!$booking) {
+            return $this->errorResponse('Booking not found', 404);
+        }
+
+        return $this->successResponse($booking, 'Booking retrieved successfully');
+    }
+
+    /**
+     * Cancel booking
+     */
+    public function cancelBooking(Request $request, $id): JsonResponse
+    {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+
+        $booking = Booking::where('hotel_id', $hotel->id)
+            ->where('id', $id)
+            ->first();
+
+        if (!$booking) {
+            return $this->errorResponse('Booking not found', 404);
+        }
+
+        if (!$booking->canBeCancelled()) {
+            return $this->errorResponse('This booking cannot be cancelled', 400);
+        }
+
+        $booking->status = 'cancelled';
+        $booking->cancelled_at = now();
+        $booking->cancellation_reason = $request->input('cancellation_reason', 'Cancelled by customer');
+        $booking->save();
+
+        return $this->successResponse($booking, 'Booking cancelled successfully');
     }
 }

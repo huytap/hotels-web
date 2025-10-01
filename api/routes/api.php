@@ -25,8 +25,12 @@ use App\Http\Controllers\Api\SyncController;
 Route::prefix('v1')->group(function () {
     Route::post('/hotel/find-rooms', [BookingController::class, 'getAvailableRoomCombinations']);
     Route::post('/bookings/confirm', [BookingController::class, 'store'])->middleware('throttle:booking');
+    Route::post('/bookings/track', [BookingController::class, 'trackBooking']);
+    Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancelBooking']);
     Route::get('/roomtypes', [HotelController::class, 'getRooms']);
     Route::get('/roomtypes/{id}', [HotelController::class, 'getRoomDetail']);
+    Route::get('/hotels/tax-settings', [HotelController::class, 'getTaxSettings']);
+    Route::put('/hotels/tax-settings', [HotelController::class, 'updateTaxSettings']);
     //promotion
     Route::get('/promotions/check-code', [PromotionController::class, 'generateCode']);
     Route::middleware('auth.api_token')->group(function () {

@@ -166,4 +166,73 @@ class HotelController extends BaseApiController
 
         return $roomData;
     }
+
+    /**
+     * Get hotel tax settings (VAT, Service Charge, prices_include_tax)
+     */
+    public function getTaxSettings(Request $request): JsonResponse
+    {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tax settings retrieved successfully',
+            'data' => [
+                'vat_rate' => $hotel->vat_rate ?? 10.00,
+                'service_charge_rate' => $hotel->service_charge_rate ?? 5.00,
+                'prices_include_tax' => $hotel->prices_include_tax ?? false,
+            ]
+        ]);
+    }
+
+    /**
+     * Update hotel tax settings
+     */
+    public function updateTaxSettings(Request $request): JsonResponse
+    {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+
+        // Get data from 'data' key (WordPress API wrapper format)
+        $inputData = $request->input('data', $request->all());
+
+        // Cast the boolean value before validation
+        if (isset($inputData['prices_include_tax'])) {
+            $inputData['prices_include_tax'] = filter_var($inputData['prices_include_tax'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        }
+
+        $validator = Validator::make($inputData, [
+            'vat_rate' => 'required|numeric|min:0|max:100',
+            'service_charge_rate' => 'required|numeric|min:0|max:100',
+            'prices_include_tax' => 'required|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $hotel->vat_rate = $inputData['vat_rate'];
+        $hotel->service_charge_rate = $inputData['service_charge_rate'];
+        $hotel->prices_include_tax = $inputData['prices_include_tax'];
+        $hotel->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tax settings updated successfully',
+            'data' => [
+                'vat_rate' => $hotel->vat_rate,
+                'service_charge_rate' => $hotel->service_charge_rate,
+                'prices_include_tax' => $hotel->prices_include_tax,
+            ]
+        ]);
+    }
 }

@@ -216,6 +216,17 @@ class Hotel_Management_Extension
                 );
             }
 
+            // Enqueue bookings list script if on bookings page
+            if (strpos($hook, 'hotel-bookings') !== false && !isset($_GET['action'])) {
+                wp_enqueue_script(
+                    'hme-bookings-list-js',
+                    HME_PLUGIN_URL . 'assets/js/bookings-list.js',
+                    array('jquery', 'hme-admin-js'),
+                    '2.0.0',
+                    true
+                );
+            }
+
             wp_enqueue_style(
                 'hme-admin-css',
                 HME_PLUGIN_URL . 'assets/css/admin.css',
@@ -237,13 +248,33 @@ class Hotel_Management_Extension
                 '2.0.0'
             );
 
-            // Localize script với config
-            wp_localize_script('hme-room-management-js', 'hme_admin', array(
+            // Enqueue dashboard assets if on dashboard page
+            if (strpos($hook, 'hotel-dashboard') !== false || strpos($hook, 'toplevel_page_hotel-dashboard') !== false) {
+                wp_enqueue_style(
+                    'hme-dashboard-css',
+                    HME_PLUGIN_URL . 'assets/css/dashboard.css',
+                    array(),
+                    '1.0.0'
+                );
+
+                wp_enqueue_script(
+                    'hme-dashboard-js',
+                    HME_PLUGIN_URL . 'assets/js/dashboard.js',
+                    array('jquery', 'hme-admin-js'),
+                    '1.0.0',
+                    true
+                );
+            }
+
+            // Localize script với config - Apply to admin.js which is always loaded
+            wp_localize_script('hme-admin-js', 'hme_admin', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'admin_url' => admin_url(),
                 'nonce' => wp_create_nonce('hme_admin_nonce'),
                 'blog_id' => get_current_blog_id(),
                 'api_configured' => $this->is_api_configured(),
+                'add_booking_url' => admin_url('admin.php?page=hotel-bookings&action=add'),
+                'edit_booking_url' => admin_url('admin.php?page=hotel-bookings&action=edit'),
                 'strings' => array(
                     'confirm_delete' => __('Bạn có chắc chắn muốn xóa mục này không?', 'hotel'),
                     'loading' => __('Đang tải...', 'hotel'),
@@ -275,6 +306,7 @@ class Hotel_Management_Extension
         add_action('wp_ajax_hme_get_booking_details', array('HME_Booking_Manager', 'ajax_get_booking_details'));
         add_action('wp_ajax_hme_get_available_room_types', array('HME_Booking_Manager', 'ajax_get_available_room_types'));
         add_action('wp_ajax_hme_calculate_booking_total', array('HME_Booking_Manager', 'ajax_calculate_booking_total'));
+        add_action('wp_ajax_hme_bulk_booking_actions', array('HME_Booking_Manager', 'ajax_bulk_booking_actions'));
 
         // Room Rate AJAX handlers - removed old handlers as they're not used anymore
         // All room rate functionality now goes through hme_api_call
@@ -346,8 +378,8 @@ class Hotel_Management_Extension
                 <div class="hme-dashboard-section">
                     <h2>Quick Actions</h2>
                     <div class="hme-quick-actions">
-                        <a href="<?php echo admin_url('admin.php?page=hotel-bookings&action=add'); ?>" class="button button-primary button-large">
-                            <span class="dashicons dashicons-plus-alt"></span> New Booking
+                        <a href="<?php echo admin_url('admin.php?page=hotel-bookings'); ?>" class="button button-primary button-large">
+                            <span class="dashicons dashicons-cart"></span> Manage Bookings
                         </a>
                         <a href="<?php echo admin_url('admin.php?page=hotel-room-rates'); ?>" class="button button-large">
                             <span class="dashicons dashicons-admin-home"></span> Manage Rooms
@@ -379,80 +411,6 @@ class Hotel_Management_Extension
                 </div>
             </div>
         </div>
-
-        <script>
-            jQuery(document).ready(function($) {
-                loadDashboardData();
-
-                function loadDashboardData() {
-                    $.ajax({
-                        url: hme_admin.ajax_url,
-                        type: 'POST',
-                        data: {
-                            action: 'hme_get_dashboard_stats',
-                            nonce: hme_admin.nonce
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                updateDashboardStats(response.data);
-                                $('.hme-dashboard-loading').hide();
-                                $('.hme-dashboard-content').show();
-                            } else {
-                                showError('Failed to load dashboard data: ' + response.data);
-                            }
-                        },
-                        error: function() {
-                            showError('Error connecting to server');
-                        }
-                    });
-                }
-
-                function updateDashboardStats(data) {
-                    $('#total-bookings .hme-stat-number').text(data.total_bookings || 0);
-                    $('#pending-bookings .hme-stat-number').text(data.pending_bookings || 0);
-                    $('#available-rooms .hme-stat-number').text((data.available_rooms || 0) + '/' + (data.total_rooms || 0));
-                    $('#active-promotions .hme-stat-number').text(data.active_promotions || 0);
-                    $('#today-revenue .hme-stat-number').text(formatCurrency(data.today_revenue || 0) + ' VNĐ');
-                    $('#month-revenue .hme-stat-number').text(formatCurrency(data.month_revenue || 0) + ' VNĐ');
-
-                    // Update recent bookings
-                    if (data.recent_bookings && data.recent_bookings.length > 0) {
-                        var html = '<ul>';
-                        data.recent_bookings.forEach(function(booking) {
-                            html += '<li><strong>' + booking.customer_name + '</strong> - ' +
-                                booking.room_type + ' <span class="status-' + booking.status + '">' + booking.status + '</span></li>';
-                        });
-                        html += '</ul>';
-                        $('#recent-bookings').html(html);
-                    } else {
-                        $('#recent-bookings').html('<p>No recent bookings</p>');
-                    }
-
-                    // Update room availability
-                    if (data.room_availability && data.room_availability.length > 0) {
-                        var html = '';
-                        data.room_availability.forEach(function(room) {
-                            html += '<div class="hme-room-item">';
-                            html += '<strong>' + room.name + '</strong><br>';
-                            html += '<span class="available">' + room.available + ' available</span> / ';
-                            html += '<span class="total">' + room.total + ' total</span>';
-                            html += '</div>';
-                        });
-                        $('#room-availability').html(html);
-                    } else {
-                        $('#room-availability').html('<p>No room data available</p>');
-                    }
-                }
-
-                function formatCurrency(amount) {
-                    return new Intl.NumberFormat('vi-VN').format(amount);
-                }
-
-                function showError(message) {
-                    $('.hme-dashboard-loading').html('<div class="notice notice-error"><p>' + message + '</p></div>');
-                }
-            });
-        </script>
 <?php
     }
 

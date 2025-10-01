@@ -179,6 +179,84 @@ class ApiService {
       throw error;
     }
   }
+
+  /**
+   * Track booking by booking number or email
+   */
+  async trackBooking(
+    wpId: string,
+    searchType: 'booking_number' | 'email',
+    searchValue: string
+  ): Promise<ApiResponse<Booking>> {
+    const config = this.getApiConfig();
+    const url = `${config.apiBaseUrl}/v1/bookings/track`;
+
+    const requestBody = {
+      wp_id: wpId,
+      [searchType]: searchValue
+    };
+
+    const requestConfig: RequestInit = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    };
+
+    try {
+      const response = await fetch(url, requestConfig);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Booking not found');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('❌ Track booking error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cancel booking
+   */
+  async cancelBooking(
+    wpId: string,
+    bookingId: number,
+    reason: string
+  ): Promise<ApiResponse<void>> {
+    const config = this.getApiConfig();
+    const url = `${config.apiBaseUrl}/v1/bookings/${bookingId}/cancel`;
+
+    const requestBody = {
+      wp_id: wpId,
+      cancellation_reason: reason
+    };
+
+    const requestConfig: RequestInit = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    };
+
+    try {
+      const response = await fetch(url, requestConfig);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to cancel booking');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('❌ Cancel booking error:', error);
+      throw error;
+    }
+  }
 }
 
 export const apiService = new ApiService();

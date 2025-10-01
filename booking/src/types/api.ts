@@ -67,17 +67,41 @@ export interface BookingRoom {
   room_name: string;
 }
 
+export interface BookingDetail {
+  id: number;
+  roomtype_id: number;
+  adults: number;
+  children: number;
+  quantity: number;
+  price_per_night: number;
+  sub_total: number;
+  promotion_id?: number;
+  roomtype?: {
+    id: number;
+    name: string;
+  };
+}
+
 export interface Booking {
   id: number;
-  guest: Guest;
-  booking_details: BookingDetails;
-  rooms: BookingRoom[];
-  total_price: number;
+  booking_number: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  nationality?: string;
+  check_in: string;
+  check_out: string;
+  nights: number;
+  guests: number;
+  total_amount: number;
   discount_amount: number;
-  final_price: number;
-  status: 'pending' | 'confirmed' | 'cancelled';
-  special_requests?: string;
+  tax_amount: number;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no_show';
+  notes?: string;
   created_at: string;
+  updated_at: string;
+  booking_details?: BookingDetail[];
 }
 
 export interface PricingBreakdown {
@@ -160,4 +184,10 @@ export interface PromotionDetail {
     is_active: number;
   };
   discounted_price_total: number;
+}
+
+export interface TaxSettings {
+  vat_rate: number;
+  service_charge_rate: number;
+  prices_include_tax: boolean;
 }

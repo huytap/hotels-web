@@ -8,6 +8,7 @@ import SearchPage from './pages/SearchPage';
 import RoomsPage from './pages/RoomsPage';
 import GuestPage from './pages/GuestPage';
 import ConfirmationPage from './pages/ConfirmationPage';
+import TrackingPage from './pages/TrackingPage';
 import './App.css';
 
 const BookingApp: React.FC = () => {
@@ -20,6 +21,9 @@ const BookingApp: React.FC = () => {
 
           {/* Search page - no protection needed */}
           <Route path="/search" element={<SearchPage />} />
+
+          {/* Tracking page - no protection needed */}
+          <Route path="/track" element={<TrackingPage />} />
 
           {/* Rooms page - requires booking details and available rooms */}
           <Route

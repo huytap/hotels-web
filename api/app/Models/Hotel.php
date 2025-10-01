@@ -96,6 +96,9 @@ class Hotel extends Model
         'currency',
         'timezone',
         'is_active',
+        'vat_rate',
+        'service_charge_rate',
+        'prices_include_tax',
         'wp_updated_at'
     ];
 
@@ -125,6 +128,9 @@ class Hotel extends Model
         'star_rating' => 'integer',
         'established_year' => 'integer',
         'total_rooms' => 'integer',
+        'vat_rate' => 'decimal:2',
+        'service_charge_rate' => 'decimal:2',
+        'prices_include_tax' => 'boolean',
         'wp_updated_at' => 'datetime'
     ];
     /**

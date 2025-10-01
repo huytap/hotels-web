@@ -3,7 +3,13 @@
     "allow": [
       "Bash(php:*)",
       "Read(//d/projects/hotels/hotels-web.com/booking/src/pages/**)",
-      "Read(//d/projects/hotels/hotels-web.com/booking/src/components/**)"
+      "Read(//d/projects/hotels/hotels-web.com/booking/src/components/**)",
+      "Read(//d/projects/hotels/hotels-web.com/api/**)",
+      "Read(//d/projects/hotels/hotels-web.com/booking/src/types/**)",
+      "Read(//d/projects/hotels/hotels-web.com/booking/src/services/**)",
+      "Read(//d/projects/hotels/hotels-web.com/booking/src/**)",
+      "Read(//d/projects/hotels/hotels-web.com/booking/**)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

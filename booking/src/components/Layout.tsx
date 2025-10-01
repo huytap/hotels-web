@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { useHotel } from '../context/HotelContext';
 import { useLanguage, useLocalizedText } from '../context/LanguageContext';
 
@@ -62,6 +62,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
 
             <div className="flex items-center gap-4">
+              {/* Track Booking Link */}
+              <Link
+                to="/track"
+                className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                {t('track_booking', 'Track Booking')}
+              </Link>
+
               {/* Language Selector */}
               {availableLanguages && availableLanguages.length > 1 && (
                 <div className="flex items-center gap-2">

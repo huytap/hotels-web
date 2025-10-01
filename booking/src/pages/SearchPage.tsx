@@ -241,14 +241,24 @@ const SearchPage: React.FC = () => {
       if (response.success) {
         console.log('Step 3: Got room list from Laravel API:', response.data);
 
+        // Extract rooms and tax settings from response
+        const rooms = response.data.rooms || response.data;
+        const taxSettings = response.data.hotel_tax_settings;
+
         // Update state instead of navigating
         setBookingDetails(searchParams);
-        setAvailableRooms(response.data);
+        setAvailableRooms(rooms);
         setSelectedRooms([]);
+
+        // Save tax settings to localStorage if available
+        if (taxSettings) {
+          localStorage.setItem('hotel_tax_settings', JSON.stringify(taxSettings));
+          console.log('💰 Tax settings saved:', taxSettings);
+        }
 
         // Save booking details and room data
         saveBookingState(searchParams);
-        localStorage.setItem('available_rooms', JSON.stringify(response.data));
+        localStorage.setItem('available_rooms', JSON.stringify(rooms));
         localStorage.setItem('selected_rooms', JSON.stringify([]));
       } else {
         setError(response.message || 'Không thể tìm phòng. Vui lòng thử lại.');

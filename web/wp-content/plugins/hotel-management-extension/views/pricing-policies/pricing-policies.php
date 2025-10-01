@@ -23,6 +23,10 @@ if (!defined('ABSPATH')) {
                 <span class="dashicons dashicons-admin-home"></span>
                 Chính Sách Giá Phòng
             </a>
+            <a href="#tax-settings" class="nav-tab" data-tab="tax-settings">
+                <span class="dashicons dashicons-money-alt"></span>
+                Thuế & Phí Dịch Vụ
+            </a>
         </h2>
 
         <!-- Loading indicator -->
@@ -164,6 +168,119 @@ if (!defined('ABSPATH')) {
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+
+        <!-- Tax Settings Tab -->
+        <div id="tax-settings-tab" class="hme-tab-content">
+            <div class="hme-card">
+                <h3>
+                    <span class="dashicons dashicons-money-alt"></span>
+                    Cấu Hình Thuế & Phí Dịch Vụ
+                </h3>
+                <p class="description">
+                    Thiết lập tỷ lệ VAT (%) và phí dịch vụ (%) cho khách sạn. Chọn xem giá hiển thị đã bao gồm hay chưa bao gồm thuế và phí.
+                </p>
+
+                <form id="tax-settings-form">
+                    <table class="form-table" role="presentation">
+                        <tbody>
+                            <tr>
+                                <th scope="row">
+                                    <label for="vat_rate">Tỷ Lệ VAT (%)</label>
+                                </th>
+                                <td>
+                                    <input type="number" id="vat_rate" name="vat_rate"
+                                        class="small-text" min="0" max="100" step="0.01" value="10.00" required>
+                                    <span class="suffix">%</span>
+                                    <p class="description">Thuế giá trị gia tăng (VAT) áp dụng cho giá phòng</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="service_charge_rate">Phí Dịch Vụ (%)</label>
+                                </th>
+                                <td>
+                                    <input type="number" id="service_charge_rate" name="service_charge_rate"
+                                        class="small-text" min="0" max="100" step="0.01" value="5.00" required>
+                                    <span class="suffix">%</span>
+                                    <p class="description">Phí dịch vụ (Service Charge) áp dụng cho giá phòng</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="prices_include_tax">Giá Hiển Thị</label>
+                                </th>
+                                <td>
+                                    <label>
+                                        <input type="checkbox" id="prices_include_tax" name="prices_include_tax" value="1">
+                                        Giá đã bao gồm VAT và phí dịch vụ
+                                    </label>
+                                    <p class="description">
+                                        <strong>Bỏ chọn:</strong> Giá hiển thị chưa bao gồm thuế và phí. Thuế & phí sẽ được tính thêm khi thanh toán.<br>
+                                        <strong>Chọn:</strong> Giá hiển thị đã bao gồm thuế và phí. Không tính thêm khi thanh toán.
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Tổng Tỷ Lệ</th>
+                                <td>
+                                    <p id="total_tax_rate" style="font-size: 14px; font-weight: bold; color: #2271b1;">
+                                        Tổng: <span id="total_rate_display">15.00</span>%
+                                    </p>
+                                    <p class="description">
+                                        Tổng phần trăm thuế và phí áp dụng = VAT (%) + Phí dịch vụ (%)
+                                    </p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p class="submit">
+                        <button type="submit" class="button button-primary">
+                            <span class="dashicons dashicons-yes"></span>
+                            Lưu Cấu Hình Thuế & Phí
+                        </button>
+                    </p>
+                </form>
+            </div>
+
+            <!-- Example Calculation -->
+            <div class="hme-card" style="background: #f0f6fc; border-color: #2271b1;">
+                <h4 style="margin-top: 0; color: #2271b1;">
+                    <span class="dashicons dashicons-info"></span>
+                    Ví Dụ Tính Toán
+                </h4>
+                <table class="widefat" id="tax-example-table">
+                    <tbody>
+                        <tr>
+                            <td><strong>Giá gốc phòng</strong></td>
+                            <td class="text-right">1,000,000 VNĐ</td>
+                        </tr>
+                        <tr>
+                            <td>VAT (<span class="vat-example">10</span>%)</td>
+                            <td class="text-right"><span id="vat-amount-example">100,000</span> VNĐ</td>
+                        </tr>
+                        <tr>
+                            <td>Phí dịch vụ (<span class="service-example">5</span>%)</td>
+                            <td class="text-right"><span id="service-amount-example">50,000</span> VNĐ</td>
+                        </tr>
+                        <tr style="border-top: 2px solid #2271b1; font-weight: bold;">
+                            <td>
+                                <strong>Giá <span id="price-type-label">chưa bao gồm</span> thuế & phí</strong>
+                            </td>
+                            <td class="text-right">
+                                <strong><span id="final-price-example">1,000,000</span> VNĐ</strong>
+                            </td>
+                        </tr>
+                        <tr style="font-weight: bold; color: #2271b1;">
+                            <td><strong>Khách phải trả</strong></td>
+                            <td class="text-right">
+                                <strong><span id="customer-pays-example">1,150,000</span> VNĐ</strong>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -408,6 +525,8 @@ if (!defined('ABSPATH')) {
                 loadChildAgePolicy();
             } else if ($(this).data('tab') === 'room-pricing-policy') {
                 loadRoomPricingPolicies();
+            } else if ($(this).data('tab') === 'tax-settings') {
+                loadTaxSettings();
             }
         });
 
@@ -418,6 +537,17 @@ if (!defined('ABSPATH')) {
         $('#child-age-policy-form').on('submit', function(e) {
             e.preventDefault();
             saveChildAgePolicy();
+        });
+
+        // Tax Settings Form Submit
+        $('#tax-settings-form').on('submit', function(e) {
+            e.preventDefault();
+            saveTaxSettings();
+        });
+
+        // Update total rate and example when VAT or Service Charge changes
+        $('#vat_rate, #service_charge_rate, #prices_include_tax').on('input change', function() {
+            updateTaxExample();
         });
 
         function loadChildAgePolicy() {
@@ -657,5 +787,97 @@ if (!defined('ABSPATH')) {
                 closePricingModal();
             }
         });
+
+        // ============ TAX SETTINGS FUNCTIONS ============
+        function loadTaxSettings() {
+            $.ajax({
+                url: hme_admin.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'hme_api_call',
+                    nonce: hme_admin.nonce,
+                    endpoint: 'hotels/tax-settings',
+                    method: 'GET'
+                },
+                success: function(response) {
+                    if (response.success && response.data) {
+                        populateTaxSettingsForm(response.data);
+                    }
+                },
+                error: function() {
+                    showNotice('Không thể tải cấu hình thuế', 'error');
+                }
+            });
+        }
+
+        function populateTaxSettingsForm(data) {
+            $('#vat_rate').val(parseFloat(data.vat_rate || 10.00).toFixed(2));
+            $('#service_charge_rate').val(parseFloat(data.service_charge_rate || 5.00).toFixed(2));
+            $('#prices_include_tax').prop('checked', data.prices_include_tax || false);
+            updateTaxExample();
+        }
+
+        function saveTaxSettings() {
+            const formData = {
+                vat_rate: parseFloat($('#vat_rate').val()),
+                service_charge_rate: parseFloat($('#service_charge_rate').val()),
+                prices_include_tax: $('#prices_include_tax').is(':checked')
+            };
+
+            $.ajax({
+                url: hme_admin.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'hme_api_call',
+                    nonce: hme_admin.nonce,
+                    endpoint: 'hotels/tax-settings',
+                    method: 'PUT',
+                    data: formData
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showNotice('Cấu hình thuế & phí đã được lưu thành công', 'success');
+                    } else {
+                        showNotice('Không thể lưu cấu hình: ' + response.data, 'error');
+                    }
+                },
+                error: function() {
+                    showNotice('Lỗi kết nối máy chủ', 'error');
+                }
+            });
+        }
+
+        function updateTaxExample() {
+            const vatRate = parseFloat($('#vat_rate').val()) || 0;
+            const serviceRate = parseFloat($('#service_charge_rate').val()) || 0;
+            const pricesIncludeTax = $('#prices_include_tax').is(':checked');
+            const totalRate = vatRate + serviceRate;
+
+            // Update total rate display
+            $('#total_rate_display').text(totalRate.toFixed(2));
+
+            // Update example table
+            const basePrice = 1000000;
+            const vatAmount = Math.round(basePrice * vatRate / 100);
+            const serviceAmount = Math.round(basePrice * serviceRate / 100);
+            const totalTax = vatAmount + serviceAmount;
+
+            $('.vat-example').text(vatRate.toFixed(2));
+            $('.service-example').text(serviceRate.toFixed(2));
+            $('#vat-amount-example').text(formatCurrency(vatAmount));
+            $('#service-amount-example').text(formatCurrency(serviceAmount));
+
+            if (pricesIncludeTax) {
+                // Giá hiển thị đã bao gồm thuế
+                $('#price-type-label').text('đã bao gồm');
+                $('#final-price-example').text(formatCurrency(basePrice + totalTax));
+                $('#customer-pays-example').text(formatCurrency(basePrice + totalTax));
+            } else {
+                // Giá hiển thị chưa bao gồm thuế
+                $('#price-type-label').text('chưa bao gồm');
+                $('#final-price-example').text(formatCurrency(basePrice));
+                $('#customer-pays-example').text(formatCurrency(basePrice + totalTax));
+            }
+        }
     });
 </script>

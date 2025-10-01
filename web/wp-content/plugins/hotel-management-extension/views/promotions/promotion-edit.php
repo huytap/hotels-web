@@ -319,9 +319,15 @@ include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
             }
 
             // Điền các trường khác
+            const bookingDaysRow = document.getElementById('booking-days-row');
+            const bookingDaysInput = document.getElementById('booking_days_in_advance');
             const typeSelect = form.querySelector('#type');
             if (typeSelect) {
                 typeSelect.value = promotion.type;
+                if (typeSelect.value == 'other') {
+                    bookingDaysRow.style.display = 'none';
+                    bookingDaysInput.removeAttribute('required');
+                }
             }
 
             const valueTypeSelect = form.querySelector('#value_type');
@@ -353,8 +359,6 @@ include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
             if (maxStayInput) {
                 maxStayInput.value = promotion.max_stay;
             }
-
-            const bookingDaysInput = form.querySelector('#booking_days_in_advance');
             if (bookingDaysInput) {
                 bookingDaysInput.value = promotion.booking_days_in_advance;
             }
