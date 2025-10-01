@@ -32,4 +32,5 @@ wp-config.php
 .vscode/
 node_modules/
 .env
+# WordPress debug log
 /wp-content/debug.log
