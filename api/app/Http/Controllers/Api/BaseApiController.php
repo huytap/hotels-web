@@ -53,12 +53,26 @@ abstract class BaseApiController extends Controller
 
     protected function getHotelFromRequest(Request $request)
     {
+        // Try multiple ways to get hotel ID:
+        // 1. From request input/json (for data submissions)
         $wpId = $request->input('wp_id') ?? $request->json('wp_id');
-        if (!$wpId) {
-            return null;
+        if ($wpId) {
+            return \App\Models\Hotel::where('wp_id', $wpId)->first();
         }
 
-        return \App\Models\Hotel::where('wp_id', $wpId)->first();
+        // 2. From x-hotel-id header (for API calls from WordPress admin)
+        $hotelId = $request->header('x-hotel-id');
+        if ($hotelId) {
+            return \App\Models\Hotel::find($hotelId);
+        }
+
+        // 3. From hotel_id parameter
+        $hotelId = $request->input('hotel_id') ?? $request->json('hotel_id');
+        if ($hotelId) {
+            return \App\Models\Hotel::find($hotelId);
+        }
+
+        return null;
     }
 
     protected function validateHotelAccess(Request $request)

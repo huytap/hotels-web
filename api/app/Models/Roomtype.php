@@ -73,13 +73,41 @@ class Roomtype extends Model
      */
     public function isAvailable($checkIn, $checkOut, $guests = 1)
     {
-        // Check guest capacity against adult_capacity
-        if ($guests > $this->adult_capacity) {
+        // Get pricing policy for this room type
+        $pricingPolicy = $this->pricingPolicy;
+        if (!$pricingPolicy) {
+            // If no pricing policy, fall back to basic adult_capacity check
+            return $guests <= $this->adult_capacity;
+        }
+
+        // Calculate effective capacity using same logic as BookingService
+        $baseOccupancy = $pricingPolicy->base_occupancy ?? 2;
+        $additionalAdultPrice = $pricingPolicy->additional_adult_price ?? 0;
+
+        // Base capacity: số người lớn cơ bản
+        $effectiveCapacity = $baseOccupancy;
+
+        // Thêm capacity cho người lớn phụ thu (nếu có additional_adult_price)
+        if ($additionalAdultPrice > 0) {
+            $effectiveCapacity += 2; // Cho phép thêm tối đa 2 người lớn/phòng
+        }
+
+        // Thêm capacity cho trẻ em (nếu có extra bed hoặc child capacity)
+        $childCapacity = $this->child_capacity ?? 0;
+        $hasExtraBed = $this->is_extra_bed_available ?? false;
+
+        if ($hasExtraBed || $childCapacity > 0) {
+            // Nếu có giường phụ hoặc child capacity, cho phép thêm trẻ em
+            $effectiveCapacity += max($childCapacity, 1); // Ít nhất 1 trẻ em
+        }
+
+        // Check if guests can be accommodated with effective capacity
+        if ($guests > $effectiveCapacity) {
             return false;
         }
 
-        // For now, assume room type is available if it exists
-        // In a real implementation, you would check against existing bookings
+        // For now, assume room type is available if it exists and capacity allows
+        // In a real implementation, you would check against existing bookings and room_rates
         return true;
     }
 
@@ -97,6 +125,14 @@ class Roomtype extends Model
     public function getMaxGuestsAttribute()
     {
         return $this->adult_capacity + $this->child_capacity;
+    }
+
+    /**
+     * Một loại phòng có một chính sách giá.
+     */
+    public function pricingPolicy()
+    {
+        return $this->hasOne(RoomPricingPolicy::class);
     }
 
     // public function scopeActive($query)

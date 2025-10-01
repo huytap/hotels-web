@@ -12,7 +12,9 @@
       "Read(//d/projects/hotels/**)",
       "Bash(php artisan make:migration:*)",
       "Bash(php artisan:*)",
-      "Bash(php:*)"
+      "Bash(php:*)",
+      "Bash(python3:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

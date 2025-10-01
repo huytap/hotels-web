@@ -3,11 +3,13 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Calendar, Users, Bed, Tag, CreditCard, X } from 'lucide-react';
 import type { BookingDetails, RoomAvailability } from '../types/api';
+import { useLocalizedText } from '../context/LanguageContext';
 
 interface SelectedRoom {
   roomId: number;
   quantity: number;
   promotionId?: number;
+  useExtraBed?: boolean;
 }
 
 interface BookingSummaryProps {
@@ -28,9 +30,10 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
   onProceedToBooking,
   onRemoveRoom,
   loading = false,
-  buttonText = 'Tiếp Tục Đặt Phòng',
+  buttonText,
   showButton = true
 }) => {
+  const { t } = useLocalizedText();
   console.log('📋 BookingSummary render:', {
     selectedRooms,
     selectedRoomsLength: selectedRooms.length,
@@ -63,18 +66,28 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
   };
 
   const getRoomDetails = (roomId: number) => {
-    console.log('🔍 Looking for room with ID:', roomId);
-    console.log('🔍 Raw available rooms:', availableRooms);
+    try {
+      console.log('🔍 Looking for room with ID:', roomId);
+      console.log('🔍 Raw available rooms:', availableRooms);
 
     // The availableRooms might be a combination array, need to flatten it
     let allRooms: any[] = [];
 
-    availableRooms.forEach((item: any) => {
+    availableRooms.forEach((item: any, itemIndex: number) => {
       if (item.combination_details && Array.isArray(item.combination_details)) {
         // This is a combination object, extract rooms from combination_details
-        item.combination_details.forEach((detail: any) => {
+        item.combination_details.forEach((detail: any, detailIndex: number) => {
           const roomType = detail.room_type;
           if (roomType) {
+            console.log(`🔍 Adding room from combination ${itemIndex}, detail ${detailIndex}:`, roomType.id, roomType.name);
+
+            // Check if this room already exists in allRooms to avoid duplicates
+            const existingRoom = allRooms.find(r => r.room_id === roomType.id);
+            if (existingRoom) {
+              console.log(`⚠️ Room ${roomType.id} already exists, skipping duplicate`);
+              return;
+            }
+
             allRooms.push({
               room_id: roomType.id,
               room: {
@@ -82,30 +95,54 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
                 name: roomType.name,
                 type: roomType.name,
                 description: roomType.description || '',
-                capacity: 2,
+                capacity: roomType.adult_capacity || 2,
                 amenities: roomType.amenities ? roomType.amenities.split(', ') : [],
                 images: roomType.gallery ? (typeof roomType.gallery === 'string' ? JSON.parse(roomType.gallery) : roomType.gallery) : [],
                 base_price: detail.base_price_total,
                 currency: 'VND'
               },
               available_inventory: detail.available_rooms,
-              rate_per_night: detail.base_price_total,
-              total_price: item.total_price,
-              applicable_promotions: Object.values(detail.promotions || {}).map((promo: any) => ({
-                id: promo.details.id,
-                code: promo.details.promotion_code,
-                name: promo.details.name?.vi || promo.details.name?.en || promo.details.name || '',
-                description: promo.details.description?.vi || promo.details.description || '',
-                type: promo.details.value_type === 'percentage' ? 'percentage' as const : 'fixed' as const,
-                value: parseFloat(promo.details.value),
-                start_date: promo.details.start_date,
-                end_date: promo.details.end_date,
-                min_nights: promo.details.min_stay || 1,
-                applicable_room_types: [roomType.id],
-                is_active: !!promo.details.is_active,
-                max_uses: 999,
-                current_uses: 0
-              }))
+              rate_per_night: detail.pricing_breakdown ? (detail.pricing_breakdown.final_total / detail.quantity) : (detail.base_price_total / detail.quantity),
+              total_price: detail.pricing_breakdown ? (detail.pricing_breakdown.final_total / detail.quantity) : (detail.base_price_total / detail.quantity),
+              pricing_breakdown: detail.pricing_breakdown ? {
+                ...detail.pricing_breakdown,
+                // Normalize pricing breakdown to per-room values
+                base_total: detail.pricing_breakdown.base_total / detail.quantity,
+                adult_surcharge_total: detail.pricing_breakdown.adult_surcharge_total / detail.quantity,
+                children_surcharge_total: detail.pricing_breakdown.children_surcharge_total / detail.quantity,
+                promotion_applicable_amount: detail.pricing_breakdown.promotion_applicable_amount / detail.quantity,
+                non_promotion_amount: detail.pricing_breakdown.non_promotion_amount / detail.quantity,
+                final_total: detail.pricing_breakdown.final_total / detail.quantity,
+                // Also normalize the new extra bed adult surcharge field
+                extra_bed_adult_surcharge_total: (detail.pricing_breakdown.extra_bed_adult_surcharge_total || 0) / detail.quantity,
+              } : undefined, // Normalize pricing breakdown to per-room
+              effective_capacity: detail.effective_capacity, // Thêm effective capacity từ API
+              applicable_promotions: Object.values(detail.promotions || {}).map((promo: any) => {
+                // Handle both promotion structures: with .details and without
+                const promotionData = promo.details || promo;
+
+                // Safety check to ensure promotionData exists and has required fields
+                if (!promotionData || !promotionData.id) {
+                  console.warn('Invalid promotion data:', promo);
+                  return null;
+                }
+
+                return {
+                  id: promotionData.id,
+                  code: promotionData.promotion_code || '',
+                  name: promotionData.name?.vi || promotionData.name?.en || promotionData.name || '',
+                  description: promotionData.description?.vi || promotionData.description || '',
+                  type: promotionData.value_type === 'percentage' ? 'percentage' as const : 'fixed' as const,
+                  value: parseFloat(promotionData.value || '0'),
+                  start_date: promotionData.start_date || '',
+                  end_date: promotionData.end_date || '',
+                  min_nights: promotionData.min_stay || 1,
+                  applicable_room_types: [roomType.id],
+                  is_active: !!promotionData.is_active,
+                  max_uses: 999,
+                  current_uses: 0
+                };
+              }).filter(Boolean) // Remove null values
             });
           }
         });
@@ -118,19 +155,31 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
     console.log('🔍 Flattened rooms:', allRooms);
 
     // Now find the room
-    const room = allRooms.find(r => r.room_id === roomId || r.room?.id === roomId);
+    const room = allRooms.find(r =>
+      (r.room_id && r.room_id === roomId) ||
+      (r.room && r.room.id === roomId)
+    );
     console.log('🔍 Found room:', room);
 
     return room;
+    } catch (error) {
+      console.error('Error in getRoomDetails:', error);
+      return null;
+    }
   };
 
   const getPromotionDetails = (roomId: number, promotionId?: number) => {
-    const roomAvailability = getRoomDetails(roomId);
-    if (!roomAvailability || !promotionId) return null;
-    return roomAvailability.applicable_promotions.find(p => p.id === promotionId);
+    try {
+      const roomAvailability = getRoomDetails(roomId);
+      if (!roomAvailability || !promotionId) return null;
+      return roomAvailability.applicable_promotions?.find((p: any) => p.id === promotionId) || null;
+    } catch (error) {
+      console.error('Error in getPromotionDetails:', error);
+      return null;
+    }
   };
 
-  const calculateRoomPrice = (roomId: number, quantity: number, promotionId?: number): number => {
+  const calculateRoomPrice = (roomId: number, quantity: number, promotionId?: number, useExtraBed?: boolean): number => {
     console.log('🏷️ Calculating price for room:', roomId, 'quantity:', quantity, 'promotionId:', promotionId);
 
     const roomDetails = getRoomDetails(roomId);
@@ -141,36 +190,67 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
       return 0;
     }
 
+    // Sử dụng pricing breakdown nếu có, nếu không thì fallback về logic cũ
+    if (roomDetails.pricing_breakdown) {
+      console.log('🏷️ Using pricing breakdown:', roomDetails.pricing_breakdown);
+
+      const promotion = getPromotionDetails(roomId, promotionId);
+      let finalPrice = 0;
+
+      // Calculate extra charges based on user's extra bed choice
+      let extraCharges = 0;
+      if (useExtraBed) {
+        // User chose extra bed - include all non-promotion amounts
+        extraCharges = roomDetails.pricing_breakdown.non_promotion_amount;
+      } else {
+        // User declined extra bed - only include children surcharge (if any)
+        extraCharges = roomDetails.pricing_breakdown.children_surcharge_total || 0;
+      }
+
+      if (promotion) {
+        // Với promotion: áp dụng giảm giá cho promotion_applicable_amount, cộng extraCharges
+        const discountAmount = promotion.type === 'percentage'
+          ? roomDetails.pricing_breakdown.promotion_applicable_amount * (promotion.value / 100)
+          : promotion.value;
+
+        finalPrice = (roomDetails.pricing_breakdown.promotion_applicable_amount - discountAmount) + extraCharges;
+      } else {
+        // Không có promotion: lấy base price + extraCharges
+        finalPrice = roomDetails.pricing_breakdown.promotion_applicable_amount + extraCharges;
+      }
+
+      // In mixed combinations, finalPrice is already for 1 room for the entire stay
+      // We should only multiply by quantity if user selects more than the API quantity
+      const totalPrice = finalPrice * quantity;
+      console.log('🏷️ Pricing breakdown calculation:', {
+        roomId,
+        promotionApplicableAmount: roomDetails.pricing_breakdown.promotion_applicable_amount,
+        nonPromotionAmount: roomDetails.pricing_breakdown.non_promotion_amount,
+        promotion,
+        finalPrice,
+        userQuantity: quantity,
+        totalPrice,
+        'pricing_breakdown.final_total': roomDetails.pricing_breakdown.final_total
+      });
+
+      return isNaN(totalPrice) ? 0 : totalPrice;
+    }
+
+    // Fallback to old logic if no pricing breakdown
     let pricePerNight = roomDetails.rate_per_night;
-    console.log('🏷️ Base price per night:', pricePerNight);
+    console.log('🏷️ Base price per night (fallback):', pricePerNight);
 
     const promotion = getPromotionDetails(roomId, promotionId);
-    console.log('🏷️ Promotion details:', promotion);
-
     if (promotion) {
       if (promotion.type === 'percentage') {
         pricePerNight = pricePerNight * (1 - promotion.value / 100);
       } else if (promotion.type === 'fixed') {
         pricePerNight = Math.max(0, pricePerNight - promotion.value);
       }
-      console.log('🏷️ Price after promotion:', pricePerNight);
     }
 
     const nights = calculateNights();
-
-    // Ensure all values are numbers
-    const safePricePerNight = typeof pricePerNight === 'number' ? pricePerNight : 0;
-    const safeQuantity = typeof quantity === 'number' ? quantity : 0;
-    const safeNights = typeof nights === 'number' ? nights : 0;
-
-    const totalPrice = safePricePerNight * safeQuantity * safeNights;
-    console.log('🏷️ Final calculation:', {
-      pricePerNight: safePricePerNight,
-      quantity: safeQuantity,
-      nights: safeNights,
-      totalPrice,
-      isValidNumber: !isNaN(totalPrice)
-    });
+    const totalPrice = pricePerNight * quantity * nights;
 
     return isNaN(totalPrice) ? 0 : totalPrice;
   };
@@ -181,7 +261,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
     console.log('💰 Available rooms count:', availableRooms.length);
 
     const total = selectedRooms.reduce((total, room) => {
-      const roomPrice = calculateRoomPrice(room.roomId, room.quantity, room.promotionId);
+      const roomPrice = calculateRoomPrice(room.roomId, room.quantity, room.promotionId, room.useExtraBed);
       console.log('💰 Room price calculation:', {
         roomId: room.roomId,
         quantity: room.quantity,
@@ -199,6 +279,14 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
     return selectedRooms.reduce((total, room) => {
       const roomDetails = getRoomDetails(room.roomId);
       if (!roomDetails) return total;
+
+      // Sử dụng pricing breakdown nếu có để tính giá gốc (trước khuyến mãi)
+      if (roomDetails.pricing_breakdown) {
+        const originalPrice = roomDetails.pricing_breakdown.promotion_applicable_amount + roomDetails.pricing_breakdown.non_promotion_amount;
+        return total + (originalPrice * room.quantity);
+      }
+
+      // Fallback về logic cũ
       return total + (roomDetails.rate_per_night * room.quantity * calculateNights());
     }, 0);
   };
@@ -208,15 +296,69 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
   const totalDiscount = originalPrice - totalPrice;
   const nights = calculateNights();
 
+  // Calculate total capacity and validate
+  const calculateTotalCapacity = (): { current: number; required: number; sufficient: boolean } => {
+    const required = bookingDetails.adults + bookingDetails.children;
+    let current = 0;
+
+    selectedRooms.forEach(selectedRoom => {
+      const roomDetails = getRoomDetails(selectedRoom.roomId);
+      if (roomDetails && roomDetails.room) {
+        // Determine capacity based on user's extra bed choice
+        let roomCapacity: number;
+
+        if (selectedRoom.useExtraBed && roomDetails.effective_capacity) {
+          // User selected extra bed - use effective_capacity (includes extra bed)
+          roomCapacity = roomDetails.effective_capacity;
+        } else {
+          // User did not select extra bed - use base capacity only
+          roomCapacity = roomDetails.room.capacity || 2;
+        }
+
+        current += roomCapacity * selectedRoom.quantity;
+      }
+    });
+
+    console.log('🏨 Capacity calculation:', {
+      required,
+      current,
+      selectedRooms,
+      sufficient: current >= required,
+      roomDetails: selectedRooms.map(room => {
+        const details = getRoomDetails(room.roomId);
+        const capacity = room.useExtraBed && details?.effective_capacity
+          ? details.effective_capacity
+          : (details?.room?.capacity || 2);
+        return {
+          roomId: room.roomId,
+          quantity: room.quantity,
+          useExtraBed: room.useExtraBed,
+          effective_capacity: details?.effective_capacity,
+          base_capacity: details?.room?.capacity,
+          actual_capacity_used: capacity,
+          contribution: capacity * room.quantity
+        };
+      })
+    });
+
+    return {
+      current,
+      required,
+      sufficient: current >= required
+    };
+  };
+
+  const capacityInfo = calculateTotalCapacity();
+
   if (selectedRooms.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-lg border p-6 sticky top-4">
         <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
           <CreditCard className="w-5 h-5" />
-          Tóm Tắt Đặt Phòng
+          {t('summary.title')}
         </h3>
         <div className="text-center py-8">
-          <p className="text-gray-500 mb-4">Chưa có phòng nào được chọn</p>
+          <p className="text-gray-500 mb-4">{t('summary.no_rooms_selected')}</p>
         </div>
       </div>
     );
@@ -226,42 +368,42 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
     <div className="bg-white rounded-lg shadow-lg border p-6 sticky top-4">
       <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
         <CreditCard className="w-5 h-5" />
-        Tóm Tắt Đặt Phòng
+        {t('summary.title')}
       </h3>
       {/* Booking Details */}
       <div className="space-y-3 mb-6 pb-4 border-b">
         <div className="flex items-center gap-2 text-sm">
           <Calendar className="w-4 h-4 text-gray-500" />
-          <span className="text-gray-600">Nhận phòng:</span>
+          <span className="text-gray-600">{t('summary.checkin')}:</span>
           <span className="font-medium">
             {format(new Date(bookingDetails.check_in), 'dd/MM/yyyy', { locale: vi })}
           </span>
         </div>
         <div className="flex items-center gap-2 text-sm">
           <Calendar className="w-4 h-4 text-gray-500" />
-          <span className="text-gray-600">Trả phòng:</span>
+          <span className="text-gray-600">{t('summary.checkout')}:</span>
           <span className="font-medium">
             {format(new Date(bookingDetails.check_out), 'dd/MM/yyyy', { locale: vi })}
           </span>
         </div>
         <div className="flex items-center gap-2 text-sm">
           <Bed className="w-4 h-4 text-gray-500" />
-          <span className="text-gray-600">Số đêm:</span>
-          <span className="font-medium">{nights} đêm</span>
+          <span className="text-gray-600">{t('summary.nights')}:</span>
+          <span className="font-medium">{nights} {nights === 1 ? t('summary.night') : t('summary.nights')}</span>
         </div>
         <div className="flex items-center gap-2 text-sm">
           <Users className="w-4 h-4 text-gray-500" />
-          <span className="text-gray-600">Khách:</span>
+          <span className="text-gray-600">{t('summary.guests')}:</span>
           <span className="font-medium">
-            {bookingDetails.adults} người lớn
-            {bookingDetails.children > 0 && `, ${bookingDetails.children} trẻ em`}
+            {t('summary.adults_count', { count: bookingDetails.adults })}
+            {bookingDetails.children > 0 && `, ${t('summary.children_count', { count: bookingDetails.children })}`}
           </span>
         </div>
       </div>
 
       {/* Selected Rooms - Grouped by Room Type */}
       <div className="space-y-4 mb-6">
-        <h4 className="font-semibold text-gray-700">Phòng Đã Chọn:</h4>
+        <h4 className="font-semibold text-gray-700">{t('summary.selected_rooms')}:</h4>
         {(() => {
           // Group selected rooms by room type
           const groupedRooms = selectedRooms.reduce((groups, selectedRoom) => {
@@ -288,7 +430,7 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
                 {roomSelections.map((selectedRoom, index) => {
                   const roomDetails = getRoomDetails(selectedRoom.roomId);
                   const promotion = getPromotionDetails(selectedRoom.roomId, selectedRoom.promotionId);
-                  const roomTotal = calculateRoomPrice(selectedRoom.roomId, selectedRoom.quantity, selectedRoom.promotionId);
+                  const roomTotal = calculateRoomPrice(selectedRoom.roomId, selectedRoom.quantity, selectedRoom.promotionId, selectedRoom.useExtraBed);
                   const originalRoomTotal = roomDetails ? roomDetails.rate_per_night * selectedRoom.quantity * nights : 0;
 
                   return (
@@ -301,11 +443,11 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
                               <span className="text-sm font-medium text-green-700">{promotion.name}</span>
                             </>
                           ) : (
-                            <span className="text-sm text-gray-600">Giá cơ bản</span>
+                            <span className="text-sm text-gray-600">{t('summary.basic_price')}</span>
                           )}
                         </div>
                         <p className="text-xs text-gray-500">
-                          {selectedRoom.quantity} phòng × {nights} đêm
+                          {t('summary.rooms_nights', { rooms: selectedRoom.quantity, nights })}
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
@@ -320,14 +462,14 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
                           </div>
                           {promotion && (
                             <div className="text-xs text-green-600">
-                              Tiết kiệm {(originalRoomTotal - roomTotal).toLocaleString('vi-VN')} VND
+                              {t('summary.savings')} {(originalRoomTotal - roomTotal).toLocaleString('vi-VN')} VND
                             </div>
                           )}
                         </div>
                         <button
                           onClick={() => onRemoveRoom(selectedRoom.roomId, selectedRoom.promotionId)}
                           className="flex items-center justify-center w-6 h-6 bg-red-100 hover:bg-red-200 text-red-600 rounded-full transition-colors"
-                          title="Xóa phòng này"
+                          title={t('summary.remove_room')}
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -346,13 +488,13 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
         {totalDiscount > 0 && (
           <>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Tổng giá gốc:</span>
+              <span className="text-gray-600">{t('summary.original_price')}:</span>
               <span className="line-through text-gray-500">
                 {originalPrice.toLocaleString('vi-VN')} VND
               </span>
             </div>
             <div className="flex justify-between text-sm text-green-600">
-              <span>Tiết kiệm:</span>
+              <span>{t('summary.savings')}:</span>
               <span className="font-medium">
                 -{totalDiscount.toLocaleString('vi-VN')} VND
               </span>
@@ -360,31 +502,54 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
           </>
         )}
         <div className="flex justify-between text-lg font-bold text-blue-600">
-          <span>Tổng tiền:</span>
+          <span>{t('summary.total_amount')}:</span>
           <span>{totalPrice.toLocaleString('vi-VN')} VND</span>
         </div>
+      </div>
+
+      {/* Capacity Status */}
+      <div className={`p-3 rounded-lg mb-4 ${capacityInfo.sufficient ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+        {capacityInfo.sufficient ? (
+          <div className="flex items-center gap-2 text-green-700">
+            <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+            </div>
+            <span className="text-sm font-medium">
+              {t('summary.capacity_sufficient', { guests: capacityInfo.required })}
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-red-700">
+            <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
+              <div className="w-1 h-1 bg-white rounded-full"></div>
+            </div>
+            <span className="text-sm font-medium">
+              {t('summary.capacity_warning', { current: capacityInfo.current, required: capacityInfo.required })}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Action Button */}
       {showButton && (
         <button
           onClick={onProceedToBooking}
-          disabled={loading || selectedRooms.length === 0}
+          disabled={loading || selectedRooms.length === 0 || !capacityInfo.sufficient}
           className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200 font-medium"
         >
           {loading ? (
             <div className="flex items-center justify-center gap-2">
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              Đang Xử Lý...
+              {t('summary.processing')}
             </div>
           ) : (
-            buttonText
+            buttonText || t('summary.proceed_booking')
           )}
         </button>
       )}
 
       <p className="text-xs text-gray-500 mt-3 text-center">
-        * Giá đã bao gồm thuế và phí dịch vụ
+        {t('summary.price_includes')}
       </p>
     </div>
   );

@@ -26,6 +26,12 @@ class BookingDetail extends Model
         'roomtype_id',
         'adults',
         'children',
+        'children_ages',
+        'additional_adult_price',
+        'child_surcharge_price',
+        'total_additional_charges',
+        'additional_adult_count',
+        'child_surcharge_count',
         'is_extra_bed_requested',
         'quantity',
         'price_per_night',
@@ -43,6 +49,10 @@ class BookingDetail extends Model
      * @var array
      */
     protected $casts = [
+        'children_ages' => 'array',
+        'additional_adult_price' => 'decimal:2',
+        'child_surcharge_price' => 'decimal:2',
+        'total_additional_charges' => 'decimal:2',
         'price_per_night' => 'decimal:2',
         'sub_total' => 'decimal:2',
         'tax_amount' => 'decimal:2',

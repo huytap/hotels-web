@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight, Users, Bed, Maximize, Mountain, Star, Sofa, Bath } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Users, Bed, Maximize, Mountain, Sofa, Bath } from 'lucide-react';
 import type { Room } from '../types/api';
+import { useLocalizedText } from '../context/LanguageContext';
 
 interface RoomGalleryPopupProps {
   isOpen: boolean;
@@ -13,10 +14,11 @@ const RoomGalleryPopup: React.FC<RoomGalleryPopupProps> = ({
   isOpen,
   onClose,
   room,
-  ratePerNight
+  ratePerNight: _ratePerNight
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const { t } = useLocalizedText();
 
   useEffect(() => {
     // Use gallery_images if available, otherwise fall back to images
@@ -79,9 +81,9 @@ const RoomGalleryPopup: React.FC<RoomGalleryPopupProps> = ({
   // Parse amenities from room data
   const getAmenityData = () => {
     return {
-      main: room.amenities || ['WiFi miễn phí', 'TV LCD', 'Máy lạnh'],
-      room: room.room_amenities || ['Minibar', 'Két sắt', 'Bàn làm việc'],
-      bathroom: room.bathroom_amenities || ['Vòi sen', 'Máy sấy tóc', 'Đồ vệ sinh cá nhân']
+      main: room.amenities || [t('room.amenities.default.wifi'), t('room.amenities.default.tv'), t('room.amenities.default.ac')],
+      room: room.room_amenities || [t('room.amenities.default.minibar'), t('room.amenities.default.safe'), t('room.amenities.default.desk')],
+      bathroom: room.bathroom_amenities || [t('room.amenities.default.shower'), t('room.amenities.default.hairdryer'), t('room.amenities.default.toiletries')]
     };
   };
 
@@ -179,32 +181,32 @@ const RoomGalleryPopup: React.FC<RoomGalleryPopupProps> = ({
                   <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
                     <Bed className="text-blue-500" size={24} />
                     <div>
-                      <div className="font-semibold text-gray-800">Loại giường</div>
-                      <div className="text-gray-600">{room.bed_type || 'Giường đôi king size'}</div>
+                      <div className="font-semibold text-gray-800">{t('room.bed_type')}</div>
+                      <div className="text-gray-600">{room.bed_type || t('room.bed_type.default')}</div>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
                     <Maximize className="text-blue-500" size={24} />
                     <div>
-                      <div className="font-semibold text-gray-800">Diện tích</div>
-                      <div className="text-gray-600">{room.area || '30m²'}</div>
+                      <div className="font-semibold text-gray-800">{t('room.area')}</div>
+                      <div className="text-gray-600">{room.area || t('room.area.default')}</div>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
                     <Users className="text-blue-500" size={24} />
                     <div>
-                      <div className="font-semibold text-gray-800">Sức chứa</div>
-                      <div className="text-gray-600">Tối đa {room.capacity} người</div>
+                      <div className="font-semibold text-gray-800">{t('room.capacity_label')}</div>
+                      <div className="text-gray-600">{t('room.capacity', { count: room.capacity })}</div>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
                     <Mountain className="text-blue-500" size={24} />
                     <div>
-                      <div className="font-semibold text-gray-800">View</div>
-                      <div className="text-gray-600">{room.view || 'View thành phố'}</div>
+                      <div className="font-semibold text-gray-800">{t('room.view')}</div>
+                      <div className="text-gray-600">{room.view || t('room.view.default')}</div>
                     </div>
                   </div>
                 </div>
@@ -225,7 +227,7 @@ const RoomGalleryPopup: React.FC<RoomGalleryPopupProps> = ({
                 <div>
                   <h4 className="flex items-center gap-2 text-lg font-semibold text-gray-800 mb-3">
                     <Sofa className="text-blue-500" size={20} />
-                    Tiện ích phòng
+                    {t('room.amenities.room')}
                   </h4>
                   <p className="text-gray-600 leading-relaxed">
                     {Array.isArray(amenityData.room) ? amenityData.room.join(', ') : amenityData.room}
@@ -236,7 +238,7 @@ const RoomGalleryPopup: React.FC<RoomGalleryPopupProps> = ({
                 <div>
                   <h4 className="flex items-center gap-2 text-lg font-semibold text-gray-800 mb-3">
                     <Bath className="text-blue-500" size={20} />
-                    Tiện ích phòng tắm
+                    {t('room.amenities.bathroom')}
                   </h4>
                   <p className="text-gray-600 leading-relaxed">
                     {Array.isArray(amenityData.bathroom) ? amenityData.bathroom.join(', ') : amenityData.bathroom}

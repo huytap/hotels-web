@@ -21,6 +21,12 @@ class HotelController extends BaseApiController
             return $hotel;
         }
 
+        // Get language from request, default to 'vi'
+        $language = $request->input('language', 'vi');
+
+        // Set the app locale for translations
+        app()->setLocale($language);
+
         $roomtypes = Roomtype::where('hotel_id', $hotel->id)
             ->select([
                 'id',
@@ -40,9 +46,29 @@ class HotelController extends BaseApiController
                 'is_extra_bed_available'
             ])
             ->get();
+        // Transform the data to include localized content
+        $localizedRoomtypes = $roomtypes->map(function ($roomtype) use ($language) {
+            return [
+                'id' => $roomtype->id,
+                'title' => $roomtype->getTranslation('title', $language, false) ?: $roomtype->title,
+                'description' => $roomtype->getTranslation('description', $language, false) ?: $roomtype->description,
+                'area' => $roomtype->getTranslation('area', $language, false) ?: $roomtype->area,
+                'adult_capacity' => $roomtype->adult_capacity,
+                'child_capacity' => $roomtype->child_capacity,
+                'bed_type' => $roomtype->getTranslation('bed_type', $language, false) ?: $roomtype->bed_type,
+                'amenities' => $roomtype->getTranslation('amenities', $language, false) ?: $roomtype->amenities,
+                'room_amenities' => $roomtype->getTranslation('room_amenities', $language, false) ?: $roomtype->room_amenities,
+                'bathroom_amenities' => $roomtype->getTranslation('bathroom_amenities', $language, false) ?: $roomtype->bathroom_amenities,
+                'view' => $roomtype->getTranslation('view', $language, false) ?: $roomtype->view,
+                'gallery_images' => $roomtype->gallery_images,
+                'featured_image' => $roomtype->featured_image,
+                'base_price' => $roomtype->price,
+                'is_extra_bed_available' => $roomtype->is_extra_bed_available,
+            ];
+        });
 
         // Trả về dữ liệu
-        return $this->successResponse($roomtypes, 'Lấy danh sách phòng thành công');
+        return $this->successResponse($localizedRoomtypes, 'Lấy danh sách phòng thành công');
     }
 
     public function getRoomDetail($id, Request $request)
@@ -51,6 +77,12 @@ class HotelController extends BaseApiController
         if (!$wpId) {
             return response()->json(['error' => 'wp_id is required.'], 400);
         }
+
+        // Get language from request, default to 'vi'
+        $language = $request->input('language', 'vi');
+
+        // Set the app locale for translations
+        app()->setLocale($language);
 
         $hotelId = HotelHelper::getHotelIdByWpId($wpId);
         if (!$hotelId) {
@@ -66,7 +98,26 @@ class HotelController extends BaseApiController
             return response()->json(['error' => 'Room not found.'], 404);
         }
 
-        return $this->successResponse($roomtype, 'Lấy thông tin chi tiết phòng thành công');
+        // Transform the data to include localized content
+        $localizedRoomtype = [
+            'id' => $roomtype->id,
+            'title' => $roomtype->getTranslation('title', $language, false) ?: $roomtype->title,
+            'description' => $roomtype->getTranslation('description', $language, false) ?: $roomtype->description,
+            'area' => $roomtype->getTranslation('area', $language, false) ?: $roomtype->area,
+            'adult_capacity' => $roomtype->adult_capacity,
+            'child_capacity' => $roomtype->child_capacity,
+            'bed_type' => $roomtype->getTranslation('bed_type', $language, false) ?: $roomtype->bed_type,
+            'amenities' => $roomtype->getTranslation('amenities', $language, false) ?: $roomtype->amenities,
+            'room_amenities' => $roomtype->getTranslation('room_amenities', $language, false) ?: $roomtype->room_amenities,
+            'bathroom_amenities' => $roomtype->getTranslation('bathroom_amenities', $language, false) ?: $roomtype->bathroom_amenities,
+            'view' => $roomtype->getTranslation('view', $language, false) ?: $roomtype->view,
+            'gallery_images' => $roomtype->gallery_images,
+            'featured_image' => $roomtype->featured_image,
+            'base_price' => $roomtype->base_price,
+            'is_extra_bed_available' => $roomtype->is_extra_bed_available,
+        ];
+
+        return $this->successResponse($localizedRoomtype, 'Lấy thông tin chi tiết phòng thành công');
     }
 
     public function getRoomRates(Request $request)

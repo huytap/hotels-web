@@ -30,38 +30,66 @@ class BookingController extends BaseApiController
      */
     public function getAvailableRoomCombinations(Request $request)
     {
+        \Log::info("🚀 API Called - getAvailableRoomCombinations", $request->all());
+
         // 1. Validate hotel access using BaseApiController method
         $hotel = $this->validateHotelAccess($request);
         if ($hotel instanceof JsonResponse) {
+            \Log::info("❌ Hotel validation failed");
             return $hotel;
         }
+        \Log::info("✅ Hotel validation passed - Hotel: {$hotel->name}");
 
         // 2. Validate request data (WordPress callApi wraps data in 'data' key)
         $validator = Validator::make($request->all(), [
             'data' => 'required|array',
-            'data' => 'required|array',
+            'language' => 'nullable|string|in:vi,en,ko,ja',
             'data.check_in' => 'required|date|after_or_equal:today',
             'data.check_out' => 'required|date|after_or_equal:data.check_in',
             'data.adults' => 'required|integer|min:1',
             'data.children' => 'nullable|integer|min:0',
+            'data.children_ages' => 'nullable|array',
+            'data.children_ages.*' => 'integer|min:0|max:17',
         ]);
 
         if ($validator->fails()) {
+            \Log::info("❌ Input validation failed", $validator->errors()->toArray());
             return $this->errorResponse('Validation failed', 422, $validator->errors());
         }
+        \Log::info("✅ Input validation passed");
 
         try {
+            // Get language from request, default to 'vi'
+            $language = $request->input('language', 'vi');
+
+            // Set the app locale for translations
+            app()->setLocale($language);
+
             // 3. Call service to find room combinations
             $params = $request->input('data');
+
+            // Validate children ages if children count is provided
+            $children = $params['children'] ?? 0;
+            $childrenAges = $params['children_ages'] ?? [];
+
+            // Additional validation: children_ages array length should match children count
+            if ($children > 0 && count($childrenAges) !== $children) {
+                return $this->errorResponse('Children ages must be provided for all children', 422);
+            }
+
+            \Log::info("🔍 Calling BookingService->findRoomCombinations");
             $data = $this->bookingService->findRoomCombinations(
                 $hotel->id,
                 $params['check_in'],
                 $params['check_out'],
                 $params['adults'],
-                $params['children'] ?? 0
+                $children,
+                $childrenAges,
+                $language
             );
 
             // 4. Return successful response using BaseApiController method
+            \Log::info("📦 Returning response - Data count: " . count($data));
             return $this->successResponse($data, 'Available rooms found successfully');
         } catch (\Exception $e) {
             \Log::error('Find room combinations failed', [
@@ -97,7 +125,7 @@ class BookingController extends BaseApiController
             return $this->errorResponse('Validation failed', 400, $validator->errors());
         }
 
-        $query = Booking::with(['roomType', 'promotion'])
+        $query = Booking::with(['bookingDetails.roomType', 'bookingDetails.promotion'])
             ->where('hotel_id', $hotel->id);
 
         // Apply filters
@@ -150,7 +178,7 @@ class BookingController extends BaseApiController
             return $hotel;
         }
 
-        $booking = Booking::with(['roomType', 'promotion', 'promotionUsage'])
+        $booking = Booking::with(['bookingDetails.roomType', 'bookingDetails.promotion'])
             ->where('hotel_id', $hotel->id)
             ->find($id);
 
@@ -262,14 +290,89 @@ class BookingController extends BaseApiController
                 //     throw new \Exception("Only {$availableQuantity} rooms available for {$roomType->name}");
                 // }
 
-                // SECURITY: Re-calculate pricing server-side (never trust client)
-                $pricingResult = $this->calculateBookingPricing($roomType, $checkIn, $checkOut, null, $promotionId);
+                // SECURITY: Re-calculate pricing server-side using BookingService (never trust client)
+                $bookingService = new \App\Services\BookingService();
 
-                if (!$pricingResult['success']) {
-                    throw new \Exception($pricingResult['message']);
+                // For mixed room bookings, distribute guests optimally based on room capabilities
+                // Rooms with extra bed/additional pricing should accommodate extra guests first
+
+                $roomCapacity = $roomType->adult_capacity ?? 2;
+                $hasExtraBed = $roomType->is_extra_bed_available ?? false;
+                $pricingPolicy = $roomType->pricingPolicy;
+
+                // Calculate how many guests this room should handle for pricing
+                $totalAdults = $bookingDetails['adults'];
+                $totalRooms = array_sum(array_column($rooms, 'quantity'));
+
+                if ($hasExtraBed && $pricingPolicy && $pricingPolicy->additional_adult_price > 0) {
+                    // Room có extra bed - ưu tiên chứa thêm người
+                    $adultsForPricing = min($roomCapacity + 1, $totalAdults); // +1 for extra bed
+                } else {
+                    // Room thường - chỉ chứa base capacity
+                    $adultsForPricing = min($roomCapacity, $totalAdults);
                 }
 
-                $pricing = $pricingResult['data'];
+                // Distribute children evenly
+                $childrenForPricing = round(($bookingDetails['children'] ?? 0) / $totalRooms);
+
+                // Get room combinations for this specific room type with calculated guest count
+                $searchResult = $bookingService->findRoomCombinations(
+                    $hotel->id,
+                    $checkIn->toDateString(),
+                    $checkOut->toDateString(),
+                    $adultsForPricing,
+                    $childrenForPricing,
+                    $bookingDetails['children_ages'] ?? [],
+                    'vi'
+                );
+
+                // Find the matching room combination for this specific room type
+                $matchingCombination = null;
+                foreach ($searchResult as $combination) {
+                    foreach ($combination['combination_details'] as $detail) {
+                        if ($detail['room_type']['id'] == $roomType->id) {
+                            $matchingCombination = $detail;
+                            break 2;
+                        }
+                    }
+                }
+
+                if (!$matchingCombination) {
+                    throw new \Exception("Unable to calculate pricing for room type {$roomType->name} with current booking parameters");
+                }
+
+                // Use pricing from BookingService, adjusting for actual requested quantity
+                $apiQuantity = $matchingCombination['quantity'];
+                $pricePerRoom = $matchingCombination['pricing_breakdown']['final_total'] / $apiQuantity;
+
+                $pricing = [
+                    'total_amount' => $pricePerRoom * $quantity,
+                    'discount_amount' => 0,
+                    'tax_amount' => 0,
+                    'rate_per_night' => $pricePerRoom / $checkIn->diffInDays($checkOut),
+                    'subtotal' => ($matchingCombination['pricing_breakdown']['promotion_applicable_amount'] + $matchingCombination['pricing_breakdown']['non_promotion_amount']) / $apiQuantity * $quantity,
+                    'nights' => $checkIn->diffInDays($checkOut)
+                ];
+
+                // Apply promotion if specified
+                if ($promotionId) {
+                    // Find promotion by ID (promotions are indexed by array key, not promotion ID)
+                    $promotionData = null;
+                    foreach ($matchingCombination['promotions'] as $promoKey => $promoInfo) {
+                        if ($promoInfo['details']['id'] == $promotionId) {
+                            $promotionData = $promoInfo;
+                            break;
+                        }
+                    }
+
+                    if ($promotionData) {
+                        $promotionDiscountPerRoom = ($promotionData['promotion_applicable_price'] - $promotionData['discounted_price_total']) / $apiQuantity;
+                        $promotionTotalPerRoom = ($promotionData['discounted_price_total'] + $matchingCombination['pricing_breakdown']['non_promotion_amount']) / $apiQuantity;
+
+                        $pricing['discount_amount'] = $promotionDiscountPerRoom * $quantity;
+                        $pricing['total_amount'] = $promotionTotalPerRoom * $quantity;
+                    }
+                }
 
                 // SECURITY: Validate promotion is still active and valid
                 if ($promotionId) {
@@ -288,9 +391,9 @@ class BookingController extends BaseApiController
                 $bookingDetails_array[] = [
                     'roomtype_id' => $roomType->id,
                     'quantity' => $quantity,
-                    'adults' => $bookingDetails['adults'] ?? 2,
-                    'children' => $bookingDetails['children'] ?? 0,
-                    'is_extra_bed_requested' => false,
+                    'adults' => $adultsForPricing, // Use the calculated adults for this specific room
+                    'children' => $childrenForPricing, // Use the calculated children for this specific room
+                    'is_extra_bed_requested' => ($adultsForPricing > $roomCapacity), // Mark if extra bed is needed
                     'price_per_night' => $pricing['rate_per_night'],
                     'sub_total' => $pricing['subtotal'] * $quantity,
                     'nights' => $pricing['nights'],
@@ -324,6 +427,41 @@ class BookingController extends BaseApiController
                 BookingDetail::create(array_merge($detail, [
                     'booking_id' => $booking->id,
                 ]));
+            }
+
+            // IMPORTANT: Deduct inventory (reduce available rooms)
+            foreach ($rooms as $roomData) {
+                $roomType = $roomTypes[$roomData['room_id']];
+                $quantity = (int) $roomData['quantity'];
+
+                // Update inventory for each date in the stay
+                $currentDate = $checkIn->copy();
+                while ($currentDate->lt($checkOut)) {
+                    $roomRate = \App\Models\RoomRate::where('hotel_id', $hotel->id)
+                        ->where('roomtype_id', $roomType->id)
+                        ->where('date', $currentDate->toDateString())
+                        ->first();
+
+                    if ($roomRate) {
+                        $success = $roomRate->bookRooms($quantity);
+                        if (!$success) {
+                            throw new \Exception("Failed to book {$quantity} rooms for {$roomType->name} on {$currentDate->toDateString()}. Only {$roomRate->available_rooms} available.");
+                        }
+                    } else {
+                        // Create room rate if it doesn't exist with default values
+                        $roomRate = \App\Models\RoomRate::create([
+                            'hotel_id' => $hotel->id,
+                            'roomtype_id' => $roomType->id,
+                            'date' => $currentDate->toDateString(),
+                            'price' => $roomType->price ?? 1000000,
+                            'total_for_sale' => 10, // Default total
+                            'booked_rooms' => $quantity,
+                            'is_available' => true,
+                        ]);
+                    }
+
+                    $currentDate->addDay();
+                }
             }
 
             \DB::commit();
@@ -428,7 +566,7 @@ class BookingController extends BaseApiController
             DB::commit();
 
             return $this->successResponse(
-                $this->transformBooking($booking->load(['roomType', 'promotion'])),
+                $this->transformBooking($booking->load(['bookingDetails.roomType', 'bookingDetails.promotion'])),
                 'Booking updated successfully'
             );
         } catch (\Exception $e) {
@@ -451,8 +589,8 @@ class BookingController extends BaseApiController
         if (!$booking) {
             return $this->errorResponse('Booking not found', 404);
         }
-
-        $validator = Validator::make($request->all(), [
+        $requestData = $request->all();
+        $validator = Validator::make($requestData['data'], [
             'status' => 'required|in:pending,confirmed,cancelled,completed,no_show',
             'cancellation_reason' => 'required_if:status,cancelled|string|max:500',
         ]);
@@ -460,8 +598,8 @@ class BookingController extends BaseApiController
         if ($validator->fails()) {
             return $this->errorResponse('Validation failed', 400, $validator->errors());
         }
-
-        $newStatus = $request->status;
+        //\Log::info($requestData['data']);
+        $newStatus = $requestData['data']['status'];
 
         // Business rules for status changes
         if ($newStatus === 'cancelled' && !$booking->canBeCancelled()) {
@@ -487,7 +625,7 @@ class BookingController extends BaseApiController
             DB::commit();
 
             return $this->successResponse(
-                $this->transformBooking($booking->load(['roomType', 'promotion'])),
+                $this->transformBooking($booking->load(['bookingDetails.roomType', 'bookingDetails.promotion'])),
                 'Booking status updated successfully'
             );
         } catch (\Exception $e) {
@@ -713,51 +851,84 @@ class BookingController extends BaseApiController
      */
     private function transformBooking($booking, $detailed = false)
     {
+        // Collect room types from booking details
+        $roomTypes = [];
+        $totalRoomRate = 0;
+        $promotionCodes = [];
+
+        foreach ($booking->bookingDetails as $detail) {
+            if ($detail->roomType) {
+                $roomTypes[] = $detail->roomType->name;
+                $totalRoomRate += $detail->price_per_night * $detail->quantity;
+            }
+            if ($detail->promotion) {
+                $promotionCodes[] = $detail->promotion->promotion_code ?? $detail->promotion->name;
+            }
+        }
+
         $data = [
             'id' => $booking->id,
             'booking_number' => $booking->booking_number,
-            'customer_name' => $booking->customer_name,
-            'customer_email' => $booking->customer_email,
-            'customer_phone' => $booking->customer_phone,
-            'customer_nationality' => $booking->customer_nationality,
-            'room_type' => $booking->roomType ? $booking->roomType->name : null,
-            'room_type_id' => $booking->room_type_id,
+            'customer_name' => trim(($booking->first_name ?? '') . ' ' . ($booking->last_name ?? '')),
+            'customer_email' => $booking->email,
+            'customer_phone' => $booking->phone_number,
+            'customer_nationality' => $booking->nationality,
+            'room_types' => implode(', ', array_unique($roomTypes)),
+            'room_type_count' => count($booking->bookingDetails),
             'check_in' => $booking->check_in->toDateString(),
             'check_out' => $booking->check_out->toDateString(),
             'nights' => $booking->nights,
             'guests' => $booking->guests,
-            'room_rate' => $booking->room_rate,
-            'subtotal' => $booking->subtotal,
+            'room_rate' => $totalRoomRate,
             'tax_amount' => $booking->tax_amount,
             'discount_amount' => $booking->discount_amount,
             'total_amount' => $booking->total_amount,
-            'promotion_code' => $booking->promotion_code,
+            'promotion_codes' => implode(', ', array_unique($promotionCodes)),
             'status' => $booking->status,
             'created_at' => $booking->created_at->toISOString(),
             'updated_at' => $booking->updated_at->toISOString(),
         ];
 
         if ($detailed) {
+            // Collect detailed room and promotion information
+            $roomDetails = [];
+            $promotionDetails = [];
+
+            foreach ($booking->bookingDetails as $detail) {
+                if ($detail->roomType) {
+                    $roomDetails[] = [
+                        'id' => $detail->roomType->id,
+                        'name' => $detail->roomType->name,
+                        'description' => $detail->roomType->description,
+                        'quantity' => $detail->quantity,
+                        'adults' => $detail->adults,
+                        'children' => $detail->children,
+                        'children_ages' => $detail->children_ages,
+                        'price_per_night' => $detail->price_per_night,
+                        'total_amount' => $detail->total_amount,
+                        'is_extra_bed_requested' => $detail->is_extra_bed_requested,
+                    ];
+                }
+
+                if ($detail->promotion) {
+                    $promotionDetails[] = [
+                        'id' => $detail->promotion->id,
+                        'name' => $detail->promotion->name,
+                        'promotion_code' => $detail->promotion->promotion_code,
+                        'discount_amount' => $detail->discount_amount,
+                    ];
+                }
+            }
+
             $data = array_merge($data, [
                 'notes' => $booking->notes,
-                'special_requests' => $booking->special_requests,
                 'cancellation_reason' => $booking->cancellation_reason,
                 'confirmed_at' => $booking->confirmed_at?->toISOString(),
                 'cancelled_at' => $booking->cancelled_at?->toISOString(),
                 'completed_at' => $booking->completed_at?->toISOString(),
-                'promotion' => $booking->promotion ? [
-                    'id' => $booking->promotion->id,
-                    'title' => $booking->promotion->title,
-                    'discount_type' => $booking->promotion->discount_type,
-                    'discount_value' => $booking->promotion->discount_value,
-                ] : null,
-                'room_type_details' => $booking->roomType ? [
-                    'id' => $booking->roomType->id,
-                    'name' => $booking->roomType->name,
-                    'description' => $booking->roomType->description,
-                    'max_guests' => $booking->roomType->max_guests,
-                    'amenities' => $booking->roomType->amenities,
-                ] : null,
+                'room_details' => $roomDetails,
+                'promotion_details' => $promotionDetails,
+                'booking_details' => $booking->bookingDetails->toArray(),
             ]);
         }
 
@@ -936,5 +1107,164 @@ class BookingController extends BaseApiController
             'phone_length' => strlen($phone),
             'nationality' => $guest['nationality'] ?? 'not_provided'
         ]);
+    }
+
+    /**
+     * Get child age policy for a hotel
+     */
+    public function getChildAgePolicy(Request $request)
+    {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+
+        try {
+            $childAgePolicy = $hotel->childAgePolicy()->first();
+
+            if (!$childAgePolicy) {
+                // Return default policy
+                $childAgePolicy = [
+                    'hotel_id' => $hotel->id,
+                    'free_age_limit' => 6,
+                    'surcharge_age_limit' => 12,
+                    'free_description' => null,
+                    'surcharge_description' => null,
+                    'is_active' => true
+                ];
+            }
+
+            return $this->successResponse($childAgePolicy, 'Child age policy retrieved successfully');
+        } catch (\Exception $e) {
+            \Log::error('Get child age policy failed', [
+                'hotel_id' => $hotel->id,
+                'error' => $e->getMessage()
+            ]);
+            return $this->errorResponse('Failed to get child age policy: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Update child age policy for a hotel
+     */
+    public function updateChildAgePolicy(Request $request)
+    {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+
+        $validator = Validator::make($request->all(), [
+            'data' => 'required|array',
+            'data.free_age_limit' => 'required|integer|min:0|max:17',
+            'data.surcharge_age_limit' => 'required|integer|min:0|max:17|gt:data.free_age_limit',
+            'data.free_description' => 'nullable|array',
+            'data.surcharge_description' => 'nullable|array',
+            'data.is_active' => 'boolean'
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('Validation failed', 422, $validator->errors());
+        }
+
+        try {
+            $validatedData = $validator->validated()['data'];
+            $childAgePolicy = $hotel->childAgePolicy()->updateOrCreate(
+                ['hotel_id' => $hotel->id],
+                $validatedData
+                //$request->only(['free_age_limit', 'surcharge_age_limit', 'free_description', 'surcharge_description', 'is_active'])
+            );
+
+            return $this->successResponse($childAgePolicy, 'Child age policy updated successfully');
+        } catch (\Exception $e) {
+            \Log::error('Update child age policy failed', [
+                'hotel_id' => $hotel->id,
+                'data' => $request->all(),
+                'error' => $e->getMessage()
+            ]);
+            return $this->errorResponse('Failed to update child age policy: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Get room pricing policies for a hotel
+     */
+    public function getRoomPricingPolicies(Request $request)
+    {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+
+        try {
+            $roomTypes = $hotel->roomtypes()->with('pricingPolicy')->get();
+
+            $pricingPolicies = $roomTypes->map(function ($roomType) {
+                return [
+                    'roomtype_id' => $roomType->id,
+                    'roomtype_name' => $roomType->title,
+                    'base_occupancy' => $roomType->pricingPolicy->base_occupancy ?? 2,
+                    'additional_adult_price' => $roomType->pricingPolicy->additional_adult_price ?? 0,
+                    'child_surcharge_price' => $roomType->pricingPolicy->child_surcharge_price ?? 0,
+                    'is_active' => $roomType->pricingPolicy->is_active ?? true
+                ];
+            });
+
+            return $this->successResponse($pricingPolicies, 'Room pricing policies retrieved successfully');
+        } catch (\Exception $e) {
+            \Log::error('Get room pricing policies failed', [
+                'hotel_id' => $hotel->id,
+                'error' => $e->getMessage()
+            ]);
+            return $this->errorResponse('Failed to get room pricing policies: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Update room pricing policy
+     */
+    public function updateRoomPricingPolicy(Request $request, $roomtypeId)
+    {
+        $hotel = $this->validateHotelAccess($request);
+        if ($hotel instanceof JsonResponse) {
+            return $hotel;
+        }
+
+        // Validate that roomtype belongs to this hotel
+        $roomType = $hotel->roomtypes()->find($roomtypeId);
+        if (!$roomType) {
+            return $this->errorResponse('Room type not found', 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'data' => 'required|array',
+            'data.base_occupancy' => 'required|integer|min:1|max:10',
+            'data.additional_adult_price' => 'required|numeric|min:0',
+            'data.child_surcharge_price' => 'required|numeric|min:0',
+            'data.is_active' => 'boolean'
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('Validation failed', 422, $validator->errors());
+        }
+
+        try {
+            $validatedData = $validator->validated()['data'];
+            $pricingPolicy = $roomType->pricingPolicy()->updateOrCreate(
+                ['roomtype_id' => $roomtypeId],
+                $validatedData
+                //$request->only(['base_occupancy', 'additional_adult_price', 'child_surcharge_price', 'is_active'])
+            );
+
+            return $this->successResponse($pricingPolicy, 'Room pricing policy updated successfully');
+        } catch (\Exception $e) {
+            \Log::error('Update room pricing policy failed', [
+                'hotel_id' => $hotel->id,
+                'roomtype_id' => $roomtypeId,
+                'data' => $request->all(),
+                'error' => $e->getMessage()
+            ]);
+            return $this->errorResponse('Failed to update room pricing policy: ' . $e->getMessage(), 500);
+        }
     }
 }

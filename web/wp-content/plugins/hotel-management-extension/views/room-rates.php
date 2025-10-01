@@ -35,7 +35,7 @@ $weekdays = HME_Room_Rate_Manager::get_weekdays();
                 <select id="room-type-filter">
                     <option value=""><?php _e('Tất Cả Loại Phòng', 'hotel'); ?></option>
                     <?php foreach ($room_types as $room):
-                        $room_name = $room['title'][$current_lang]; ?>
+                        $room_name = $room['title']; ?>
                         <option value="<?php echo esc_attr($room['id']); ?>"><?php echo esc_html($room_name); ?></option>
                     <?php endforeach; ?>
                 </select>
@@ -90,11 +90,11 @@ $weekdays = HME_Room_Rate_Manager::get_weekdays();
     <div id="calendar-view" class="hme-view-content">
         <div class="hme-calendar-header">
             <div class="hme-calendar-navigation">
-                <button type="button" id="prev-month" class="button">
+                <button type="button" id="prev-month" class="button" aria-label="<?php _e('Tháng trước', 'hotel'); ?>">
                     <span class="dashicons dashicons-arrow-left-alt2"></span>
                 </button>
                 <h2 id="current-month"></h2>
-                <button type="button" id="next-month" class="button">
+                <button type="button" id="next-month" class="button" aria-label="<?php _e('Tháng sau', 'hotel'); ?>">
                     <span class="dashicons dashicons-arrow-right-alt2"></span>
                 </button>
             </div>
@@ -215,7 +215,7 @@ $weekdays = HME_Room_Rate_Manager::get_weekdays();
                             <select id="bulk-room-type" name="room_type_id" required>
                                 <option value=""><?php _e('Chọn Loại Phòng', 'hotel'); ?></option>
                                 <?php foreach ($room_types as $room):
-                                    $room_name = $room['title'][$current_lang]; ?>
+                                    $room_name = is_array($room['title']) ? ($room['title'][$current_lang] ?? $room['title']['en'] ?? 'Unknown') : $room['title']; ?>
                                     <option value="<?php echo esc_attr($room['id']); ?>"><?php echo esc_html($room_name); ?></option>
                                 <?php endforeach; ?>
                             </select>
@@ -295,7 +295,7 @@ $weekdays = HME_Room_Rate_Manager::get_weekdays();
                             <select id="copy-room-type" name="room_type_id" required>
                                 <option value=""><?php _e('Chọn Loại Phòng', 'hotel'); ?></option>
                                 <?php foreach ($room_types as $room):
-                                    $room_name = $room['title'][$current_lang]; ?>
+                                    $room_name = is_array($room['title']) ? ($room['title'][$current_lang] ?? $room['title']['en'] ?? 'Unknown') : $room['title']; ?>
                                     <option value="<?php echo esc_attr($room['id']); ?>"><?php echo esc_html($room_name); ?></option>
                                 <?php endforeach; ?>
                             </select>
@@ -398,7 +398,7 @@ $weekdays = HME_Room_Rate_Manager::get_weekdays();
                             <select id="template-room-type" name="roomtype_id" required>
                                 <option value=""><?php _e('Chọn loại phòng', 'hotel'); ?></option>
                                 <?php foreach ($room_types as $room):
-                                    $room_name = $room['title'][$current_lang]; ?>
+                                    $room_name = is_array($room['title']) ? ($room['title'][$current_lang] ?? $room['title']['en'] ?? 'Unknown') : $room['title']; ?>
                                     <option value="<?php echo esc_attr($room['id']); ?>"><?php echo esc_html($room_name); ?></option>
                                 <?php endforeach; ?>
                             </select>
@@ -484,13 +484,13 @@ $weekdays = HME_Room_Rate_Manager::get_weekdays();
 </div>
 
 <script>
-// Pass room types data to JavaScript
-window.hmeRoomTypes = <?php echo json_encode(array_map(function($room) use ($current_lang) {
-    return [
-        'id' => $room['id'],
-        'name' => $room['title'][$current_lang] ?? $room['title']['en'] ?? 'Unknown'
-    ];
-}, $room_types)); ?>;
+    // Pass room types data to JavaScript
+    window.hmeRoomTypes = <?php echo json_encode(array_map(function ($room) use ($current_lang) {
+                                return [
+                                    'id' => $room['id'],
+                                    'name' => $room['title'][$current_lang] ?? $room['title']['en'] ?? 'Unknown'
+                                ];
+                            }, $room_types)); ?>;
 </script>
 
 <!-- Apply Template Modal -->

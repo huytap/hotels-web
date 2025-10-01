@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { HotelProvider, HotelLoader } from './context/HotelContext';
+import { LanguageProvider } from './context/LanguageContext';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import SearchPage from './pages/SearchPage';
@@ -71,7 +72,9 @@ function App() {
   return (
     <HotelProvider>
       <HotelLoader>
-        <BookingApp />
+        <LanguageProvider>
+          <BookingApp />
+        </LanguageProvider>
       </HotelLoader>
     </HotelProvider>
   );

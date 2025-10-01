@@ -1,6 +1,6 @@
 class TenantDetectionService {
   private static instance: TenantDetectionService;
-  private wpApiUrl = 'http://2govietnam.local/wp-json'; // WordPress API URL
+  private wpApiUrl: string = import.meta.env.VITE_WP_API_URL;; // WordPress API URL
   private cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours
 
   private constructor() { }

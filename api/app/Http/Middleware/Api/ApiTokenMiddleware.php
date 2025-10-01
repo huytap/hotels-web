@@ -69,9 +69,7 @@ class ApiTokenMiddleware
         if (app()->environment('local')) {
             return $next($request);
         }
-
         $authHeader = $request->header('Authorization');
-
         if (!empty($authHeader) && str_starts_with($authHeader, 'Bearer ')) {
             // Request từ WP -> xác thực token
             $providedToken = trim(substr($authHeader, 7));

@@ -134,4 +134,12 @@ class Hotel extends Model
     {
         return $this->hasMany(Roomtype::class);
     }
+
+    /**
+     * Một khách sạn có một chính sách độ tuổi trẻ em.
+     */
+    public function childAgePolicy()
+    {
+        return $this->hasOne(ChildAgePolicy::class);
+    }
 }

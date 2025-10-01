@@ -18,9 +18,9 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
         <span class="dashicons dashicons-calendar-alt"></span>
         Booking Management
     </h1>
-    <a href="<?php echo admin_url('admin.php?page=hotel-bookings&action=add'); ?>" class="page-title-action">
+    <!-- <a href="<?php echo admin_url('admin.php?page=hotel-bookings&action=add'); ?>" class="page-title-action">
         <span class="dashicons dashicons-plus-alt"></span> Add New Booking
-    </a>
+    </a> -->
 
     <!-- Loading Indicator -->
     <div id="hme-loading" class="hme-loading-overlay" style="display: none;">
@@ -153,7 +153,7 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
         </div>
         <div class="hme-modal-footer">
             <button type="button" class="button hme-modal-close">Close</button>
-            <button type="button" class="button button-primary" id="edit-booking-btn">Edit Booking</button>
+            <!-- <button type="button" class="button button-primary" id="edit-booking-btn">Edit Booking</button> -->
         </div>
     </div>
 </div>
@@ -202,9 +202,10 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
         let sortField = 'created_at';
         let sortOrder = 'desc';
 
-        // Initialize
-        loadBookings();
-
+        const tableContainer = $('#bookings-table').parent();
+        setTimeout(function() {
+            loadBookings();
+        }, 500);
         // Event Listeners
         $('#filter-bookings').on('click', function() {
             currentPage = 1;
@@ -330,6 +331,7 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
         }
 
         function loadBookings() {
+            console.log('📋 loadBookings() called');
             showLoading();
 
             const data = {
@@ -349,45 +351,68 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
                 success: function(response) {
                     hideLoading();
                     if (response.success) {
-                        displayBookings(response.data);
+                        try {
+                            displayBookings(response.data);
+                        } catch (error) {
+                            showError('Error displaying bookings: ' + error.message);
+                        }
                     } else {
                         showError('Failed to load bookings: ' + response.data);
                     }
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error('📋 AJAX error:', {
+                        xhr,
+                        status,
+                        error
+                    });
                     hideLoading();
-                    showError('Error connecting to server');
+                    showError('Error connecting to server: ' + error);
                 }
             });
         }
 
         function displayBookings(data) {
             let html = '';
-
-            if (data.data && data.data.length > 0) {
-                data.data.forEach(function(booking) {
+            if (data && data.length > 0) {
+                data.forEach(function(booking) {
                     const formatted = formatBookingRow(booking);
-                    html += `
+                    const customerId = booking.id || 'N/A';
+                    const customerName = booking.customer_name || booking.guest_name || 'Unknown';
+                    const customerEmail = booking.customer_email || booking.guest_email || '';
+                    const customerPhone = booking.customer_phone || booking.guest_phone || '';
+                    const roomTypes = booking.room_types || booking.room_type || 'N/A';
+                    const roomCount = booking.room_type_count || (booking.booking_details ? booking.booking_details.length : 1);
+                    const guests = booking.guests || booking.total_guests || `${booking.adults || 0} adults`;
+                    const discountAmount = booking.discount_amount || 0;
+                    const promotionCodes = booking.promotion_codes || booking.promotion_code || '';
+                    const nights = booking.nights || 1;
+                    const bookingStatus = booking.status || 'pending';
+
+                    const rowHtml = `
                     <tr>
                         <th scope="row" class="check-column">
-                            <input type="checkbox" value="${booking.id}">
+                            <input type="checkbox" value="${customerId}">
                         </th>
-                        <td class="column-id"><strong>#${booking.id}</strong></td>
+                        <td class="column-id"><strong>#${customerId}</strong></td>
                         <td class="column-customer">
-                            <strong>${booking.customer_name}</strong><br>
-                            <small><a href="mailto:${booking.customer_email}">${booking.customer_email}</a></small><br>
-                            <small>${booking.customer_phone}</small>
+                            <strong>${customerName}</strong><br>
+                            ${customerEmail ? `<small><a href="mailto:${customerEmail}">${customerEmail}</a></small><br>` : ''}
+                            ${customerPhone ? `<small>${customerPhone}</small>` : ''}
                         </td>
-                        <td class="column-room">${booking.room_type || 'N/A'}</td>
+                        <td class="column-room">
+                            ${roomTypes}
+                            ${roomCount > 1 ? `<br><small>(${roomCount} rooms)</small>` : ''}
+                        </td>
                         <td class="column-dates">
                             <strong>In:</strong> ${formatted.check_in_formatted}<br>
                             <strong>Out:</strong> ${formatted.check_out_formatted}<br>
-                            <small>${booking.nights || 0} night(s)</small>
+                            <small>${nights} night(s)</small>
                         </td>
-                        <td class="column-guests">${booking.guests}</td>
+                        <td class="column-guests">${guests}</td>
                         <td class="column-amount">
                             <strong>${formatted.total_amount_formatted}</strong>
-                            ${booking.discount_amount > 0 ? `<br><small>-${formatCurrency(booking.discount_amount)} (${booking.promotion_code})</small>` : ''}
+                            ${discountAmount > 0 ? `<br><small>-${formatCurrency(discountAmount)} ${promotionCodes ? `(${promotionCodes})` : ''}</small>` : ''}
                         </td>
                         <td class="column-status">
                             <span class="hme-status ${formatted.status_class}">${formatted.status_label}</span>
@@ -398,21 +423,22 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
                         <td class="column-actions">
                             <div class="row-actions">
                                 <span class="view">
-                                    <a href="#" class="view-booking" data-id="${booking.id}">View</a> |
+                                    <a href="#" class="view-booking" data-id="${customerId}">View</a> |
                                 </span>
-                                <span class="edit">
-                                    <a href="${getEditUrl(booking.id)}">Edit</a> |
-                                </span>
+                                
                                 <span class="status">
-                                    <a href="#" class="change-status" data-id="${booking.id}" data-status="${booking.status}">Status</a> |
+                                    <a href="#" class="change-status" data-id="${customerId}" data-status="${bookingStatus}">Status</a> |
                                 </span>
                                 <span class="delete">
-                                    <a href="#" class="delete-booking" data-id="${booking.id}" style="color: #d63638;">Delete</a>
+                                    <a href="#" class="delete-booking" data-id="${customerId}" style="color: #d63638;">Delete</a>
                                 </span>
                             </div>
                         </td>
                     </tr>
                 `;
+
+                    console.log('🔧 Generated row HTML:', rowHtml.substring(0, 200) + '...');
+                    html += rowHtml;
                 });
             } else {
                 html = `
@@ -426,28 +452,165 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
                 </tr>
             `;
             }
+            // If HTML is empty or doesn't contain table rows, show warning
+            if (!html || html.trim() === '' || !html.includes('<tr>')) {
+                console.error('🔧 CRITICAL: HTML generation failed');
+                return;
+            }
 
-            $('#bookings-tbody').html(html);
+            // Check if target element exists
+            let targetElement = $('#bookings-tbody');
 
-            // Update pagination
-            updatePagination(data);
+            if (targetElement.length === 0) {
+                targetElement = $('tbody').first();
+                if (targetElement.length === 0) {
+                    // Try pure JavaScript as fallback
+                    const jsElement = document.getElementById('bookings-tbody');
+                    if (jsElement) {
+                        jsElement.innerHTML = html;
+                        console.log('📋 HTML set using pure JavaScript');
+                        return;
+                    } else {
+                        console.error('📋 CRITICAL: Cannot find bookings tbody element by any method!');
+                        return;
+                    }
+                }
+            }
+            // Set the HTML with multiple methods
+            try {
+                // Method 1: jQuery .html()
+                targetElement.html(html);
+                console.log('📋 HTML set successfully using jQuery .html()');
 
-            // Update counts
-            const total = data.total || 0;
-            $('#bookings-count, #bookings-count-bottom').text(`${total} item${total !== 1 ? 's' : ''}`);
+                // Verify immediately
+                if (targetElement.html().length < html.length * 0.8) {
+                    console.warn('📋 WARNING: HTML seems to be truncated after jQuery .html()');
+                    // Try alternative method
+                    targetElement.empty().append(html);
+                    console.log('📋 Retry with .empty().append()');
+                }
+            } catch (error) {
+                console.error('📋 Error setting HTML with jQuery:', error);
+                // Fallback to pure JavaScript
+                if (targetElement[0]) {
+                    targetElement[0].innerHTML = html;
+                    console.log('📋 HTML set using pure JavaScript fallback');
+                }
+            }
 
-            // Uncheck select all
-            $('#cb-select-all-1').prop('checked', false);
+            // Also try direct assignment as backup
+            try {
+                document.getElementById('bookings-tbody').innerHTML = html;
+                console.log('📋 Also set via direct getElementById as backup');
+            } catch (e) {
+                console.warn('📋 Direct getElementById backup failed:', e);
+            }
+
+            // Verify HTML was set
+            console.log('📋 HTML after setting:', targetElement.html().substring(0, 200) + '...');
+            console.log('📋 Element is visible:', targetElement.is(':visible'));
+            console.log('📋 Element display CSS:', targetElement.css('display'));
+
+            // Debug CSS and styling issues
+            const table = $('#bookings-table');
+            const tbody = $('#bookings-tbody');
+            const wrap = $('.wrap');
+
+            // Check if rows are actually there
+            const rows = tbody.find('tr');
+            // Force some styling to make it visible
+            tbody.css({
+                'background-color': '#ffcccc',
+                'border': '3px solid red',
+                'min-height': '100px'
+            });
+
+            // Force table and all elements to be visible
+            table.css({
+                'display': 'table !important',
+                'visibility': 'visible !important',
+                'opacity': '1 !important',
+                'height': 'auto !important',
+                'overflow': 'visible !important'
+            });
+
+            tbody.css({
+                'display': 'table-row-group !important',
+                'visibility': 'visible !important',
+                'opacity': '1 !important'
+            });
+
+            // Force all rows to be visible
+            tbody.find('tr').css({
+                'display': 'table-row !important',
+                'visibility': 'visible !important',
+                'opacity': '1 !important',
+                'height': 'auto !important'
+            });
+
+            // Force all cells to be visible
+            tbody.find('td, th').css({
+                'display': 'table-cell !important',
+                'visibility': 'visible !important',
+                'opacity': '1 !important',
+                'padding': '8px !important',
+                'border': '1px solid #ddd !important'
+            });
+
+            // Additional verification
+            setTimeout(function() {
+                const currentContent = targetElement.html();
+            }, 1000);
+
+            // Update pagination with error handling
+            try {
+                updatePagination(data);
+                console.log('📋 Pagination updated successfully');
+            } catch (error) {
+                console.error('📋 Error updating pagination:', error);
+            }
+
+            // Update counts with error handling
+            try {
+                const total = data.total || 0;
+                $('#bookings-count, #bookings-count-bottom').text(`${total} item${total !== 1 ? 's' : ''}`);
+                console.log('📋 Counts updated successfully, total:', total);
+            } catch (error) {
+                console.error('📋 Error updating counts:', error);
+            }
+
+            // Uncheck select all with error handling
+            try {
+                $('#cb-select-all-1').prop('checked', false);
+                console.log('📋 Select all checkbox reset successfully');
+            } catch (error) {
+                console.error('📋 Error resetting select all checkbox:', error);
+            }
+
+            // Final desperate measure: Force table refresh
+            setTimeout(function() {
+                if (targetElement.html().trim() === '' || !targetElement.html().includes('<tr>')) {
+                    const table = $('#bookings-table');
+                    if (table.length > 0) {
+                        const newTbody = `<tbody id="bookings-tbody">${html}</tbody>`;
+                        table.find('tbody').remove();
+                        table.append(newTbody);
+                        console.log('📋 Forced table rebuild completed');
+                    }
+                }
+            }, 2000);
+
+            console.log('📋 displayBookings function completed successfully');
         }
 
         function formatBookingRow(booking) {
             return {
-                check_in_formatted: formatDate(booking.check_in),
-                check_out_formatted: formatDate(booking.check_out),
-                total_amount_formatted: formatCurrency(booking.total_amount),
-                status_class: getStatusClass(booking.status),
-                status_label: getStatusLabel(booking.status),
-                created_at_formatted: formatDateTime(booking.created_at)
+                check_in_formatted: booking.check_in ? formatDate(booking.check_in) : 'N/A',
+                check_out_formatted: booking.check_out ? formatDate(booking.check_out) : 'N/A',
+                total_amount_formatted: booking.total_amount ? formatCurrency(booking.total_amount) : formatCurrency(0),
+                status_class: getStatusClass(booking.status || 'pending'),
+                status_label: getStatusLabel(booking.status || 'pending'),
+                created_at_formatted: booking.created_at ? formatDateTime(booking.created_at) : 'N/A'
             };
         }
 
@@ -545,7 +708,8 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
                 <div class="hme-detail-section">
                     <h3>Booking Information</h3>
                     <table class="hme-detail-table">
-                        <tr><td><strong>Room Type:</strong></td><td>${booking.room_type || 'N/A'}</td></tr>
+                        <tr><td><strong>Room Types:</strong></td><td>${booking.room_types || 'N/A'}</td></tr>
+                        <tr><td><strong>Room Count:</strong></td><td>${booking.room_type_count || 0}</td></tr>
                         <tr><td><strong>Check-in:</strong></td><td>${formatDate(booking.check_in)}</td></tr>
                         <tr><td><strong>Check-out:</strong></td><td>${formatDate(booking.check_out)}</td></tr>
                         <tr><td><strong>Guests:</strong></td><td>${booking.guests}</td></tr>
@@ -555,11 +719,11 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
                     </table>
                 </div>
                 
-                ${booking.promotion_code ? `
+                ${booking.promotion_codes ? `
                 <div class="hme-detail-section">
-                    <h3>Promotion</h3>
+                    <h3>Promotions</h3>
                     <table class="hme-detail-table">
-                        <tr><td><strong>Code:</strong></td><td>${booking.promotion_code}</td></tr>
+                        <tr><td><strong>Codes:</strong></td><td>${booking.promotion_codes}</td></tr>
                         <tr><td><strong>Discount:</strong></td><td>-${formatCurrency(booking.discount_amount || 0)}</td></tr>
                     </table>
                 </div>
@@ -695,25 +859,62 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
         }
 
         // Utility functions
-        // Use shared utility functions from HME_Utils
+        // Use shared utility functions from HME_Utils with fallbacks
         function formatCurrency(amount) {
-            return HME_Utils.formatCurrency(amount);
+            if (typeof HME_Utils !== 'undefined' && HME_Utils.formatCurrency) {
+                return HME_Utils.formatCurrency(amount);
+            }
+            // Fallback: Simple VND formatting
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
         }
 
         function formatDate(dateString) {
-            return HME_Utils.formatDate(dateString);
+            if (typeof HME_Utils !== 'undefined' && HME_Utils.formatDate) {
+                return HME_Utils.formatDate(dateString);
+            }
+            // Fallback: Simple date formatting
+            return new Date(dateString).toLocaleDateString('vi-VN');
         }
 
         function formatDateTime(dateString) {
-            return HME_Utils.formatDateTime(dateString);
+            if (typeof HME_Utils !== 'undefined' && HME_Utils.formatDateTime) {
+                return HME_Utils.formatDateTime(dateString);
+            }
+            // Fallback: Simple datetime formatting
+            return new Date(dateString).toLocaleString('vi-VN');
         }
 
         function getStatusClass(status) {
-            return HME_Utils.getStatusClass(status);
+            if (typeof HME_Utils !== 'undefined' && HME_Utils.getStatusClass) {
+                return HME_Utils.getStatusClass(status);
+            }
+            // Fallback: Basic status classes
+            const statusClasses = {
+                'pending': 'status-pending',
+                'confirmed': 'status-confirmed',
+                'cancelled': 'status-cancelled',
+                'completed': 'status-completed',
+                'no_show': 'status-no-show'
+            };
+            return statusClasses[status] || 'status-unknown';
         }
 
         function getStatusLabel(status) {
-            return HME_Utils.getStatusLabel(status);
+            if (typeof HME_Utils !== 'undefined' && HME_Utils.getStatusLabel) {
+                return HME_Utils.getStatusLabel(status);
+            }
+            // Fallback: Basic status labels
+            const statusLabels = {
+                'pending': 'Pending',
+                'confirmed': 'Confirmed',
+                'cancelled': 'Cancelled',
+                'completed': 'Completed',
+                'no_show': 'No Show'
+            };
+            return statusLabels[status] || status;
         }
 
         function getEditUrl(bookingId) {
@@ -721,23 +922,43 @@ $booking_statuses = HME_Booking_Manager::get_booking_statuses();
         }
 
         function showLoading() {
-            HME_Utils.showLoading();
+            if (typeof HME_Utils !== 'undefined' && HME_Utils.showLoading) {
+                HME_Utils.showLoading();
+            } else {
+                $('#hme-loading').show();
+            }
         }
 
         function hideLoading() {
-            HME_Utils.hideLoading();
+            if (typeof HME_Utils !== 'undefined' && HME_Utils.hideLoading) {
+                HME_Utils.hideLoading();
+            } else {
+                $('#hme-loading').hide();
+            }
         }
 
         function showSuccess(message) {
-            HME_Utils.showSuccess(message);
+            if (typeof HME_Utils !== 'undefined' && HME_Utils.showSuccess) {
+                HME_Utils.showSuccess(message);
+            } else {
+                alert('Success: ' + message);
+            }
         }
 
         function showError(message) {
-            HME_Utils.showError(message);
+            if (typeof HME_Utils !== 'undefined' && HME_Utils.showError) {
+                HME_Utils.showError(message);
+            } else {
+                alert('Error: ' + message);
+            }
         }
 
         function showNotice(message, type) {
-            HME_Utils.showNotice(message, type);
+            if (typeof HME_Utils !== 'undefined' && HME_Utils.showNotice) {
+                HME_Utils.showNotice(message, type);
+            } else {
+                alert(type + ': ' + message);
+            }
         }
     });
 </script>

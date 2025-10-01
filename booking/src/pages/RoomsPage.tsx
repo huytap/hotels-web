@@ -70,11 +70,11 @@ const RoomsPage: React.FC = () => {
     }
   };
 
-  const handleRoomSelectionChange = (roomId: string, quantity: number, promotionId?: string) => {
+  const handleRoomSelectionChange = (roomId: string, quantity: number, promotionId?: string, useExtraBed?: boolean) => {
     setSelectedRooms(prev => {
       const filtered = prev.filter(r => !(r.roomId === roomId && r.promotionId === promotionId));
       const newSelectedRooms = quantity > 0
-        ? [...filtered, { roomId, quantity, promotionId }]
+        ? [...filtered, { roomId, quantity, promotionId, useExtraBed }]
         : filtered;
 
       // Save to localStorage

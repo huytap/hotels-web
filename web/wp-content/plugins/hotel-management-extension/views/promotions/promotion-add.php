@@ -277,6 +277,12 @@ include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
                 selectedRoomtypes.push($(this).val());
             });
 
+            // Validation: Yêu cầu chọn ít nhất 1 room type
+            if (selectedRoomtypes.length === 0) {
+                HME_Utils.showError('Vui lòng chọn ít nhất một loại phòng để áp dụng khuyến mãi.');
+                return;
+            }
+
             // Prepare data
             const promotionData = {
                 action: 'hme_create_promotion',
@@ -312,15 +318,37 @@ include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
                 data: promotionData,
                 success: function(response) {
                     HME_Utils.hideLoading();
-                    HME_Utils.showSuccess('Khuyến mãi đã được tạo thành công!');
-                    console.log('Promotion created successfully:', response);
-                    // Optional: redirect or reload page
-                    // window.location.reload();
+                    console.log('Promotion created - Full response:', response);
+
+                    if (response.success) {
+                        HME_Utils.showSuccess('Khuyến mãi đã được tạo thành công!');
+                        // Optional: redirect or reload page
+                        // window.location.reload();
+                    } else {
+                        HME_Utils.showError('Lỗi: ' + (response.data || 'Không thể tạo khuyến mãi'));
+                        console.error('API Error:', response.data);
+                    }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     HME_Utils.hideLoading();
-                    HME_Utils.showError('Lỗi: Không thể tạo khuyến mãi.');
-                    console.error('Error creating promotion:', textStatus, errorThrown);
+                    console.error('AJAX Error creating promotion:', {
+                        status: jqXHR.status,
+                        statusText: jqXHR.statusText,
+                        responseText: jqXHR.responseText,
+                        textStatus: textStatus,
+                        errorThrown: errorThrown
+                    });
+
+                    let errorMessage = 'Lỗi: Không thể tạo khuyến mãi.';
+                    if (jqXHR.responseText) {
+                        try {
+                            const errorResponse = JSON.parse(jqXHR.responseText);
+                            errorMessage = 'Lỗi: ' + (errorResponse.data || errorResponse.message || errorMessage);
+                        } catch (e) {
+                            errorMessage += ' (' + jqXHR.status + ' ' + jqXHR.statusText + ')';
+                        }
+                    }
+                    HME_Utils.showError(errorMessage);
                 }
             });
         }

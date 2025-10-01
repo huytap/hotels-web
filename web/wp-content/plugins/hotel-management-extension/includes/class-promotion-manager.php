@@ -549,9 +549,28 @@ class HME_Promotion_Manager
             return;
         }
 
+        // Debug: Log dữ liệu được gửi từ frontend
+        error_log('Create Promotion - Received POST data: ' . print_r($_POST, true));
+
+        // Clean up data trước khi gửi đến API
+        $data = $_POST;
+        unset($data['action'], $data['nonce']); // Loại bỏ WordPress-specific fields
+
+        error_log('Create Promotion - Cleaned data for API: ' . print_r($data, true));
+
         // Gọi API để tạo promotion
-        $response = callApi('promotions', 'POST', $_POST);
+        $response = callApi('promotions', 'POST', $data);
+
+        // Debug: Log API response
+        if (is_wp_error($response)) {
+            error_log('Create Promotion - API Error: ' . $response->get_error_message());
+        } else {
+            error_log('Create Promotion - API Response: ' . print_r($response, true));
+        }
+
         $result = handle_api_response($response);
+
+        error_log('Create Promotion - Final result: ' . print_r($result, true));
 
         if ($result['success']) {
             wp_send_json_success($result['data']);
@@ -575,10 +594,28 @@ class HME_Promotion_Manager
             return;
         }
 
+        // Debug: Log dữ liệu được gửi từ frontend
+        error_log('Update Promotion - Received POST data: ' . print_r($_POST, true));
+
+        // Clean up data trước khi gửi đến API
+        $data = $_POST;
+        unset($data['action'], $data['nonce']); // Loại bỏ WordPress-specific fields
+
+        error_log('Update Promotion - Cleaned data for API: ' . print_r($data, true));
 
         // Gọi API
-        $response = callApi("promotions/{$promotionId}", 'PUT', $_POST);
+        $response = callApi("promotions/{$promotionId}", 'PUT', $data);
+
+        // Debug: Log API response
+        if (is_wp_error($response)) {
+            error_log('Update Promotion - API Error: ' . $response->get_error_message());
+        } else {
+            error_log('Update Promotion - API Response: ' . print_r($response, true));
+        }
+
         $result = handle_api_response($response);
+
+        error_log('Update Promotion - Final result: ' . print_r($result, true));
 
         if ($result['success']) {
             wp_send_json_success($result['data']);

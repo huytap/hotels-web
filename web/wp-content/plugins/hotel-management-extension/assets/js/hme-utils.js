@@ -9,7 +9,7 @@ window.HME_Utils = {
      * @param {number} amount - The amount to format
      * @returns {string} Formatted currency string
      */
-    formatCurrency: function(amount) {
+    formatCurrency: function (amount) {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
     },
 
@@ -18,7 +18,7 @@ window.HME_Utils = {
      * @param {string} dateString - Date string to format
      * @returns {string} Formatted date
      */
-    formatDate: function(dateString) {
+    formatDate: function (dateString) {
         return new Date(dateString).toLocaleDateString('vi-VN');
     },
 
@@ -27,7 +27,7 @@ window.HME_Utils = {
      * @param {string} dateString - Date string to format
      * @returns {string} Formatted date and time
      */
-    formatDateTime: function(dateString) {
+    formatDateTime: function (dateString) {
         return new Date(dateString).toLocaleString('vi-VN');
     },
 
@@ -35,7 +35,7 @@ window.HME_Utils = {
      * Show success notification
      * @param {string} message - Success message to display
      */
-    showSuccess: function(message) {
+    showSuccess: function (message) {
         this.showNotice(message, 'success');
     },
 
@@ -43,7 +43,7 @@ window.HME_Utils = {
      * Show error notification
      * @param {string} message - Error message to display
      */
-    showError: function(message) {
+    showError: function (message) {
         this.showNotice(message, 'error');
     },
 
@@ -52,16 +52,16 @@ window.HME_Utils = {
      * @param {string} message - Message to display
      * @param {string} type - Type of notice (success, error, warning, info)
      */
-    showNotice: function(message, type) {
+    showNotice: function (message, type) {
         const noticeClass = type === 'success' ? 'notice-success' :
-                           type === 'error' ? 'notice-error' :
-                           type === 'warning' ? 'notice-warning' : 'notice-info';
+            type === 'error' ? 'notice-error' :
+                type === 'warning' ? 'notice-warning' : 'notice-info';
 
         const notice = jQuery(`<div class="notice ${noticeClass} is-dismissible"><p>${message}</p></div>`);
         jQuery('.wrap h1').first().after(notice);
 
         // Auto dismiss after 5 seconds
-        setTimeout(function() {
+        setTimeout(function () {
             notice.fadeOut();
         }, 5000);
     },
@@ -69,7 +69,7 @@ window.HME_Utils = {
     /**
      * Show loading indicator
      */
-    showLoading: function() {
+    showLoading: function () {
         if (jQuery('.hme-loading').length === 0) {
             jQuery('body').append('<div class="hme-loading"><div class="loading-spinner"></div><div class="loading-text">Loading...</div></div>');
         }
@@ -78,7 +78,7 @@ window.HME_Utils = {
     /**
      * Hide loading indicator
      */
-    hideLoading: function() {
+    hideLoading: function () {
         jQuery('.hme-loading').remove();
     },
 
@@ -87,7 +87,7 @@ window.HME_Utils = {
      * @param {jQuery} field - Field element
      * @param {string} message - Error message
      */
-    showFieldError: function(field, message) {
+    showFieldError: function (field, message) {
         field.addClass('error');
         field.next('.field-error').remove();
         field.after(`<span class="field-error">${message}</span>`);
@@ -97,7 +97,7 @@ window.HME_Utils = {
      * Clear field error
      * @param {jQuery} field - Field element
      */
-    clearFieldError: function(field) {
+    clearFieldError: function (field) {
         field.removeClass('error');
         field.next('.field-error').remove();
     },
@@ -107,7 +107,7 @@ window.HME_Utils = {
      * @param {string} email - Email to validate
      * @returns {boolean} True if valid email
      */
-    isValidEmail: function(email) {
+    isValidEmail: function (email) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     },
 
@@ -117,7 +117,7 @@ window.HME_Utils = {
      * @param {string} checkOut - Check-out date
      * @returns {number} Number of nights
      */
-    calculateNights: function(checkIn, checkOut) {
+    calculateNights: function (checkIn, checkOut) {
         const start = new Date(checkIn);
         const end = new Date(checkOut);
         return Math.ceil((end - start) / (1000 * 60 * 60 * 24));
@@ -129,8 +129,8 @@ window.HME_Utils = {
      * @param {number} value - Discount value
      * @returns {string} Formatted discount
      */
-    formatDiscountValue: function(type, value) {
-        switch(type) {
+    formatDiscountValue: function (type, value) {
+        switch (type) {
             case 'percentage':
                 return value + '%';
             case 'fixed':
@@ -147,7 +147,7 @@ window.HME_Utils = {
      * @param {string} status - Status value
      * @returns {string} CSS class
      */
-    getStatusClass: function(status) {
+    getStatusClass: function (status) {
         const statusClasses = {
             'pending': 'status-pending',
             'confirmed': 'status-confirmed',
@@ -165,9 +165,9 @@ window.HME_Utils = {
      * @param {string} status - Status value
      * @returns {string} Display label
      */
-    getStatusLabel: function(status) {
+    getStatusLabel: function (status) {
         const statusLabels = {
-            'pending': 'Chờ xử lý',
+            'pending': 'Chờ xác nhận',
             'confirmed': 'Đã xác nhận',
             'cancelled': 'Đã hủy',
             'completed': 'Hoàn thành',
@@ -185,7 +185,7 @@ window.HME_Utils = {
      * @param {string} method - HTTP method (GET, POST, PUT, DELETE)
      * @returns {Promise} jQuery AJAX promise
      */
-    apiCall: function(endpoint, data = {}, method = 'GET') {
+    apiCall: function (endpoint, data = {}, method = 'GET') {
         const requestData = {
             url: hme_admin.api_base_url + endpoint,
             method: method,
@@ -210,7 +210,7 @@ window.HME_Utils = {
      * @param {string} text - Text to copy
      * @returns {boolean} True if successful
      */
-    copyToClipboard: function(text) {
+    copyToClipboard: function (text) {
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text);
             return true;
@@ -232,7 +232,7 @@ window.HME_Utils = {
      * @param {number} wait - Wait time in milliseconds
      * @returns {Function} Debounced function
      */
-    debounce: function(func, wait) {
+    debounce: function (func, wait) {
         let timeout;
         return function executedFunction(...args) {
             const later = () => {
@@ -247,7 +247,7 @@ window.HME_Utils = {
     /**
      * Initialize common UI components
      */
-    initCommonUI: function() {
+    initCommonUI: function () {
         // Add loading styles if not already present
         if (jQuery('#hme-loading-styles').length === 0) {
             jQuery('head').append(`
@@ -296,13 +296,13 @@ window.HME_Utils = {
         }
 
         // Make notice dismissible
-        jQuery(document).on('click', '.notice-dismiss', function() {
+        jQuery(document).on('click', '.notice-dismiss', function () {
             jQuery(this).parent().fadeOut();
         });
     }
 };
 
 // Initialize when DOM is ready
-jQuery(document).ready(function() {
+jQuery(document).ready(function () {
     HME_Utils.initCommonUI();
 });

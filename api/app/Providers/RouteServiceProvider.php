@@ -24,6 +24,14 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // TẠO LIMITER RIÊNG CHO BOOKING
+        RateLimiter::for('booking', function (Request $request) {
+            // Giới hạn: 3 lần submit trong vòng 1 phút (60 giây) cho mỗi IP.
+            return Limit::perMinute(3)->by($request->ip());
+            // Hoặc giới hạn chặt hơn: 1 lần submit trong 10 giây.
+            // return Limit::perSecond(0.1)->by($request->ip()); 
+        });
+
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });

@@ -23,7 +23,8 @@ class HME_Room_Rate_Manager
      */
     public static function get_room_types()
     {
-        $response = callApi('roomtypes', 'GET');
+        $current_lang = get_locale();
+        $response = callApi('roomtypes', 'GET', ['lang' => $current_lang]);
         $result = handle_api_response($response);
 
         if ($result['success'] && isset($result['data'])) {

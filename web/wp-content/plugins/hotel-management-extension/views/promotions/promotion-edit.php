@@ -1,8 +1,8 @@
 <?php
 // Lấy danh sách ngôn ngữ từ Polylang nếu đã kích hoạt, nếu không thì mặc định là 'vi' và 'en'
 $languages = function_exists('pll_languages_list') ? pll_languages_list() : ['vi', 'en'];
-$roomTypes = HME_Room_Rate_Manager::get_room_types();
 $current_lang = get_locale();
+$roomTypes = HME_Room_Rate_Manager::get_room_types();
 ?>
 
 <div class="wrap">
@@ -31,7 +31,22 @@ $current_lang = get_locale();
                         <tr>
                             <th scope="row"><label for="description_<?php echo esc_attr($lang_code); ?>">Mô tả (<?php echo esc_html(strtoupper($lang_code)); ?>)</label></th>
                             <td>
-                                <textarea name="description[<?php echo esc_attr($lang_code); ?>]" id="description_<?php echo esc_attr($lang_code); ?>" rows="4" cols="50" class="tinymce"></textarea>
+                                <?php
+                                $content   = ''; // sẽ được điền từ AJAX khi load dữ liệu
+                                $editor_id = 'description_' . sanitize_key($lang_code); // dùng sanitize_key cho id
+
+                                wp_editor(
+                                    $content,
+                                    $editor_id,
+                                    [
+                                        'textarea_name' => "description[{$lang_code}]", // name field
+                                        'textarea_rows' => 10,
+                                        'media_buttons' => true,   // Hiện nút Add Media
+                                        'teeny'         => false,  // true = toolbar đơn giản
+                                        'quicktags'     => true,   // bật tab Text
+                                    ]
+                                );
+                                ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -98,7 +113,7 @@ $current_lang = get_locale();
                                         <input type="checkbox"
                                             name="roomtypes[]"
                                             value="<?php echo esc_attr($roomType['id']); ?>">
-                                        <?php echo esc_html($roomType['title'][$current_lang] ?? $roomType['title']['en']); ?>
+                                        <?php echo esc_html($roomType['title']); ?>
                                     </label><br>
                                 <?php endforeach; ?>
                                 <p class="description">Chọn một hoặc nhiều loại phòng áp dụng khuyến mãi.</p>
@@ -192,6 +207,14 @@ $current_lang = get_locale();
 include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
 ?>
 <script>
+    // Lấy danh sách ngôn ngữ từ PHP
+    const availableLanguages = <?php echo json_encode($languages); ?>;
+
+    // Tạo mapping giữa language code và editor ID để đảm bảo khớp với PHP
+    const editorIdMapping = {};
+    <?php foreach ($languages as $lang_code) : ?>
+        editorIdMapping['<?php echo esc_js($lang_code); ?>'] = '<?php echo esc_js('description_' . sanitize_key($lang_code)); ?>';
+    <?php endforeach; ?>
     jQuery(document).ready(function($) {
         loadPromotion();
 
@@ -200,6 +223,25 @@ include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
             const url = new URL(window.location.href);
             const params = new URLSearchParams(url.search);
             const promotionId = params.get('id');
+
+            // Đợi TinyMCE editors được khởi tạo
+            function waitForTinyMCE(callback) {
+                if (typeof tinymce !== 'undefined') {
+                    // Kiểm tra xem tất cả editors đã được khởi tạo chưa
+                    const allEditorsReady = availableLanguages.every(lang => {
+                        const editorId = editorIdMapping[lang];
+                        return tinymce.get(editorId) !== null;
+                    });
+
+                    if (allEditorsReady) {
+                        callback();
+                    } else {
+                        setTimeout(() => waitForTinyMCE(callback), 100);
+                    }
+                } else {
+                    setTimeout(() => waitForTinyMCE(callback), 100);
+                }
+            }
 
             $.ajax({
                 url: hme_admin.ajax_url,
@@ -211,7 +253,9 @@ include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
                 },
                 success: function(response) {
                     if (response.success) {
-                        displayPromotion(response.data.data);
+                        waitForTinyMCE(() => {
+                            displayPromotion(response.data.data);
+                        });
                     } else {
                         $('#promotion-detail-content').html(`<p class="error">Error: ${response.data}</p>`);
                     }
@@ -254,9 +298,23 @@ include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
             }
 
             for (const lang in promotion.description) {
-                const descriptionField = form.querySelector(`textarea[name="description[${lang}]"]`);
-                if (descriptionField) {
-                    descriptionField.value = promotion.description[lang];
+                const editorId = editorIdMapping[lang];
+                console.log(`Setting description for ${lang}, editor ID: ${editorId}, content:`, promotion.description[lang]);
+
+                // Kiểm tra xem TinyMCE editor có tồn tại không
+                if (typeof tinymce !== 'undefined' && tinymce.get(editorId)) {
+                    // Nếu editor đã được khởi tạo, set content
+                    tinymce.get(editorId).setContent(promotion.description[lang] || '');
+                    console.log(`Set content via TinyMCE for ${lang}`);
+                } else {
+                    // Fallback cho textarea nếu editor chưa được khởi tạo
+                    const descriptionField = form.querySelector(`textarea[name="description[${lang}]"]`);
+                    if (descriptionField) {
+                        descriptionField.value = promotion.description[lang] || '';
+                        console.log(`Set content via textarea for ${lang}`);
+                    } else {
+                        console.error(`No editor or textarea found for ${lang}, editor ID: ${editorId}`);
+                    }
                 }
             }
 
@@ -401,25 +459,57 @@ include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
          */
         function ajax_update_promotion() {
             //showLoading();
+
+            // Đồng bộ nội dung từ TinyMCE editors trước khi submit
+            if (typeof tinymce !== 'undefined') {
+                tinymce.triggerSave();
+            }
+
             const form = document.getElementById('update-promotion-form');
             const formData = new FormData(form);
 
             // Lấy dữ liệu đa ngôn ngữ từ form
             const names = {};
             const descriptions = {};
+
+            // Lấy dữ liệu từ form data cho names
             for (const [key, value] of formData.entries()) {
                 if (key.startsWith('name[')) {
                     const lang = key.match(/\[(.*?)\]/)[1];
                     names[lang] = value;
-                } else if (key.startsWith('description[')) {
-                    const lang = key.match(/\[(.*?)\]/)[1];
-                    descriptions[lang] = value;
                 }
             }
+
+            // Lấy dữ liệu từ TinyMCE editors cho descriptions
+            availableLanguages.forEach(lang => {
+                const editorId = editorIdMapping[lang];
+                console.log(`Getting description for ${lang}, editor ID: ${editorId}`);
+
+                if (typeof tinymce !== 'undefined' && tinymce.get(editorId)) {
+                    descriptions[lang] = tinymce.get(editorId).getContent();
+                    console.log(`Got content via TinyMCE for ${lang}:`, descriptions[lang]);
+                } else {
+                    // Fallback cho textarea
+                    const textarea = form.querySelector(`textarea[name="description[${lang}]"]`);
+                    if (textarea) {
+                        descriptions[lang] = textarea.value;
+                        console.log(`Got content via textarea for ${lang}:`, descriptions[lang]);
+                    } else {
+                        console.error(`No editor or textarea found for ${lang}, editor ID: ${editorId}`);
+                    }
+                }
+            });
+
             const selectedRoomtypes = [];
             document.querySelectorAll('input[name="roomtypes[]"]:checked').forEach(checkbox => {
                 selectedRoomtypes.push(checkbox.value);
             });
+
+            // Validation: Yêu cầu chọn ít nhất 1 room type
+            if (selectedRoomtypes.length === 0) {
+                alert('Vui lòng chọn ít nhất một loại phòng để áp dụng khuyến mãi.');
+                return;
+            }
             // Tạo đối tượng dữ liệu để gửi đi
             const promotionData = {
                 action: 'hme_update_promotion',
@@ -450,6 +540,14 @@ include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
                 valid_sunday: formData.get('valid_sunday') ? 1 : 0
             };
 
+            // Debug: Log dữ liệu trước khi gửi
+            console.log('Promotion Data being sent:', {
+                action: promotionData.action,
+                names: promotionData.name,
+                descriptions: promotionData.description,
+                id: promotionData.id
+            });
+
             // Gửi dữ liệu bằng jQuery.ajax hoặc Fetch API
             // Ví dụ sử dụng jQuery.ajax()
             jQuery.ajax({
@@ -458,16 +556,37 @@ include HME_PLUGIN_PATH . 'views/promotions/includes/script.php';
                 data: promotionData,
                 success: function(response) {
                     //hideLoading();
-                    // Xử lý khi API thành công
-                    alert('Promotion updated successfully');
-                    // Có thể chuyển hướng người dùng hoặc làm mới trang
-                    window.location.reload();
+                    console.log('Promotion updated - Full response:', response);
+
+                    if (response.success) {
+                        alert('Khuyến mãi đã được cập nhật thành công!');
+                        // Có thể chuyển hướng người dùng hoặc làm mới trang
+                        window.location.reload();
+                    } else {
+                        alert('Lỗi: ' + (response.data || 'Không thể cập nhật khuyến mãi'));
+                        console.error('API Error:', response.data);
+                    }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     //hideLoading();
-                    // Xử lý khi có lỗi
-                    console.error('Error creating promotion:', textStatus, errorThrown);
-                    alert('Lỗi: Không thể tạo khuyến mãi.');
+                    console.error('AJAX Error updating promotion:', {
+                        status: jqXHR.status,
+                        statusText: jqXHR.statusText,
+                        responseText: jqXHR.responseText,
+                        textStatus: textStatus,
+                        errorThrown: errorThrown
+                    });
+
+                    let errorMessage = 'Lỗi: Không thể cập nhật khuyến mãi.';
+                    if (jqXHR.responseText) {
+                        try {
+                            const errorResponse = JSON.parse(jqXHR.responseText);
+                            errorMessage = 'Lỗi: ' + (errorResponse.data || errorResponse.message || errorMessage);
+                        } catch (e) {
+                            errorMessage += ' (' + jqXHR.status + ' ' + jqXHR.statusText + ')';
+                        }
+                    }
+                    alert(errorMessage);
                 }
             });
         }

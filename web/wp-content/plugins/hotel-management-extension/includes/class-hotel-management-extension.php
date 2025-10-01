@@ -91,11 +91,11 @@ class Hotel_Management_Extension
         }
 
         // Kiểm tra xem có cấu hình API không
-        if (!$this->is_api_configured()) {
-            add_action('admin_notices', function () {
-                echo '<div class="notice notice-warning"><p><strong>Hotel Management:</strong> API not configured for this site. Please contact administrator.</p></div>';
-            });
-        }
+        // if (!$this->is_api_configured()) {
+        //     add_action('admin_notices', function () {
+        //         echo '<div class="notice notice-warning"><p><strong>Hotel Management:</strong> API not configured for this site. Please contact administrator.</p></div>';
+        //     });
+        // }
 
         // Menu chính
         add_menu_page(
@@ -144,6 +144,15 @@ class Hotel_Management_Extension
             'hotel-promotions',
             array($this, 'promotions_page')
         );
+
+        add_submenu_page(
+            'hotel-dashboard',
+            __('Chính Sách Giá', 'hotel'),
+            __('Chính Sách Giá', 'hotel'),
+            'manage_options',
+            'hotel-pricing-policies',
+            array($this, 'pricing_policies_page')
+        );
     }
 
     private function is_api_configured()
@@ -177,20 +186,35 @@ class Hotel_Management_Extension
                 '2.0.0',
                 true
             );
-            wp_enqueue_script(
-                'hme-room-management-js',
-                HME_PLUGIN_URL . 'assets/js/room-management.js',
-                array('jquery', 'jquery-ui-datepicker', 'jquery-ui-dialog', 'hme-utils-js'),
-                '2.0.0',
-                true
-            );
+
+            // Enqueue room rates list script if on room rates page
+            if (strpos($hook, 'hotel-room-rates') !== false) {
+                wp_enqueue_script(
+                    'hme-room-management-js',
+                    HME_PLUGIN_URL . 'assets/js/room-management.js',
+                    array('jquery', 'jquery-ui-datepicker', 'jquery-ui-dialog', 'hme-utils-js'),
+                    '2.0.3',
+                    true
+                );
+            }
             wp_enqueue_script(
                 'hme-admin-js',
                 HME_PLUGIN_URL . 'assets/js/admin.js',
                 array('jquery', 'hme-utils-js'),
-                '2.0.0',
+                '2.0.2',
                 true
             );
+
+            // Enqueue promotions list script if on promotions page
+            if (strpos($hook, 'hotel-promotions') !== false && !isset($_GET['action'])) {
+                wp_enqueue_script(
+                    'hme-promotions-list-js',
+                    HME_PLUGIN_URL . 'assets/js/promotions-list.js',
+                    array('jquery', 'hme-admin-js'),
+                    '2.0.0',
+                    true
+                );
+            }
 
             wp_enqueue_style(
                 'hme-admin-css',
@@ -216,6 +240,7 @@ class Hotel_Management_Extension
             // Localize script với config
             wp_localize_script('hme-room-management-js', 'hme_admin', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
+                'admin_url' => admin_url(),
                 'nonce' => wp_create_nonce('hme_admin_nonce'),
                 'blog_id' => get_current_blog_id(),
                 'api_configured' => $this->is_api_configured(),
@@ -466,6 +491,11 @@ class Hotel_Management_Extension
             default:
                 include HME_PLUGIN_PATH . 'views/promotions/promotions-list.php';
         }
+    }
+
+    public function pricing_policies_page()
+    {
+        include HME_PLUGIN_PATH . 'views/pricing-policies/pricing-policies.php';
     }
 
     // ============ AJAX HANDLERS ============

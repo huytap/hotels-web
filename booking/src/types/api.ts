@@ -22,16 +22,7 @@ export interface Room {
   view?: string;
   gallery_images?: string[];
   featured_image?: string;
-}
-
-export interface RoomRate {
-  id: number;
-  room_id: number;
-  date: string;
-  rate: number;
-  inventory: number;
-  min_stay: number;
-  is_available: boolean;
+  is_extra_bed_available?: boolean;
 }
 
 export interface Promotion {
@@ -55,6 +46,7 @@ export interface BookingDetails {
   check_out: string;
   adults: number;
   children: number;
+  children_ages?: number[];
   rooms: number;
 }
 
@@ -67,14 +59,12 @@ export interface Guest {
 }
 
 export interface BookingRoom {
-  room_id: number;
-  room_name: string;
-  room_type: string;
+  roomId: number;
+  quantity: number;
+  promotionId?: number;
   rate_per_night: number;
-  total_nights: number;
-  subtotal: number;
-  promotion_id?: string;
-  promotion_discount?: number;
+  total_price: number;
+  room_name: string;
 }
 
 export interface Booking {
@@ -90,6 +80,30 @@ export interface Booking {
   created_at: string;
 }
 
+export interface PricingBreakdown {
+  base_price: number;
+  base_nights: number;
+  base_total: number;
+  adult_surcharge_per_night: number;
+  adult_surcharge_nights: number;
+  adult_surcharge_total: number;
+  children_surcharge_per_night: number;
+  children_surcharge_nights: number;
+  children_surcharge_total: number;
+  promotion_applicable_amount: number; // base + adult surcharge (có thể áp dụng khuyến mãi)
+  non_promotion_amount: number; // extra bed adult + children surcharge (không áp dụng khuyến mãi)
+  promotion_discount: number;
+  final_total: number;
+  // Breakdown of non_promotion_amount
+  extra_bed_adult_surcharge_total: number;
+  extra_bed_adult_count: number;
+  children_breakdown?: {
+    free_children: number;
+    surcharge_children: number;
+    adult_rate_children: number;
+  };
+}
+
 export interface RoomAvailability {
   room_id: number;
   room: Room;
@@ -97,12 +111,22 @@ export interface RoomAvailability {
   rate_per_night: number;
   total_price: number;
   applicable_promotions: Promotion[];
+  pricing_breakdown?: PricingBreakdown;
+  effective_capacity?: number; // Capacity thực tế bao gồm khả năng thêm người với phụ thu
+  is_extra_bed_available?: boolean;
+  requires_extra_bed?: boolean; // Indicates if the current guest count needs extra bed
+  extra_bed_options?: {
+    without_extra_bed?: RoomPricingOption;
+    with_extra_bed?: RoomPricingOption;
+  };
 }
 
-// Laravel API Response format
-export interface LaravelRoomResponse {
+export interface RoomPricingOption {
+  can_accommodate: boolean;
+  rate_per_night: number;
   total_price: number;
-  combination_details: CombinationDetail[];
+  pricing_breakdown?: PricingBreakdown;
+  guest_accommodation_note?: string;
 }
 
 export interface CombinationDetail {
@@ -136,15 +160,4 @@ export interface PromotionDetail {
     is_active: number;
   };
   discounted_price_total: number;
-}
-
-export interface BookingCalculation {
-  subtotal: number;
-  promotions_applied: {
-    promotion: Promotion;
-    discount_amount: number;
-  }[];
-  total_discount: number;
-  final_total: number;
-  rooms: BookingRoom[];
 }

@@ -1,4 +1,4 @@
-import type { ApiResponse, Room, RoomAvailability, Promotion, Booking, BookingCalculation, BookingDetails, Guest } from '../types/api';
+import type { ApiResponse, RoomAvailability, Booking, BookingDetails, Guest } from '../types/api';
 import type { HotelConfig } from '../types/tenant';
 
 class ApiService {
@@ -49,19 +49,15 @@ class ApiService {
     }
   }
 
-  // Room APIs
-  async getRoomTypes(): Promise<ApiResponse<Room[]>> {
-    return this.makeRequest<Room[]>('/sync/roomtypes');
-  }
-
   async findAvailableRooms(searchParams: {
     check_in: string;
     check_out: string;
     adults: number;
     children: number;
+    children_ages?: number[];
     rooms: number;
   }): Promise<ApiResponse<RoomAvailability[]>> {
-    return this.makeRequest<RoomAvailability[]>('/sync/hotel/find-rooms', {
+    return this.makeRequest<RoomAvailability[]>('/v1/hotel/find-rooms', {
       method: 'POST',
       body: JSON.stringify(searchParams),
     });
@@ -70,20 +66,23 @@ class ApiService {
   // New method following exact flow: wp_id + token + search data → Laravel API → room list
   async searchRoomsWithWpData(
     wpId: string,
-    token: string,
+    //token: string,
     searchParams: {
       check_in: string;
       check_out: string;
       adults: number;
       children: number;
+      children_ages?: number[];
       rooms: number;
-    }
+    },
+    language?: string
   ): Promise<ApiResponse<RoomAvailability[]>> {
     const config = this.getApiConfig();
-    const url = `${config.apiBaseUrl}/sync/hotel/find-rooms`;
+    const url = `${config.apiBaseUrl}/v1/hotel/find-rooms`;
 
     const requestBody = {
       wp_id: wpId,
+      language: language || 'vi',
       data: searchParams
     };
 
@@ -127,91 +126,6 @@ class ApiService {
     }
   }
 
-  // Promotion APIs
-  async getPromotions(filters?: {
-    room_type?: string;
-    check_in?: string;
-    check_out?: string;
-    is_active?: boolean;
-  }): Promise<ApiResponse<Promotion[]>> {
-    const queryParams = new URLSearchParams();
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined) {
-          queryParams.append(key, value.toString());
-        }
-      });
-    }
-
-    const endpoint = `/sync/promotions${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-    return this.makeRequest<Promotion[]>(endpoint);
-  }
-
-  async validatePromotionCode(code: string, bookingDetails: BookingDetails): Promise<ApiResponse<Promotion>> {
-    return this.makeRequest<Promotion>('/sync/promotions/check-code', {
-      method: 'POST',
-      body: JSON.stringify({ code, ...bookingDetails }),
-    });
-  }
-
-  // Booking APIs
-  async calculateBookingTotal(bookingData: {
-    rooms: { room_id: string; quantity: number }[];
-    booking_details: BookingDetails;
-    promotion_codes?: string[];
-  }): Promise<ApiResponse<BookingCalculation>> {
-    return this.makeRequest<BookingCalculation>('/sync/bookings/calculate-total', {
-      method: 'POST',
-      body: JSON.stringify(bookingData),
-    });
-  }
-
-  async createBooking(bookingData: {
-    guest: Guest;
-    booking_details: BookingDetails;
-    rooms: { room_id: string; quantity: number; promotion_id?: string }[];
-    special_requests?: string;
-  }): Promise<ApiResponse<Booking>> {
-    return this.makeRequest<Booking>('/sync/bookings', {
-      method: 'POST',
-      body: JSON.stringify(bookingData),
-    });
-  }
-
-  async getBooking(id: string): Promise<ApiResponse<Booking>> {
-    return this.makeRequest<Booking>(`/sync/bookings/${id}`);
-  }
-
-  async updateBookingStatus(id: string, status: string): Promise<ApiResponse<Booking>> {
-    return this.makeRequest<Booking>(`/sync/bookings/${id}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
-    });
-  }
-
-  // Room Management APIs
-  async getRoomRates(params: {
-    room_type?: string;
-    date_from?: string;
-    date_to?: string;
-  }): Promise<ApiResponse<any>> {
-    const queryParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value) queryParams.append(key, value);
-    });
-
-    return this.makeRequest(`/room-rates?${queryParams.toString()}`);
-  }
-
-  async getCalendarData(params: {
-    room_type: string;
-    date_from: string;
-    date_to: string;
-  }): Promise<ApiResponse<any>> {
-    const queryParams = new URLSearchParams(params);
-    return this.makeRequest(`/sync/room-management/calendar?${queryParams.toString()}`);
-  }
-
   // Submit booking with wp_id + token approach
   async submitBooking(
     wpId: string,
@@ -223,7 +137,7 @@ class ApiService {
     }
   ): Promise<ApiResponse<Booking>> {
     const config = this.getApiConfig();
-    const url = `${config.apiBaseUrl}/sync/bookings`;
+    const url = `${config.apiBaseUrl}/v1/bookings/confirm`;
 
     const requestBody = {
       wp_id: wpId,
@@ -249,6 +163,11 @@ class ApiService {
 
     try {
       const response = await fetch(url, requestConfig);
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After');
+        alert(`Xin lỗi, bạn đã gửi quá nhiều yêu cầu đặt phòng. Vui lòng chờ ${retryAfter} giây để thử lại.`);
+        throw new Error(`Rate limited. Please wait ${retryAfter} seconds.`); // Throw error instead of returning
+      }
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message || 'Booking submission failed');

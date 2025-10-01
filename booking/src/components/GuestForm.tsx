@@ -2,12 +2,52 @@ import React, { useState } from 'react';
 import { User, Mail, Phone, Globe, MessageSquare, CreditCard } from 'lucide-react';
 import type { Guest } from '../types/api';
 import countriesData from '../data/countries.json';
+import { useLocalizedText, useLanguage } from '../context/LanguageContext';
 interface GuestFormProps {
   onSubmit: (guestData: Guest & { specialRequests: string }) => void;
   loading?: boolean;
 }
 
 const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
+  const { t } = useLocalizedText();
+  const { hotelConfig, currentLanguage } = useLanguage();
+
+  // Format check-in/out times from hotel config - currently using hotel policy instead
+  // const getCheckInOutInfo = () => {
+  //   const defaultCheckIn = '14:00';
+  //   const defaultCheckOut = '12:00';
+
+  //   if (hotelConfig) {
+  //     const checkIn = hotelConfig.check_in_time || defaultCheckIn;
+  //     const checkOut = hotelConfig.check_out_time || defaultCheckOut;
+  //     return t('guest.terms.dynamic_checkin_checkout', { checkIn, checkOut });
+  //   }
+
+  //   return t('guest.terms.dynamic_checkin_checkout', { checkIn: defaultCheckIn, checkOut: defaultCheckOut });
+  // };
+
+  // Get hotel policy from config
+  const getHotelPolicy = () => {
+    if (hotelConfig && hotelConfig.policy) {
+      // If policy is an object with language keys
+      if (typeof hotelConfig.policy === 'object' && hotelConfig.policy !== null) {
+        return hotelConfig.policy[currentLanguage] || hotelConfig.policy.vi || hotelConfig.policy.en || '';
+      }
+      // If policy is a string
+      if (typeof hotelConfig.policy === 'string') {
+        return hotelConfig.policy;
+      }
+    }
+
+    // Default fallback policy
+    return `
+      • ${t('guest.terms.dynamic_checkin_checkout', { checkIn: '14:00', checkOut: '12:00' })}
+      • ${t('guest.terms.free_cancellation')}
+      • ${t('guest.terms.prices_include')}
+      • ${t('guest.terms.id_required')}
+    `;
+  };
+
   const [guestData, setGuestData] = useState<Guest & { specialRequests: string }>({
     first_name: '',
     last_name: '',
@@ -23,27 +63,27 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
     const newErrors: { [key: string]: string } = {};
 
     if (!guestData.first_name.trim()) {
-      newErrors.first_name = 'Vui lòng nhập tên';
+      newErrors.first_name = t('validation.first_name_required');
     }
 
     if (!guestData.last_name.trim()) {
-      newErrors.last_name = 'Vui lòng nhập họ';
+      newErrors.last_name = t('validation.last_name_required');
     }
 
     if (!guestData.email.trim()) {
-      newErrors.email = 'Vui lòng nhập email';
+      newErrors.email = t('validation.email_required');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestData.email)) {
-      newErrors.email = 'Email không hợp lệ';
+      newErrors.email = t('validation.email_invalid');
     }
 
     if (!guestData.phone.trim()) {
-      newErrors.phone = 'Vui lòng nhập số điện thoại';
+      newErrors.phone = t('validation.phone_required');
     } else if (!/^[+]?[\d\s-()]{8,}$/.test(guestData.phone)) {
-      newErrors.phone = 'Số điện thoại không hợp lệ';
+      newErrors.phone = t('validation.phone_invalid');
     }
 
     if (!guestData.nationality) {
-      newErrors.nationality = 'Vui lòng chọn quốc tịch';
+      newErrors.nationality = t('validation.nationality_required');
     }
 
     setErrors(newErrors);
@@ -80,7 +120,7 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
     <div className="bg-white rounded-lg shadow-lg border p-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
         <User className="w-6 h-6" />
-        Thông Tin Khách Hàng
+        {t('guest.form_title')}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-6 text-left">
@@ -88,7 +128,7 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tên <span className="text-red-500">*</span>
+              {t('guest.first_name')} <span className="text-red-500">{t('guest.required')}</span>
             </label>
             <input
               type="text"
@@ -96,7 +136,7 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
               onChange={(e) => handleInputChange('first_name', e.target.value)}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.first_name ? 'border-red-500' : 'border-gray-300'
                 }`}
-              placeholder="Nhập tên của bạn"
+              placeholder={t('guest.first_name.placeholder')}
             />
             {errors.first_name && (
               <p className="text-red-500 text-xs mt-1">{errors.first_name}</p>
@@ -105,7 +145,7 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Họ <span className="text-red-500">*</span>
+              {t('guest.last_name')} <span className="text-red-500">{t('guest.required')}</span>
             </label>
             <input
               type="text"
@@ -113,7 +153,7 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
               onChange={(e) => handleInputChange('last_name', e.target.value)}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.last_name ? 'border-red-500' : 'border-gray-300'
                 }`}
-              placeholder="Nhập họ của bạn"
+              placeholder={t('guest.last_name.placeholder')}
             />
             {errors.last_name && (
               <p className="text-red-500 text-xs mt-1">{errors.last_name}</p>
@@ -126,7 +166,7 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <Mail className="w-4 h-4 inline mr-1" />
-              Email <span className="text-red-500">*</span>
+              {t('guest.email')} <span className="text-red-500">{t('guest.required')}</span>
             </label>
             <input
               type="email"
@@ -134,7 +174,7 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
               onChange={(e) => handleInputChange('email', e.target.value)}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
                 }`}
-              placeholder="example@email.com"
+              placeholder={t('guest.email.placeholder')}
             />
             {errors.email && (
               <p className="text-red-500 text-xs mt-1">{errors.email}</p>
@@ -144,7 +184,7 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <Phone className="w-4 h-4 inline mr-1" />
-              Số Điện Thoại <span className="text-red-500">*</span>
+              {t('guest.phone')} <span className="text-red-500">{t('guest.required')}</span>
             </label>
             <input
               type="tel"
@@ -152,7 +192,7 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
               onChange={(e) => handleInputChange('phone', e.target.value)}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.phone ? 'border-red-500' : 'border-gray-300'
                 }`}
-              placeholder="+84 123 456 789"
+              placeholder={t('guest.phone.placeholder')}
             />
             {errors.phone && (
               <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
@@ -164,7 +204,7 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <Globe className="w-4 h-4 inline mr-1" />
-            Quốc Tịch <span className="text-red-500">*</span>
+            {t('guest.nationality')} <span className="text-red-500">{t('guest.required')}</span>
           </label>
           <select
             value={guestData.nationality}
@@ -172,7 +212,7 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.nationality ? 'border-red-500' : 'border-gray-300'
               }`}
           >
-            <option value="">Chọn quốc tịch</option>
+            <option value="">{t('guest.nationality.placeholder')}</option>
             {countries.map((country) => (
               <option key={country.code} value={country.code}>
                 {country.name}
@@ -188,29 +228,29 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <MessageSquare className="w-4 h-4 inline mr-1" />
-            Yêu Cầu Đặc Biệt (Tùy Chọn)
+            {t('guest.special_requests')}
           </label>
           <textarea
             value={guestData.specialRequests}
             onChange={(e) => handleInputChange('specialRequests', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows={3}
-            placeholder="Ví dụ: Phòng view biển, giường đôi, không hút thuốc..."
+            placeholder={t('guest.special_requests.placeholder')}
           />
           <p className="text-xs text-gray-500 mt-1">
-            Khách sạn sẽ cố gắng đáp ứng yêu cầu của bạn tùy theo tình hình thực tế.
+            {t('guest.special_requests.note')}
           </p>
         </div>
 
         {/* Terms and Conditions */}
         <div className="bg-gray-50 p-4 rounded-lg">
-          <h4 className="font-medium text-gray-800 mb-2">Điều Khoản Đặt Phòng:</h4>
-          <ul className="text-sm text-gray-600 space-y-1">
-            <li>• Check-in: 14:00 | Check-out: 12:00</li>
-            <li>• Hủy miễn phí trước 24 giờ</li>
-            <li>• Giá đã bao gồm thuế và phí dịch vụ</li>
-            <li>• Vui lòng mang theo CMND/Passport khi check-in</li>
-          </ul>
+          <h4 className="font-medium text-gray-800 mb-2">{t('guest.terms.title')}</h4>
+          <div
+            className="text-sm text-gray-600 whitespace-pre-line"
+            dangerouslySetInnerHTML={{
+              __html: getHotelPolicy().replace(/\n/g, '<br/>')
+            }}
+          />
         </div>
 
         {/* Submit Button */}
@@ -222,12 +262,12 @@ const GuestForm: React.FC<GuestFormProps> = ({ onSubmit, loading = false }) => {
           {loading ? (
             <div className="flex items-center justify-center gap-2">
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              Đang Đặt Phòng...
+              {t('guest.booking_loading')}
             </div>
           ) : (
             <div className="flex items-center justify-center gap-2">
               <CreditCard className="w-4 h-4" />
-              Xác Nhận Đặt Phòng
+              {t('guest.confirm_booking')}
             </div>
           )}
         </button>

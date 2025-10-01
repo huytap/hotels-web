@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Wifi, Car, Coffee, Tag, Plus, Minus, Eye } from 'lucide-react';
-import type { RoomAvailability, Promotion } from '../types/api';
+import type { RoomAvailability, Promotion, PricingBreakdown } from '../types/api';
 import RoomGalleryPopup from './RoomGalleryPopup';
+import { useLocalizedText } from '../context/LanguageContext';
+import { useHotel } from '../context/HotelContext';
 
 interface PromotionQuantity {
   promotionId: number;
@@ -12,14 +14,17 @@ interface SelectedRoom {
   roomId: number;
   quantity: number;
   promotionId?: number;
+  useExtraBed?: boolean;
 }
 
 interface RoomCardProps {
   roomAvailability: RoomAvailability;
-  onAddRoom: (roomId: number, quantity: number, promotionId?: number) => void;
+  onAddRoom: (roomId: string, quantity: number, promotionId?: string, useExtraBed?: boolean) => void;
   selectedRooms: SelectedRoom[];
   selectedQuantity?: number;
   maxQuantity?: number;
+  recommendedQuantity?: number;
+  canAccommodateGuests?: boolean;
 }
 
 const RoomCard: React.FC<RoomCardProps> = ({
@@ -27,14 +32,23 @@ const RoomCard: React.FC<RoomCardProps> = ({
   onAddRoom,
   selectedRooms,
   selectedQuantity = 0,
-  maxQuantity = 5
+  maxQuantity = 5,
+  recommendedQuantity = 1,
+  canAccommodateGuests: _canAccommodateGuests = true
 }) => {
   const { room, rate_per_night, available_inventory, applicable_promotions } = roomAvailability;
-  const [baseQuantity, setBaseQuantity] = useState(selectedQuantity);
+  const { bookingDetails } = useHotel();
+
+  // Debug logging
+  console.log('🏨 RoomCard - roomAvailability:', roomAvailability);
+  console.log('🏨 RoomCard - pricing_breakdown:', roomAvailability.pricing_breakdown);
+  const [baseQuantity, setBaseQuantity] = useState(selectedQuantity || 0);
   const [promotionQuantities, setPromotionQuantities] = useState<PromotionQuantity[]>(
     applicable_promotions.map(promo => ({ promotionId: promo.id, quantity: 0 }))
   );
+  const [useExtraBed, setUseExtraBed] = useState(false);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const { t } = useLocalizedText();
 
   // Sync internal state with selectedRooms from parent
   useEffect(() => {
@@ -42,7 +56,15 @@ const RoomCard: React.FC<RoomCardProps> = ({
 
     // Reset base quantity
     const baseRoomSelection = selectedRooms.find(r => r.roomId === currentRoomId && !r.promotionId);
-    setBaseQuantity(baseRoomSelection?.quantity || 0);
+    const initialQuantity = baseRoomSelection?.quantity || 0;
+    setBaseQuantity(initialQuantity);
+
+    // Auto-select recommended quantity if no selection exists
+    // Disabled auto-selection to let users choose manually
+    // if (!baseRoomSelection && recommendedQuantity > 0) {
+    //   const roomId = roomAvailability.room_id || room.id;
+    //   onAddRoom(roomId.toString(), recommendedQuantity, undefined);
+    // }
 
     // Reset promotion quantities
     setPromotionQuantities(prev =>
@@ -56,7 +78,15 @@ const RoomCard: React.FC<RoomCardProps> = ({
         };
       })
     );
-  }, [selectedRooms, roomAvailability.room_id, room.id]);
+  }, [selectedRooms, roomAvailability.room_id, room.id, recommendedQuantity, onAddRoom]);
+
+  // Update pricing when extra bed choice changes
+  useEffect(() => {
+    if (baseQuantity > 0) {
+      const roomId = roomAvailability.room_id || room.id;
+      onAddRoom(roomId.toString(), baseQuantity, undefined, useExtraBed);
+    }
+  }, [useExtraBed]); // Re-calculate when extra bed choice changes
 
   const getRemainingInventory = (excludePromotion?: number): number => {
     const currentTotal = baseQuantity + promotionQuantities
@@ -82,7 +112,7 @@ const RoomCard: React.FC<RoomCardProps> = ({
       // Use roomAvailability.room_id for consistency
       const roomId = roomAvailability.room_id || room.id;
       console.log('🏨 RoomCard: Adding room with ID:', roomId, 'room.id:', room.id, 'roomAvailability.room_id:', roomAvailability.room_id);
-      onAddRoom(roomId, newQuantity, undefined); // Base price, no promotion
+      onAddRoom(roomId.toString(), newQuantity, undefined, useExtraBed); // Base price, no promotion
     }
   };
 
@@ -100,7 +130,7 @@ const RoomCard: React.FC<RoomCardProps> = ({
       );
       // Trigger callback for this specific promotion
       const roomId = roomAvailability.room_id || room.id;
-      onAddRoom(roomId, newQuantity, promotionId);
+      onAddRoom(roomId.toString(), newQuantity, promotionId.toString(), useExtraBed);
     }
   };
 
@@ -121,7 +151,7 @@ const RoomCard: React.FC<RoomCardProps> = ({
   const getTotalRoomsSelected = (): number => {
     return baseQuantity + promotionQuantities.reduce((sum, pq) => sum + pq.quantity, 0);
   };
-  const cleanDescription = (desc) => {
+  const cleanDescription = (desc: string | undefined) => {
     if (!desc) return "";
     return desc.replace(/<!--[\s\S]*?-->/g, "").trim();
   };
@@ -146,21 +176,22 @@ const RoomCard: React.FC<RoomCardProps> = ({
     onQuantityChange: (newQuantity: number) => void;
     maxQuantity: number;
     label?: string;
-  }> = ({ quantity, onQuantityChange, maxQuantity, label }) => (
+    disabled?: boolean;
+  }> = ({ quantity, onQuantityChange, maxQuantity, label, disabled = false }) => (
     <div className="flex items-center gap-3">
       {label && <span className="text-sm font-medium text-gray-700">{label}</span>}
       <div className="flex items-center gap-2">
         <button
           onClick={() => onQuantityChange(quantity - 1)}
-          disabled={quantity <= 0}
+          disabled={disabled || quantity <= 0}
           className="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-full hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Minus className="w-4 h-4" />
         </button>
-        <span className="w-8 text-center font-medium">{quantity}</span>
+        <span className={`w-8 text-center font-medium ${disabled ? 'text-gray-400' : ''}`}>{quantity}</span>
         <button
           onClick={() => onQuantityChange(quantity + 1)}
-          disabled={quantity >= maxQuantity}
+          disabled={disabled || quantity >= maxQuantity}
           className="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-full hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Plus className="w-4 h-4" />
@@ -190,16 +221,16 @@ const RoomCard: React.FC<RoomCardProps> = ({
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-all duration-300 flex items-center justify-center">
             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-center">
               <Eye size={32} className="mx-auto mb-2" />
-              <span className="text-sm font-medium">Xem gallery</span>
+              <span className="text-sm font-medium">{t('room.view_gallery')}</span>
               {room.images && room.images.length > 1 && (
-                <div className="text-xs mt-1">+{room.images.length - 1} ảnh khác</div>
+                <div className="text-xs mt-1">{t('room.more_images', { count: room.images.length - 1 })}</div>
               )}
             </div>
           </div>
 
           {applicable_promotions.length > 0 && (
             <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold z-10">
-              {applicable_promotions.length} Khuyến Mãi
+              {t('promotion.count', { count: applicable_promotions.length })}
             </div>
           )}
         </div>
@@ -216,10 +247,90 @@ const RoomCard: React.FC<RoomCardProps> = ({
           <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
             <div className="flex items-center gap-1">
               <Users className="w-4 h-4" />
-              <span>Tối đa {room.capacity} người</span>
+              <span>{t('room.capacity', { count: room.capacity })}</span>
             </div>
-            <span>Còn {available_inventory} phòng</span>
+            <span>{t('room.remaining', { count: available_inventory })}</span>
           </div>
+
+          {/* Recommended quantity notice */}
+          {recommendedQuantity > 1 && (
+            <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center gap-2 text-blue-700">
+                <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                </div>
+                <span className="text-sm font-medium">
+                  {t('room.recommended_rooms', { count: recommendedQuantity })}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Extra bed selection - show when room has extra bed and exceeds base capacity */}
+          {roomAvailability.requires_extra_bed && roomAvailability.room?.is_extra_bed_available && (
+            <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="text-sm font-medium text-amber-800 mb-2">
+                ⚠️ Số khách ({bookingDetails?.adults || 0}) vượt quá capacity phòng ({room.capacity} người)
+              </div>
+
+              <div className="flex items-start gap-3 mt-3">
+                <input
+                  type="checkbox"
+                  id={`extra-bed-${room.id}`}
+                  checked={useExtraBed}
+                  onChange={(e) => {
+                    setUseExtraBed(e.target.checked);
+                    // Trigger re-calculation when user changes extra bed choice
+                    if (baseQuantity > 0) {
+                      const roomId = roomAvailability.room_id || room.id;
+                      onAddRoom(roomId.toString(), baseQuantity, undefined, e.target.checked);
+                    }
+                  }}
+                  className="mt-1 w-4 h-4 text-amber-600 border-amber-300 rounded focus:ring-amber-500"
+                />
+                <div className="flex-1">
+                  <label htmlFor={`extra-bed-${room.id}`} className="text-sm font-medium text-amber-800 cursor-pointer">
+                    ✓ Tôi chấp nhận sử dụng giường phụ
+                  </label>
+                  <div className="text-xs text-amber-600 mt-1">
+                    {useExtraBed ? (
+                      <div>
+                        <div className="text-green-700 font-medium">
+                          → Phòng có thể chứa đủ {bookingDetails?.adults || 0} khách
+                        </div>
+                        <div>
+                          Phụ thu giường phụ: <strong>{(roomAvailability.pricing_breakdown?.extra_bed_adult_surcharge_total || 0).toLocaleString('vi-VN')} VND</strong>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-red-700">
+                        → Phòng chỉ chứa được {room.capacity} người (thiếu {(bookingDetails?.adults || 0) - room.capacity} chỗ)
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {!useExtraBed && (
+                <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-600">
+                  <strong>Lưu ý:</strong> Nếu không chọn giường phụ, phòng này không đủ chỗ cho số khách của bạn.
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Show accommodation conflict warning */}
+          {roomAvailability.requires_extra_bed && !roomAvailability.room?.is_extra_bed_available && (
+            <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="text-sm font-medium text-red-800 mb-1">
+                ❌ Phòng không phù hợp
+              </div>
+              <div className="text-xs text-red-600">
+                Phòng này chỉ chứa được {room.capacity} người, không có giường phụ.
+                Không thể chứa {roomAvailability.effective_capacity} khách như yêu cầu.
+              </div>
+            </div>
+          )}
 
           {/* Amenities */}
           <div className="flex flex-wrap gap-2 mb-4">
@@ -241,13 +352,44 @@ const RoomCard: React.FC<RoomCardProps> = ({
           <div className="mb-4">
             {/* <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-1">
               <Tag className="w-4 h-4" />
-              Chương Trình Khuyến Mãi
+              {t('promotion.title')}
             </h4> */}
             <div className="space-y-3">
               {applicable_promotions.map((promotion) => {
-                const promotionPrice = calculatePromotionPrice(promotion);
-                const discountAmount = rate_per_night - promotionPrice;
                 const promotionQuantity = promotionQuantities.find(pq => pq.promotionId === promotion.id)?.quantity || 0;
+
+                // Calculate pricing based on user's extra bed choice
+                let originalPrice, promotionPrice, discountAmount;
+
+                if (roomAvailability.pricing_breakdown) {
+                  // Base price calculation considering extra bed choice
+                  let basePrice = roomAvailability.pricing_breakdown.promotion_applicable_amount;
+                  let extraCharges = 0;
+
+                  if (useExtraBed) {
+                    // User chose extra bed - include extra bed surcharge
+                    extraCharges = roomAvailability.pricing_breakdown.non_promotion_amount;
+                  } else {
+                    // User declined extra bed - only include children surcharge (if any)
+                    extraCharges = roomAvailability.pricing_breakdown.children_surcharge_total || 0;
+                  }
+
+                  originalPrice = basePrice + extraCharges;
+
+                  // Tính discount chỉ áp dụng cho promotion_applicable_amount
+                  const promotionDiscount = promotion.type === 'percentage'
+                    ? basePrice * (promotion.value / 100)
+                    : promotion.value;
+
+                  // Giá sau promotion: (basePrice - discount) + extraCharges
+                  promotionPrice = (basePrice - promotionDiscount) + extraCharges;
+                  discountAmount = promotionDiscount;
+                } else {
+                  // Fallback logic cũ
+                  originalPrice = rate_per_night;
+                  promotionPrice = calculatePromotionPrice(promotion);
+                  discountAmount = originalPrice - promotionPrice;
+                }
 
                 return (
                   <div key={promotion.id} className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -262,22 +404,26 @@ const RoomCard: React.FC<RoomCardProps> = ({
                       <div className=" m-5">
                         <div className="gap-3">
                           <div className="text-sm text-gray-500 line-through">
-                            {rate_per_night.toLocaleString('vi-VN')} VND
+                            {originalPrice.toLocaleString('vi-VN')} VND
                           </div>
                           <div className="text-lg font-bold text-green-600">
                             {promotionPrice.toLocaleString('vi-VN')} VND
-                            <span className="text-xs text-gray-500 ml-1">/ đêm</span>
+                            <span className="text-xs text-gray-500 ml-1">/ tổng</span>
                           </div>
                         </div>
                         <div className="text-xs text-green-600 font-medium">
-                          Tiết kiệm {discountAmount.toLocaleString('vi-VN')} VND ({promotion.type === 'percentage' ? `${promotion.value}%` : 'Giá cố định'})
+                          {t('promotion.savings', {
+                            amount: discountAmount.toLocaleString('vi-VN'),
+                            type: promotion.type === 'percentage' ? t('promotion.percentage', { value: promotion.value }) : t('promotion.fixed')
+                          })}
                         </div>
                       </div>
                       <div className="flex-shrink-0">
                         <QuantitySelector
                           quantity={promotionQuantity}
                           onQuantityChange={(newQuantity) => handlePromotionQuantityChange(promotion.id, newQuantity)}
-                          maxQuantity={Math.min(available_inventory, promotionQuantity + getRemainingInventory(promotion.id.toString()))}
+                          maxQuantity={Math.min(available_inventory, promotionQuantity + getRemainingInventory(promotion.id))}
+                          disabled={roomAvailability.requires_extra_bed && !roomAvailability.room?.is_extra_bed_available}
                         />
                       </div>
                     </div>
@@ -287,6 +433,24 @@ const RoomCard: React.FC<RoomCardProps> = ({
                         <div className="text-lg font-bold text-green-600">
                           {(promotionPrice * promotionQuantity).toLocaleString('vi-VN')} VND
                         </div>
+                        {roomAvailability.pricing_breakdown && roomAvailability.pricing_breakdown.non_promotion_amount > 0 && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            {(() => {
+                              const breakdown = roomAvailability.pricing_breakdown;
+                              const extraBedAmount = (breakdown.extra_bed_adult_surcharge_total || 0) * promotionQuantity;
+                              const childAmount = (breakdown.children_surcharge_total || 0) * promotionQuantity;
+
+                              if (extraBedAmount > 0 && childAmount > 0) {
+                                return `(Phụ thu người lớn giường phụ: ${extraBedAmount.toLocaleString('vi-VN')} VND + Phụ thu trẻ em: ${childAmount.toLocaleString('vi-VN')} VND không giảm giá)`;
+                              } else if (extraBedAmount > 0) {
+                                return `(Phụ thu người lớn giường phụ: ${extraBedAmount.toLocaleString('vi-VN')} VND không giảm giá)`;
+                              } else if (childAmount > 0) {
+                                return `(Phụ thu trẻ em: ${childAmount.toLocaleString('vi-VN')} VND không giảm giá)`;
+                              }
+                              return `(Phụ thu: ${(breakdown.non_promotion_amount * promotionQuantity).toLocaleString('vi-VN')} VND không giảm giá)`;
+                            })()}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -302,11 +466,28 @@ const RoomCard: React.FC<RoomCardProps> = ({
                 <div className="flex-1">
                   <h4 className="font-semibold text-blue-800 mb-1">Giá Gốc</h4>
                   <div className="text-sm text-blue-600 mb-2">
-                    Không áp dụng khuyến mãi
+                    {t('promotion.no_promotion')}
                   </div>
                   <div className="text-lg font-bold text-blue-600">
-                    {rate_per_night.toLocaleString('vi-VN')} VND
-                    <span className="text-xs text-gray-500 ml-1">/ đêm</span>
+                    {(() => {
+                      if (roomAvailability.pricing_breakdown) {
+                        let basePrice = roomAvailability.pricing_breakdown.promotion_applicable_amount;
+                        let extraCharges = 0;
+
+                        if (useExtraBed) {
+                          // User chose extra bed - include extra bed surcharge
+                          extraCharges = roomAvailability.pricing_breakdown.non_promotion_amount;
+                        } else {
+                          // User declined extra bed - only include children surcharge (if any)
+                          extraCharges = roomAvailability.pricing_breakdown.children_surcharge_total || 0;
+                        }
+
+                        return (basePrice + extraCharges).toLocaleString('vi-VN');
+                      } else {
+                        return rate_per_night.toLocaleString('vi-VN');
+                      }
+                    })()} VND
+                    <span className="text-xs text-gray-500 ml-1">/ tổng</span>
                   </div>
                 </div>
                 <div className="flex-shrink-0">
@@ -314,6 +495,7 @@ const RoomCard: React.FC<RoomCardProps> = ({
                     quantity={baseQuantity}
                     onQuantityChange={handleBaseQuantityChange}
                     maxQuantity={Math.min(available_inventory, baseQuantity + getRemainingInventory())}
+                    disabled={roomAvailability.requires_extra_bed && !roomAvailability.room?.is_extra_bed_available}
                   />
                 </div>
               </div>
@@ -321,28 +503,48 @@ const RoomCard: React.FC<RoomCardProps> = ({
                 <div className="mt-3 text-right">
                   <div className="text-sm text-gray-500">Tổng cộng:</div>
                   <div className="text-lg font-bold text-blue-600">
-                    {(rate_per_night * baseQuantity).toLocaleString('vi-VN')} VND
+                    {(() => {
+                      if (roomAvailability.pricing_breakdown) {
+                        let basePrice = roomAvailability.pricing_breakdown.promotion_applicable_amount;
+                        let extraCharges = 0;
+
+                        if (useExtraBed) {
+                          // User chose extra bed - include extra bed surcharge
+                          extraCharges = roomAvailability.pricing_breakdown.non_promotion_amount;
+                        } else {
+                          // User declined extra bed - only include children surcharge (if any)
+                          extraCharges = roomAvailability.pricing_breakdown.children_surcharge_total || 0;
+                        }
+
+                        return ((basePrice + extraCharges) * baseQuantity).toLocaleString('vi-VN');
+                      } else {
+                        return (rate_per_night * baseQuantity).toLocaleString('vi-VN');
+                      }
+                    })()} VND
                   </div>
+                  {roomAvailability.pricing_breakdown && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      {(() => {
+                        const breakdown = roomAvailability.pricing_breakdown;
+                        if (useExtraBed && (breakdown.extra_bed_adult_surcharge_total || 0) > 0) {
+                          const extraBedAmount = (breakdown.extra_bed_adult_surcharge_total || 0) * baseQuantity;
+                          const childAmount = (breakdown.children_surcharge_total || 0) * baseQuantity;
+
+                          if (childAmount > 0) {
+                            return `(Bao gồm phụ thu người lớn giường phụ: ${extraBedAmount.toLocaleString('vi-VN')} VND + Phụ thu trẻ em: ${childAmount.toLocaleString('vi-VN')} VND)`;
+                          } else {
+                            return `(Bao gồm phụ thu người lớn giường phụ: ${extraBedAmount.toLocaleString('vi-VN')} VND)`;
+                          }
+                        } else if ((breakdown.children_surcharge_total || 0) > 0) {
+                          const childAmount = (breakdown.children_surcharge_total || 0) * baseQuantity;
+                          return `(Bao gồm phụ thu trẻ em: ${childAmount.toLocaleString('vi-VN')} VND)`;
+                        }
+                        return '';
+                      })()}
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-          </div>
-        )}
-
-        {/* Total Summary */}
-        {getTotalRoomsSelected() > 0 && (
-          <div className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-600">Tổng phòng đã chọn:</div>
-                <div className="text-lg font-semibold text-gray-800">{getTotalRoomsSelected()} phòng</div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm text-gray-600">Tổng tiền:</div>
-                <div className="text-xl font-bold text-green-600">
-                  {calculateTotalPrice().toLocaleString('vi-VN')} VND
-                </div>
-              </div>
             </div>
           </div>
         )}

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { tenantDetection } from '../services/tenantDetection';
 import { useHotel } from '../context/HotelContext';
+import { useLanguage, useLocalizedText } from '../context/LanguageContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,11 +10,16 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const { hotel } = useHotel();
-  const [languageInfo, setLanguageInfo] = useState<any>(null);
-  const [currentLanguage, setCurrentLanguage] = useState<string>('vi');
-  const [hotelConfig, setHotelConfig] = useState<any>(null);
-  const [themeData, setThemeData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const {
+    currentLanguage,
+    availableLanguages,
+    hotelConfig,
+    themeData,
+    languageInfo,
+    loading,
+    changeLanguage
+  } = useLanguage();
+  const { t } = useLocalizedText();
 
   // Get current step from URL
   const getCurrentStep = () => {
@@ -26,80 +31,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return 'search-rooms';
   };
 
-  // Load cached hotel information on component mount
-  useEffect(() => {
-    const loadCachedHotelData = () => {
-      try {
-        // Try to load from cache first
-        const cachedConfig = tenantDetection.getCachedHotelConfig(currentLanguage);
-        const cachedTheme = tenantDetection.getCachedTheme(currentLanguage);
-
-        if (cachedConfig) {
-          setHotelConfig(cachedConfig);
-        }
-
-        if (cachedTheme) {
-          setThemeData(cachedTheme);
-        }
-
-        // If no cache, try to load fresh data
-        if (!cachedConfig || !cachedTheme) {
-          loadFreshHotelData();
-        }
-      } catch (error) {
-        console.error('Error loading cached hotel data:', error);
-      }
-    };
-
-    const loadFreshHotelData = async () => {
-      try {
-        const hotelData = await tenantDetection.getHotelData(currentLanguage);
-
-        if (hotelData.config) {
-          setHotelConfig(hotelData.config);
-          if (hotelData.config.theme) {
-            setThemeData(hotelData.config.theme);
-          }
-        }
-
-        if (hotelData.language_info) {
-          setLanguageInfo(hotelData.language_info);
-        }
-      } catch (error) {
-        console.error('Error loading fresh hotel data:', error);
-      }
-    };
-
-    loadCachedHotelData();
-  }, [currentLanguage]);
-
-  const handleLanguageChange = async (newLanguage: string) => {
-    if (newLanguage === currentLanguage) return;
-
-    try {
-      setLoading(true);
-      // Get hotel data with the new language
-      const hotelData = await tenantDetection.getHotelData(newLanguage);
-
-      if (hotelData.language_info) {
-        setLanguageInfo(hotelData.language_info);
-        setCurrentLanguage(hotelData.language_info.current_language || newLanguage);
-      }
-
-      // Update hotel configuration and theme data for new language
-      if (hotelData.config) {
-        setHotelConfig(hotelData.config);
-
-        if (hotelData.config.theme) {
-          setThemeData(hotelData.config.theme);
-        }
-      }
-    } catch (error) {
-      console.error('Error switching language:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const currentStep = getCurrentStep();
 
@@ -132,16 +63,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             <div className="flex items-center gap-4">
               {/* Language Selector */}
-              {languageInfo && languageInfo.available_languages && languageInfo.available_languages.length > 1 && (
+              {availableLanguages && availableLanguages.length > 1 && (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Ngôn ngữ:</span>
+                  <span className="text-sm text-gray-600">{t('booking.language')}:</span>
                   <select
                     value={currentLanguage}
-                    onChange={(e) => handleLanguageChange(e.target.value)}
+                    onChange={(e) => changeLanguage(e.target.value)}
                     className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     disabled={loading}
                   >
-                    {languageInfo.available_languages.map((lang: string) => (
+                    {availableLanguages.map((lang: string) => (
                       <option key={lang} value={lang}>
                         {lang.toUpperCase()}
                       </option>
@@ -153,7 +84,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {/* Phone Contact */}
                 {(hotelConfig?.contact?.phone || hotel?.settings.contact.phone) && (
                   <div className="text-right">
-                    <p className="text-sm text-gray-600">Hotline</p>
+                    <p className="text-sm text-gray-600">{t('booking.hotline')}</p>
                     <a
                       href={`tel:${hotelConfig?.contact?.phone || hotel?.settings.contact.phone}`}
                       className="text-lg font-semibold text-blue-600 hover:text-blue-800"
@@ -178,15 +109,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <nav className="mt-2">
             <div className="flex items-center space-x-2 text-sm">
               <span className={`px-2 py-1 rounded ${currentStep === 'search-rooms' ? 'bg-blue-100 text-blue-800' : 'text-gray-500'}`}>
-                1. Tìm & Chọn Phòng
+                {t('booking.step1')}
               </span>
               <span className="text-gray-300">→</span>
               <span className={`px-2 py-1 rounded ${currentStep === 'guest' ? 'bg-blue-100 text-blue-800' : 'text-gray-500'}`}>
-                2. Thông Tin
+                {t('booking.step2')}
               </span>
               <span className="text-gray-300">→</span>
               <span className={`px-2 py-1 rounded ${currentStep === 'confirmation' ? 'bg-blue-100 text-blue-800' : 'text-gray-500'}`}>
-                3. Xác Nhận
+                {t('booking.step3')}
               </span>
             </div>
           </nav>

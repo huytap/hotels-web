@@ -56,12 +56,26 @@
         $('.hme-tab-btn').on('click', handleViewSwitch);
 
         // Calendar navigation
-        $('#prev-month').on('click', navigatePreviousMonth);
-        $('#next-month').on('click', navigateNextMonth);
+        $('#prev-month').on('click', function (e) {
+            e.preventDefault();
+            navigatePreviousMonth();
+        });
+
+        $('#next-month').on('click', function (e) {
+            e.preventDefault();
+            navigateNextMonth();
+        });
 
         // Data loading
-        $('#load-calendar').on('click', loadCalendarData);
-        $('#export-rates').on('click', exportRates);
+        $('#load-calendar').on('click', function (e) {
+            e.preventDefault();
+            loadCalendarData();
+        });
+
+        $('#export-rates').on('click', function (e) {
+            e.preventDefault();
+            exportRates();
+        });
 
         // Modal triggers
         $('#bulk-update-btn').on('click', () => showModal('#bulk-update-modal'));

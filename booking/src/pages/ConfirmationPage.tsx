@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLocalizedText } from '../context/LanguageContext';
 
 const ConfirmationPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useLocalizedText();
   const [bookingResult, setBookingResult] = useState<any>(null);
 
   // Load booking result and validate access
@@ -48,7 +50,7 @@ const ConfirmationPage: React.FC = () => {
         <div className="text-center">
           <div className="text-6xl mb-4">✅</div>
           <h3 className="text-xl font-semibold text-gray-600 mb-2">
-            Đang tải thông tin xác nhận...
+            {t('confirmation.loading')}
           </h3>
         </div>
       </div>
@@ -60,28 +62,28 @@ const ConfirmationPage: React.FC = () => {
       <div className="bg-white rounded-lg shadow-lg border p-6 text-center">
         <div className="text-6xl mb-4">🎉</div>
         <h2 className="text-2xl font-bold text-green-600 mb-4">
-          Đặt Phòng Thành Công!
+          {t('confirmation.success')}
         </h2>
         <div className="text-lg text-gray-700 mb-4">
           <p className="mb-2">
-            <strong>Mã đặt phòng:</strong> {bookingResult.booking_id || bookingResult.id || 'N/A'}
+            <strong>{t('confirmation.booking_id')}:</strong> {bookingResult.booking_id || bookingResult.id || 'N/A'}
           </p>
           <p className="mb-2">
-            <strong>Tổng tiền:</strong> {bookingResult.total_amount?.toLocaleString('vi-VN') || 'N/A'} VND
+            <strong>{t('confirmation.total_amount')}:</strong> {bookingResult.total_amount?.toLocaleString('vi-VN') || 'N/A'} VND
           </p>
           {bookingResult.guest_name && (
             <p className="mb-2">
-              <strong>Khách hàng:</strong> {bookingResult.guest_name}
+              <strong>{t('confirmation.guest_name')}:</strong> {bookingResult.guest_name}
             </p>
           )}
           {bookingResult.check_in && bookingResult.check_out && (
             <p className="mb-2">
-              <strong>Thời gian:</strong> {bookingResult.check_in} - {bookingResult.check_out}
+              <strong>{t('confirmation.duration')}:</strong> {bookingResult.check_in} - {bookingResult.check_out}
             </p>
           )}
         </div>
         <p className="text-sm text-gray-600 mt-2">
-          Chúng tôi đã gửi email xác nhận đến địa chỉ của bạn.
+          {t('confirmation.email_sent')}
         </p>
       </div>
 
@@ -90,7 +92,7 @@ const ConfirmationPage: React.FC = () => {
           onClick={handleNewBooking}
           className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200"
         >
-          Đặt Phòng Mới
+          {t('confirmation.new_booking')}
         </button>
       </div>
     </div>

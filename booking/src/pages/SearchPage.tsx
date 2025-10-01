@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { format, addDays } from 'date-fns';
 import BookingSearch from '../components/BookingSearch';
 import RoomList from '../components/RoomList';
@@ -7,6 +7,7 @@ import BookingSummary from '../components/BookingSummary';
 import type { BookingDetails, RoomAvailability } from '../types/api';
 import { apiService } from '../services/api';
 import { tenantDetection } from '../services/tenantDetection';
+import { useLanguage } from '../context/LanguageContext';
 
 interface SelectedRoom {
   roomId: number;
@@ -16,6 +17,8 @@ interface SelectedRoom {
 
 const SearchPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { currentLanguage } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [autoSearchTriggered, setAutoSearchTriggered] = useState(false);
@@ -29,9 +32,9 @@ const SearchPage: React.FC = () => {
 
     const dummyRooms: RoomAvailability[] = [
       {
-        room_id: 'room-001',
+        room_id: 1,
         room: {
-          id: 'room-001',
+          id: 1,
           name: 'Phòng Deluxe',
           type: 'deluxe',
           description: 'Phòng cao cấp với view biển',
@@ -46,7 +49,7 @@ const SearchPage: React.FC = () => {
         total_price: 1500000,
         applicable_promotions: [
           {
-            id: 'promo-001',
+            id: 1,
             code: 'SUMMER20',
             name: 'Khuyến mãi mùa hè',
             description: 'Giảm 20% cho mùa hè',
@@ -69,6 +72,7 @@ const SearchPage: React.FC = () => {
       check_out: '2025-09-30',
       adults: 2,
       children: 0,
+      children_ages: [],
       rooms: 1
     };
 
@@ -78,13 +82,20 @@ const SearchPage: React.FC = () => {
     console.log('🧪 Dummy data created:', { dummyRooms, dummyBookingDetails });
   };
 
-  // Get default booking details for auto-load
+  // Get default booking details for auto-load (with URL params support)
   const getDefaultBookingDetails = (): BookingDetails => {
+    // Try to get values from URL parameters first
+    const checkIn = searchParams.get('check-in') || searchParams.get('checkin');
+    const checkOut = searchParams.get('check-out') || searchParams.get('checkout');
+    const adults = searchParams.get('adults');
+    const children = searchParams.get('children');
+
     return {
-      check_in: format(new Date(), 'yyyy-MM-dd'),
-      check_out: format(addDays(new Date(), 1), 'yyyy-MM-dd'),
-      adults: 2,
-      children: 0,
+      check_in: checkIn || format(new Date(), 'yyyy-MM-dd'),
+      check_out: checkOut || format(addDays(new Date(), 1), 'yyyy-MM-dd'),
+      adults: adults ? parseInt(adults) : 2,
+      children: children ? parseInt(children) : 0,
+      children_ages: [],
       rooms: 1,
     };
   };
@@ -169,14 +180,38 @@ const SearchPage: React.FC = () => {
     triggerAutoSearch();
   }, [autoSearchTriggered]);
 
+  // Re-search when language changes and we have booking details
+  useEffect(() => {
+    const refreshRoomsWithNewLanguage = async () => {
+      if (bookingDetails && !loading) {
+        console.log('🌐 Language changed to:', currentLanguage, 'Re-searching rooms...');
+        try {
+          await handleSearch(bookingDetails);
+        } catch (error) {
+          console.error('Failed to refresh rooms with new language:', error);
+        }
+      }
+    };
+
+    refreshRoomsWithNewLanguage();
+  }, [currentLanguage]);
+
   const handleSearch = async (searchParams: BookingDetails) => {
     setLoading(true);
     setError(null);
 
+    // Update URL with search parameters
+    const params = new URLSearchParams();
+    params.set('check-in', searchParams.check_in);
+    params.set('check-out', searchParams.check_out);
+    params.set('adults', searchParams.adults.toString());
+    params.set('children', searchParams.children.toString());
+    navigate(`/search?${params.toString()}`, { replace: true });
+
     try {
       // Step 1: Get wp_id + token + language info from WordPress API
       console.log('Step 1: Getting wp_id + token + language info from WordPress...');
-      const hotelData = await tenantDetection.getHotelData();
+      const hotelData = await tenantDetection.getHotelData(currentLanguage);
 
       if (!hotelData.wp_id || !hotelData.token) {
         throw new Error('Không thể lấy thông tin khách sạn');
@@ -185,20 +220,22 @@ const SearchPage: React.FC = () => {
       console.log('Step 2: Sending search data to Laravel API...', {
         wp_id: hotelData.wp_id,
         searchParams,
-        language: hotelData.config?.language || 'vi'
+        language: currentLanguage
       });
 
-      // Step 2: Send wp_id + token + search data to Laravel API
+      // Step 2: Send wp_id + token + search data to Laravel API with current language
       const response = await apiService.searchRoomsWithWpData(
         hotelData.wp_id,
-        hotelData.token,
+        //hotelData.token,
         {
           check_in: searchParams.check_in,
           check_out: searchParams.check_out,
           adults: searchParams.adults,
           children: searchParams.children,
+          children_ages: searchParams.children_ages || [],
           rooms: searchParams.rooms,
-        }
+        },
+        currentLanguage
       );
 
       if (response.success) {
@@ -224,8 +261,8 @@ const SearchPage: React.FC = () => {
     }
   };
 
-  const handleRoomSelectionChange = (roomId: string, quantity: number, promotionId?: string) => {
-    console.log('🏨 SearchPage: Room selection change:', { roomId, quantity, promotionId });
+  const handleRoomSelectionChange = (roomId: string, quantity: number, promotionId?: string, useExtraBed?: boolean) => {
+    console.log('🏨 SearchPage: Room selection change:', { roomId, quantity, promotionId, useExtraBed });
 
     // Convert roomId to number and promotionId to number if exists
     const numericRoomId = parseInt(roomId, 10);
@@ -234,7 +271,7 @@ const SearchPage: React.FC = () => {
     setSelectedRooms(prev => {
       const filtered = prev.filter(r => !(r.roomId === numericRoomId && r.promotionId === numericPromotionId));
       const newSelectedRooms = quantity > 0
-        ? [...filtered, { roomId: numericRoomId, quantity, promotionId: numericPromotionId }]
+        ? [...filtered, { roomId: numericRoomId, quantity, promotionId: numericPromotionId, useExtraBed }]
         : filtered;
 
       console.log('🏨 SearchPage: New selected rooms:', newSelectedRooms);
@@ -286,7 +323,11 @@ const SearchPage: React.FC = () => {
       {/* Search Form */}
       <div className="formSearch">
         <div className="mb-6">
-          <BookingSearch onSearch={handleSearch} loading={loading} />
+          <BookingSearch
+            onSearch={handleSearch}
+            loading={loading}
+            initialValues={bookingDetails || getDefaultBookingDetails()}
+          />
         </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

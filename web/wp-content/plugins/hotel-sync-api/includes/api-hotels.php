@@ -187,7 +187,6 @@ function sync_hotel_data_to_laravel()
             'lang' => $lang,
         ], $multilingual_fields, $common_fields);
     }
-
     callApi('hotels', 'PUT', $data);
 }
 
@@ -370,7 +369,8 @@ function get_hotel_config_by_domain(WP_REST_Request $request)
  * Helper function to get hotel logo URL from various sources
  * Converts URL to use correct subdomain
  */
-function get_hotel_logo_url($target_domain = null) {
+function get_hotel_logo_url($target_domain = null)
+{
     $logo_url = '';
 
     // Method 1: Custom logo from WordPress Customizer
@@ -426,7 +426,8 @@ function get_hotel_logo_url($target_domain = null) {
 /**
  * Convert URL from main domain to subdomain
  */
-function convert_url_to_subdomain($url, $target_domain) {
+function convert_url_to_subdomain($url, $target_domain)
+{
     if (empty($url) || empty($target_domain)) {
         return $url;
     }

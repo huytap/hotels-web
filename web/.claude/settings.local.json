@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php:*)",
+      "Read(//d/projects/hotels/hotels-web.com/booking/src/pages/**)",
+      "Read(//d/projects/hotels/hotels-web.com/booking/src/components/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
