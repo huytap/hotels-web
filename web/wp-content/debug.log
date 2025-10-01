@@ -5745,3 +5745,11 @@ Giấy vệ sinh
 [01-Oct-2025 03:28:40 UTC] API Call success: GET dashboard/stats - HTTP 200
 [01-Oct-2025 03:29:01 UTC] API Call success: GET dashboard/stats - HTTP 200
 [01-Oct-2025 03:29:07 UTC] API Call success: GET bookings - HTTP 200
+[01-Oct-2025 03:35:03 UTC] API Call success: GET roomtypes - HTTP 200
+[01-Oct-2025 03:35:06 UTC] API Call success: GET room-management/calendar - HTTP 200
+[01-Oct-2025 03:35:28 UTC] API Call success: POST room-management/update-both - HTTP 200
+[01-Oct-2025 03:35:29 UTC] API Call success: GET room-management/calendar - HTTP 200
+[01-Oct-2025 03:37:35 UTC] API Call success: POST room-management/update-both - HTTP 200
+[01-Oct-2025 03:37:36 UTC] API Call success: GET room-management/calendar - HTTP 200
+[01-Oct-2025 03:37:53 UTC] API Call success: POST room-management/update-both - HTTP 200
+[01-Oct-2025 03:37:54 UTC] API Call success: GET room-management/calendar - HTTP 200
