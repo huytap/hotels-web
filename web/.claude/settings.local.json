@@ -9,7 +9,8 @@
       "Read(//d/projects/hotels/hotels-web.com/booking/src/services/**)",
       "Read(//d/projects/hotels/hotels-web.com/booking/src/**)",
       "Read(//d/projects/hotels/hotels-web.com/booking/**)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Read(//d/projects/hotels/hotels-web.com/pms/**)"
     ],
     "deny": [],
     "ask": []

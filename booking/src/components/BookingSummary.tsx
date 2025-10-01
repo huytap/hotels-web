@@ -333,9 +333,15 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({
 
   // Calculate total capacity and validate
   const calculateTotalCapacity = (): { current: number; required: number; sufficient: boolean } => {
-    const required = bookingDetails.adults + bookingDetails.children;
+    var required = bookingDetails.adults;
+    if (bookingDetails.children_ages?.length) {
+      bookingDetails.children_ages.forEach(children_age => {
+        if (children_age > 11) {
+          required += 1;
+        }
+      })
+    }
     let current = 0;
-
     selectedRooms.forEach(selectedRoom => {
       const roomDetails = getRoomDetails(selectedRoom.roomId);
       if (roomDetails && roomDetails.room) {

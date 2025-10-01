@@ -153,7 +153,7 @@ class BookingService
                         'adult_capacity' => $roomType->adult_capacity,
                         'child_capacity' => $roomType->child_capacity,
                         'is_extra_bed_available' => $roomType->is_extra_bed_available ?? false,
-                        'requires_extra_bed' => $adults > $roomType->adult_capacity && ($roomType->is_extra_bed_available ?? false)
+                        'requires_extra_bed' => $effectiveAdults > $roomType->adult_capacity && ($roomType->is_extra_bed_available ?? false)
                     ],
                     'quantity' => $quantity,
                     'available_rooms' => $availableCount,

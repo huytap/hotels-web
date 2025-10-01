@@ -355,12 +355,30 @@ class BookingController extends BaseApiController
                 $apiQuantity = $matchingCombination['quantity'];
                 $pricePerRoom = $matchingCombination['pricing_breakdown']['final_total'] / $apiQuantity;
 
+                // Get hotel tax settings
+                $vatRate = $hotel->vat_rate ?? 10.00;
+                $serviceChargeRate = $hotel->service_charge_rate ?? 5.00;
+                $pricesIncludeTax = $hotel->prices_include_tax ?? false;
+
+                // Calculate tax amount if not included in price
+                $subtotalBeforeTax = $pricePerRoom * $quantity;
+                $taxAmount = 0;
+
+                if (!$pricesIncludeTax) {
+                    // Prices don't include tax - calculate VAT and Service Charge
+                    // Logic: Subtotal + VAT(10% of subtotal) + Service Charge(5% of subtotal + VAT)
+                    $vatAmount = $subtotalBeforeTax * ($vatRate / 100);
+                    $subtotalAfterVat = $subtotalBeforeTax + $vatAmount;
+                    $serviceChargeAmount = $subtotalAfterVat * ($serviceChargeRate / 100);
+                    $taxAmount = $vatAmount + $serviceChargeAmount;
+                }
+
                 $pricing = [
-                    'total_amount' => $pricePerRoom * $quantity,
+                    'total_amount' => $subtotalBeforeTax + $taxAmount,
                     'discount_amount' => 0,
-                    'tax_amount' => 0,
+                    'tax_amount' => $taxAmount,
                     'rate_per_night' => $pricePerRoom / $checkIn->diffInDays($checkOut),
-                    'subtotal' => ($matchingCombination['pricing_breakdown']['promotion_applicable_amount'] + $matchingCombination['pricing_breakdown']['non_promotion_amount']) / $apiQuantity * $quantity,
+                    'subtotal' => $subtotalBeforeTax,
                     'nights' => $checkIn->diffInDays($checkOut)
                 ];
 
